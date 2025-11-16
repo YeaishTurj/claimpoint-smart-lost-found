@@ -1,0 +1,198 @@
+/* Professional Superadmin Login Styles */
+
+:root {
+  --primary-color: #dc2626; /* Red accent for superadmin */
+  --primary-hover: #b91c1c;
+  --secondary-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #6b7280;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --bg-light: #f5f7fb;
+  --border-color: #e5e7eb;
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-primary: rgba(220, 38, 38, 0.25);
+  --border-radius: 12px;
+  --transition: all 0.25s ease;
+}
+
+.superadmin-login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, var(--bg-light) 0%, #e2e8f0 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.superadmin-login-card {
+  background: var(--secondary-bg);
+  width: 100%;
+  max-width: 400px;
+  border-radius: var(--border-radius);
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 50px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.superadmin-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.superadmin-login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.superadmin-login-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.error-message {
+  background: #fef2f2;
+  color: var(--error-color);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  border: 1px solid #fecaca;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background: var(--secondary-bg);
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-login:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: 0 6px 14px var(--shadow-primary);
+  transform: translateY(-2px);
+}
+
+.btn-login:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-login:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.forgot-password {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.forgot-password a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .superadmin-login-card {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+
+  .superadmin-login-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* Accessibility */
+.btn-login:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.form-input:focus {
+  outline: none;
+}

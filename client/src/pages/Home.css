@@ -1,0 +1,211 @@
+/* Professional Home Page Styles */
+
+:root {
+  --primary-color: #005dff;
+  --primary-hover: #0048c7;
+  --secondary-bg: #ffffff;
+  --secondary-hover: #f4f7fb;
+  --success-color: #10b981;
+  --text-primary: #0f172a;
+  --text-secondary: #6b7280;
+  --bg-light: #f5f7fb;
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-primary: rgba(0, 90, 255, 0.25);
+  --shadow-success: rgba(16, 185, 129, 0.35);
+  --border-radius: 24px;
+  --btn-radius: 14px;
+  --transition: all 0.25s ease;
+}
+
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, var(--bg-light) 0%, #e2e8f0 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.home-card {
+  background: var(--secondary-bg);
+  width: 100%;
+  max-width: 520px;
+  border-radius: var(--border-radius);
+  padding: 3rem 2rem;
+  box-shadow: 0 20px 50px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo-container {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 12px 28px var(--shadow-primary);
+  transition: var(--transition);
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.home-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 340px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn-link {
+  text-decoration: none;
+  display: block;
+}
+
+.btn {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-radius: var(--btn-radius);
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 6px 14px var(--shadow-primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 12px 28px var(--shadow-primary);
+  transform: translateY(-3px);
+}
+
+.btn-secondary {
+  background: var(--secondary-bg);
+  border: 2px solid #e5e7eb;
+  color: #374151;
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: var(--secondary-hover);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+.btn-success {
+  border: 2px solid var(--success-color);
+  background: transparent;
+  color: var(--success-color);
+  box-shadow: none;
+}
+
+.btn-success:hover {
+  background: var(--success-color);
+  color: white;
+  box-shadow: 0 8px 18px var(--shadow-success);
+  transform: translateY(-3px);
+}
+
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .home-card {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+
+  .home-title {
+    font-size: 2.2rem;
+  }
+
+  .home-subtitle {
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Accessibility */
+.btn:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.btn-link:focus {
+  outline: none;
+}
