@@ -39,6 +39,52 @@ export default function Dashboard() {
     }
   };
 
+  const getRoleBenefits = (role) => {
+    const baseBenefits = [
+      "Real-time visibility into claims and matches",
+      "Centralized access from any device",
+      "Guided workflows that reduce resolution time",
+    ];
+
+    const roleSpecific = {
+      superadmin: [
+        "Configure locations, teams, and permissions",
+        "Audit access with accountability in mind",
+        "Oversee data quality across all records",
+      ],
+      staff: [
+        "Log found items and track claimant details",
+        "Coordinate timely returns with clear status updates",
+        "Escalate edge cases while keeping context intact",
+      ],
+      user: [
+        "View the status of your reported items",
+        "Share accurate details to speed up verification",
+        "Receive updates without losing the thread",
+      ],
+    };
+
+    return [...baseBenefits, ...(roleSpecific[role] || [])];
+  };
+
+  const quickStats = [
+    {
+      label: "Access Level",
+      value: user ? getRoleDisplay(user.role) : "—",
+      hint: "Personalized tools based on your role",
+    },
+    {
+      label: "Session Status",
+      value: "Secure & Active",
+      hint: "Remember to sign out on shared devices",
+    },
+    {
+      label: "Focus",
+      value: "Fast Resolution",
+      hint: "Prioritize clear details for every case",
+    },
+  ];
+
   const getRoleColor = (role) => {
     switch (role) {
       case "superadmin":
@@ -56,10 +102,21 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <div className="dashboard-card">
         <div className="dashboard-header">
+          <div className="dashboard-eyebrow">Account overview</div>
           <h1 className="dashboard-title">Dashboard</h1>
           <p className="dashboard-subtitle">
             Welcome back to ClaimPoint
           </p>
+        </div>
+
+        <div className="stats-grid">
+          {quickStats.map((stat) => (
+            <div className="stat-card" key={stat.label}>
+              <p className="stat-label">{stat.label}</p>
+              <p className="stat-value">{stat.value}</p>
+              <p className="stat-hint">{stat.hint}</p>
+            </div>
+          ))}
         </div>
 
         <div className="user-info-card">
@@ -78,6 +135,21 @@ export default function Dashboard() {
               {getRoleDisplay(user.role)}
             </span>
           </div>
+        </div>
+
+        <div className="benefits-card">
+          <div className="benefits-header">
+            <p className="benefits-eyebrow">Stay on track</p>
+            <h3>What you can expect here</h3>
+            <p className="benefits-subtext">
+              A concise view of how to make the most of this workspace.
+            </p>
+          </div>
+          <ul className="benefits-list">
+            {getRoleBenefits(user.role).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
 
         <div className="dashboard-actions">
