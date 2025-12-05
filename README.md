@@ -1,12 +1,13 @@
 # ClaimPoint - Smart Lost & Found Management System
 
-ClaimPoint is a **web-based Lost & Found Management System** built with the **MERN stack** (MongoDB, Express, React, Node.js). It helps organizations efficiently manage lost and found items with AI-powered smart matching, making the process faster, secure, and user-friendly.
+ClaimPoint is a **web-based Lost & Found Management System** built with **PostgreSQL, Express, React, and Node.js**. It helps organizations efficiently manage lost and found items with AI-powered smart matching, making the process faster, secure, and user-friendly.
 
 ---
 
 ## **Project Overview**
 
 - **Role-Based Access:**
+
   - **Superadmin:** Can manage users and staff accounts.
   - **Staff:** Can record found items, view claims, and handle item returns.
   - **General Users:** Can report lost items, browse found items, and claim items.
@@ -28,17 +29,17 @@ ClaimPoint is a **web-based Lost & Found Management System** built with the **ME
 ✅ Notification System (Email/SMS/in-app)  
 ✅ Secure Authentication & Role-Based Access  
 ✅ Search & Filter for items  
-✅ Scalable & Modular Architecture  
+✅ Scalable & Modular Architecture
 
 ---
 
 ## **Tech Stack**
 
-- **Frontend:** React, Vite, Axios, React Router  
-- **Backend:** Node.js, Express  
-- **Database:** MongoDB (Online/Atlas)  
-- **Authentication:** JWT (JSON Web Tokens), bcrypt  
-- **AI Matching:** Custom similarity algorithm (to be implemented)  
+- **Frontend:** React, Vite, Axios, React Router
+- **Backend:** Node.js, Express
+- **Database:** PostgreSQL (Docker)
+- **Authentication:** JWT (JSON Web Tokens), bcrypt
+- **AI Matching:** Custom similarity algorithm (to be implemented)
 
 ---
 
@@ -63,14 +64,62 @@ cd ../client
 npm install
 ```
 
-### **3. Create `.env` files:**
+### **3. Set up PostgreSQL with Docker:**
+
+```bash
+# Pull and run PostgreSQL container
+docker run --name claimpoint-postgres \
+  -e POSTGRES_DB=claimpoint_db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=your_postgres_password \
+  -p 5432:5432 \
+  -d postgres:latest
+
+# Verify the container is running
+docker ps
+```
+
+Alternatively, use Docker Compose by creating a `docker-compose.yml` file in the root directory:
+
+```yaml
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: claimpoint-postgres
+    environment:
+      POSTGRES_DB: claimpoint_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_postgres_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+```
+
+Then run:
+
+```bash
+docker-compose up -d
+```
+
+### **4. Create `.env` files:**
 
 Create a `.env` file in the `server` directory:
 
 ```env
 # Backend Environment Variables
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=claimpoint_db
+DB_USER=postgres
+DB_PASSWORD=your_postgres_password
 JWT_SECRET=your_jwt_secret_key
 NODE_ENV=development
 
@@ -90,7 +139,7 @@ Create a `.env` file in the `client` directory (if needed):
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### **4. Run the project:**
+### **5. Run the project:**
 
 ```bash
 # Start Backend Server
@@ -122,12 +171,14 @@ npm run dev
 ### **User Roles:**
 
 - **Superadmin:**
+
   - Create and manage staff accounts
   - Manage user accounts
   - Oversee entire system operations
   - Access analytics and reports
 
 - **Staff:**
+
   - Add and manage found items
   - View and verify claims
   - Process item returns
@@ -184,6 +235,7 @@ claimpoint-smart-lost-found/
     └── utils
 
 ```
+
 ---
 
 ## **Development Roadmap**
@@ -201,7 +253,8 @@ claimpoint-smart-lost-found/
 - [ ] Deployment
 
 ---
-<!-- 
+
+<!--
 ## **Contributing**
 
 Contributions are welcome! Please follow these steps:
@@ -222,8 +275,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## **Contact**
 
-**Project Maintainer:** Your Name  
-**Email:** your.email@example.com  
+**Project Maintainer:** Your Name
+**Email:** your.email@example.com
 **GitHub:** [@yourusername](https://github.com/yourusername)
 
 ---
