@@ -6,8 +6,6 @@ import { eq } from "drizzle-orm";
 export const addStaff = async (req, res) => {
   const { email, full_name, phone } = req.body;
 
-  console.log("Adding staff with email:", email);
-
   const password = process.env.STAFF_DEFAULT_PASSWORD;
 
   try {
@@ -30,6 +28,7 @@ export const addStaff = async (req, res) => {
       full_name,
       phone,
       role: "STAFF",
+      email_verified: true,
     };
 
     // Insert staff into database
