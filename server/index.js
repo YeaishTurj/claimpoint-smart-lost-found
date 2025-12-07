@@ -4,8 +4,10 @@ import "dotenv/config";
 import authRoutes from "./src/routes/auth.routes.js";
 import adminRoutes from "./src/routes/admin.routes.js";
 import staffRoutes from "./src/routes/staff.routes.js";
+import itemRoutes from "./src/routes/item.routes.js";
 import { roleAuthorization } from "./src/middlewares/roleAuth.middleware.js";
 import { authenticateToken } from "./src/middlewares/auth.middleware.js";
+import { optionalAuthenticateToken } from "./src/middlewares/optionalAuth.middleware.js";
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use(
   roleAuthorization("STAFF"),
   staffRoutes
 );
+
+app.use("/api/items", optionalAuthenticateToken, itemRoutes);
 
 const PORT = process.env.PORT;
 
