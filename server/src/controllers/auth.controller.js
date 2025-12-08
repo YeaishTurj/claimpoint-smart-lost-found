@@ -20,10 +20,11 @@ export const register = async (req, res) => {
     }
 
     // Generate OTP verification code
+    // Digits-only OTP (no letters/symbols)
     const verificationCode = otpGenerator.generate(6, {
       digits: true,
-      alphabets: false,
-      upperCase: false,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
       specialChars: false,
     });
 
@@ -50,16 +51,14 @@ export const register = async (req, res) => {
     // Prepare verification email
     const emailBody = `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; padding: 0 4px;">
           <h2 style="margin: 0 0 12px 0; color: #111827;">Verify your email</h2>
-          <p style="margin: 0 0 12px 0;">Use the code below to verify your email address:</p>
-          <p style="font-size: 20px; font-weight: 700; letter-spacing: 2px; margin: 0 0 16px 0;">${verificationCode}</p>
-          <p style="margin: 0 0 16px 0;">Or click the button:</p>
-          <a href="http://localhost:${process.env.PORT}/api/auth/verify-email?code=${verificationCode}&email=${email}"
-             style="display: inline-block; padding: 10px 16px; background: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px;">
-            Verify Email
-          </a>
-          <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">This code will expire in 5 minutes.</p>
+          <p style="margin: 0 0 10px 0;">Hi ${full_name || "there"},</p>
+          <p style="margin: 0 0 12px 0;">Use the one-time code below to verify your ClaimPoint account:</p>
+          <p style="font-size: 22px; font-weight: 800; letter-spacing: 3px; margin: 12px 0 16px 0; color: #111827;">${verificationCode}</p>
+          <p style="margin: 0 0 10px 0;">This code expires in <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
+          <p style="margin: 0 0 10px 0;">If you did not request this, you can safely ignore this email.</p>
+          <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">Questions? Contact support at support@claimpoint.com.</p>
         </body>
       </html>
     `;
@@ -162,8 +161,8 @@ export const resendVerificationCode = async (req, res) => {
     // Generate new OTP verification code
     const newCode = otpGenerator.generate(6, {
       digits: true,
-      alphabets: false,
-      upperCase: false,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
       specialChars: false,
     });
 
@@ -183,16 +182,14 @@ export const resendVerificationCode = async (req, res) => {
     // Prepare verification email
     const emailBody = `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-          <h2 style="margin: 0 0 12px 0; color: #111827;">New verification code</h2>
-          <p style="margin: 0 0 12px 0;">Use the code below to verify your email address:</p>
-          <p style="font-size: 20px; font-weight: 700; letter-spacing: 2px; margin: 0 0 16px 0;">${newCode}</p>
-          <p style="margin: 0 0 16px 0;">Or click the button:</p>
-          <a href="http://localhost:${process.env.PORT}/api/auth/verify-email?code=${newCode}&email=${email}"
-             style="display: inline-block; padding: 10px 16px; background: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px;">
-            Verify Email
-          </a>
-          <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">This code will expire in 5 minutes.</p>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; padding: 0 4px;">
+          <h2 style="margin: 0 0 12px 0; color: #111827;">Your new verification code</h2>
+          <p style="margin: 0 0 10px 0;">Hi ${user.full_name || "there"},</p>
+          <p style="margin: 0 0 12px 0;">Use this one-time code to verify your ClaimPoint account:</p>
+          <p style="font-size: 22px; font-weight: 800; letter-spacing: 3px; margin: 12px 0 16px 0; color: #111827;">${newCode}</p>
+          <p style="margin: 0 0 10px 0;">This code expires in <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
+          <p style="margin: 0 0 10px 0;">If you did not request this, you can ignore this email.</p>
+          <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">Need help? Contact support at support@claimpoint.com.</p>
         </body>
       </html>
     `;
@@ -241,12 +238,37 @@ export const login = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1 week",
     });
 
     return res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getProfile = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Find user by ID
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Exclude sensitive fields
+    const { password, otp_verification_code, otp_expires_at, ...userProfile } =
+      user;
+
+    return res.status(200).json({ user: userProfile });
+  } catch (error) {
+    console.error("Get profile error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

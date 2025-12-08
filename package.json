@@ -1,13 +1,26 @@
 {
   "name": "claimpoint-smart-lost-found",
   "version": "1.0.0",
-  "description": "",
+  "description": "Smart Lost & Found Management System",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "setup": "npm install && cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module"
+  "keywords": [
+    "lost-and-found",
+    "management-system"
+  ],
+  "author": "ClaimPoint Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }
