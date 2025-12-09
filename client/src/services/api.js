@@ -117,6 +117,21 @@ const api = {
     if (!response.ok) throw new Error(data.message || "Failed to record item");
     return data;
   },
+
+  // Admin endpoints
+  addStaff: async (staffData, token) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/add-staff`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(staffData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to add staff");
+    return data;
+  },
 };
 
 export default api;

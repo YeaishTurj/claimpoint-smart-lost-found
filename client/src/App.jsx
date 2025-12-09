@@ -8,9 +8,17 @@ import { ItemsList } from "./components/ItemsList";
 import { StaffDashboard } from "./components/StaffDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { UserDashboard } from "./components/UserDashboard";
+import { HowItWorksPage } from "./pages/HowItWorksPage";
+import { AboutPage } from "./pages/AboutPage";
+import { ContactPage } from "./pages/ContactPage";
+import { BrowseFoundItemsPage } from "./pages/BrowseFoundItemsPage";
+import { AddStaffPage } from "./pages/AddStaffPage";
+import { UserManagementPage } from "./pages/UserManagementPage";
+import { AllClaimsPage } from "./pages/AllClaimsPage";
 import api from "./services/api";
 
 function App() {
+  const [currentPage, setCurrentPage] = useState("home");
   const [authToken, setAuthToken] = useState(
     localStorage.getItem("authToken") || null
   );
@@ -23,7 +31,7 @@ function App() {
   const [foundItems, setFoundItems] = useState([]);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState("login"); // "login" or "register"
+  const [authModalMode, setAuthModalMode] = useState("login");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
   const [showRecordItemForm, setShowRecordItemForm] = useState(false);
@@ -39,6 +47,19 @@ function App() {
     phone: "",
     password: "",
   });
+
+  // Handle hash-based navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) || "home";
+      setCurrentPage(hash);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange();
+
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   // Fetch found items on component mount or when auth token changes
   useEffect(() => {
@@ -95,6 +116,9 @@ function App() {
 
       setLoginForm({ email: "", password: "" });
       setAuthError(null);
+      setShowAuthModal(false);
+      setCurrentPage("home");
+      window.location.hash = "#home";
     } catch (error) {
       setAuthError(error.message || "Login failed. Please try again.");
       console.error("Login error:", error);
@@ -160,6 +184,8 @@ function App() {
         password: "",
       });
       setPendingEmail("");
+      setCurrentPage("home");
+      window.location.hash = "#home";
     } catch (error) {
       setAuthError(
         error.message || "Email verification failed. Please try again."
@@ -192,6 +218,8 @@ function App() {
     });
     localStorage.removeItem("authToken");
     localStorage.removeItem("userRole");
+    setCurrentPage("home");
+    window.location.hash = "#home";
   };
 
   const openAuthModal = (mode) => {
@@ -205,70 +233,158 @@ function App() {
     setAuthError(null);
   };
 
+  // Page Rendering Logic
+  const renderPage = () => {
+    // Different pages
+    if (currentPage === "how-it-works") {
+      return (
+        <HowItWorksPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    if (currentPage === "about") {
+      return (
+        <AboutPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    if (currentPage === "contact") {
+      return (
+        <ContactPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    if (currentPage === "browse-items") {
+      return (
+        <BrowseFoundItemsPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    if (currentPage === "add-staff") {
+      return (
+        <AddStaffPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    if (currentPage === "user-management") {
+      return (
+        <UserManagementPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    if (currentPage === "all-claims") {
+      return (
+        <AllClaimsPage
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+      );
+    }
+
+    // Default home page
+    return (
+      <>
+        <Navbar
+          authToken={authToken}
+          user={user}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onSignInClick={() => openAuthModal("login")}
+          onRegisterClick={() => openAuthModal("register")}
+          onRecordItemClick={() => setShowRecordItemForm(true)}
+        />
+        <div className="max-w-7xl mx-auto pt-20 px-6">
+          {!authToken && <HeroSection />}
+
+          <div className="mt-20 mb-10" id="items">
+            {authToken ? (
+              <div className="space-y-8">
+                {/* Role-based Dashboard */}
+                {userRole === "STAFF" && (
+                  <StaffDashboard
+                    foundItems={foundItems}
+                    onRecordItemClick={() => setShowRecordItemForm(true)}
+                  />
+                )}
+                {userRole === "ADMIN" && (
+                  <AdminDashboard foundItems={foundItems} />
+                )}
+                {userRole === "USER" && (
+                  <UserDashboard foundItems={foundItems} />
+                )}
+
+                {/* Items List Section */}
+                <ItemsList
+                  items={foundItems}
+                  loading={itemsLoading}
+                  userRole={userRole}
+                />
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  };
+
   return (
     <>
-      <Navbar
-        authToken={authToken}
-        user={user}
-        userRole={userRole}
-        onLogout={handleLogout}
-        onSignInClick={() => openAuthModal("login")}
-        onRegisterClick={() => openAuthModal("register")}
-        onRecordItemClick={() => setShowRecordItemForm(true)}
-      />
-      <div className="max-w-7xl mx-auto pt-20 px-6">
-        {!authToken && <HeroSection />}
-
-        <div className="mt-20 mb-10">
-          {authToken ? (
-            <div className="space-y-8">
-              {/* Role-based Dashboard */}
-              {userRole === "STAFF" && (
-                <StaffDashboard
-                  foundItems={foundItems}
-                  onRecordItemClick={() => setShowRecordItemForm(true)}
-                />
-              )}
-              {userRole === "ADMIN" && (
-                <AdminDashboard foundItems={foundItems} />
-              )}
-              {userRole === "USER" && <UserDashboard foundItems={foundItems} />}
-
-              {/* Items List Section */}
-              <ItemsList
-                items={foundItems}
-                loading={itemsLoading}
-                userRole={userRole}
-              />
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  Welcome to ClaimPoint
-                </h2>
-                <p className="text-gray-400 mb-8 text-lg">
-                  Sign in or create an account to get started
-                </p>
-                <div className="flex gap-4 justify-center">
-                  <button
-                    onClick={() => openAuthModal("login")}
-                    className="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => openAuthModal("register")}
-                    className="px-8 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition"
-                  >
-                    Register
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {renderPage()}
 
       {/* Auth Modal */}
       {showAuthModal && !authToken && (

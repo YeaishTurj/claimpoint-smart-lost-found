@@ -32,7 +32,9 @@ const Navbar = ({
   const getNavItems = () => {
     if (!authToken) {
       return [
-        { label: "Home", href: "/", icon: null },
+        { label: "Home", href: "#home", icon: null },
+        { label: "Browse Found Items", href: "#browse-items", icon: Package },
+        { label: "How It Works", href: "#how-it-works", icon: FileText },
         { label: "About", href: "#about", icon: null },
         { label: "Contact", href: "#contact", icon: null },
       ];
@@ -41,10 +43,10 @@ const Navbar = ({
     // General User Navigation
     if (userRole === "USER") {
       return [
-        { label: "Dashboard", href: "/", icon: null },
-        { label: "Browse Items", href: "#items", icon: Package },
-        { label: "Report Lost Item", href: "#report-lost", icon: FileText },
-        { label: "My Claims", href: "#my-claims", icon: ClipboardList },
+        { label: "Dashboard", href: "#home", icon: null },
+        { label: "Browse Found Items", href: "#browse-items", icon: Package },
+        { label: "Report Lost Item", href: "#home", icon: FileText },
+        { label: "My Claims", href: "#home", icon: ClipboardList },
       ];
     }
 
@@ -83,7 +85,7 @@ const Navbar = ({
       <div className="container px-4 mx-auto relative lg:text-sm">
         <div className="flex justify-between items-center">
           <div className="flex items-center flex-shrink-0">
-            <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
+            <img className="h-10 w-auto mr-2" src={logo} alt="Logo" />
             <span className="text-xl tracking-tight">ClaimPoint</span>
             {authToken && userRole && (
               <span className="ml-3 px-2 py-1 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40">
@@ -183,6 +185,18 @@ const Navbar = ({
                       onClick={() => {
                         if (item.action === "recordItem" && onRecordItemClick) {
                           onRecordItemClick();
+                        }
+                        if (item.action === "browseItems") {
+                          window.location.hash = "#home";
+                          setTimeout(() => {
+                            const itemsSection =
+                              document.getElementById("items");
+                            if (itemsSection) {
+                              itemsSection.scrollIntoView({
+                                behavior: "smooth",
+                              });
+                            }
+                          }, 100);
                         }
                         setMobileDrawerOpen(false);
                       }}

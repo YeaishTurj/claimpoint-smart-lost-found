@@ -12,3 +12,6 @@ export { ItemsSection } from "./ItemsSection";
 export { StaffDashboard } from "./StaffDashboard";
 export { AdminDashboard } from "./AdminDashboard";
 export { UserDashboard } from "./UserDashboard";
+export { HowItWorks } from "./HowItWorks";
+export { About } from "./About";
+export { Contact } from "./Contact";

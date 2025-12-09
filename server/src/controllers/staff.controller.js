@@ -1,4 +1,5 @@
 import { db, foundItemsTable } from "../index.js";
+import { desc, eq } from "drizzle-orm";
 
 // Helper: pick only public fields
 const pickPublicFields = (item) => {
@@ -106,3 +107,4 @@ export const addFoundItem = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
