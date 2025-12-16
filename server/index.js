@@ -5,6 +5,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import adminRoutes from "./src/routes/admin.routes.js";
 import staffRoutes from "./src/routes/staff.routes.js";
 import itemRoutes from "./src/routes/item.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
 import { roleAuthorization } from "./src/middlewares/roleAuth.middleware.js";
 import { authenticateToken } from "./src/middlewares/auth.middleware.js";
 import { optionalAuthenticateToken } from "./src/middlewares/optionalAuth.middleware.js";
@@ -29,6 +30,8 @@ app.use(
   roleAuthorization("STAFF"),
   staffRoutes
 );
+
+app.use("/api/user", authenticateToken, roleAuthorization("USER"), userRoutes);
 
 app.use("/api/items", optionalAuthenticateToken, itemRoutes);
 

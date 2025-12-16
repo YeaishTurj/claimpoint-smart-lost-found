@@ -118,6 +118,21 @@ const api = {
     return data;
   },
 
+  reportLostItem: async (token, itemData) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/report-lost-item`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(itemData),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to report lost item");
+    return data;
+  },
+
   // Admin endpoints
   addStaff: async (staffData, token) => {
     const response = await fetch(`${API_BASE_URL}/api/admin/add-staff`, {

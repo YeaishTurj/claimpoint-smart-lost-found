@@ -254,6 +254,53 @@ export const getProfile = async (req, res) => {
   try {
     // Find user by ID
     const [user] = await db
+      .select({
+        full_name: usersTable.full_name,
+        email: usersTable.email,
+        phone: usersTable.phone,
+        role: usersTable.role,
+        email_verified: usersTable.email_verified,
+        created_at: usersTable.created_at,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  const userId = req.user.id;
+  const { full_name, phone } = req.body;
+
+  try {
+    // Update user profile
+    await db
+      .update(usersTable)
+      .set({ full_name, phone })
+      .where(eq(usersTable.id, userId));
+
+    return res.status(200).json({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  const userId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    // Find user by ID
+    const [user] = await db
       .select()
       .from(usersTable)
       .where(eq(usersTable.id, userId));
@@ -262,13 +309,27 @@ export const getProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Exclude sensitive fields
-    const { password, otp_verification_code, otp_expires_at, ...userProfile } =
-      user;
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
 
-    return res.status(200).json({ user: userProfile });
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user's password
+    await db
+      .update(usersTable)
+      .set({ password: hashedNewPassword })
+      .where(eq(usersTable.id, userId));
+
+    return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
-    console.error("Get profile error:", error);
+    console.error("Change password error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -11,8 +11,6 @@ import { relations } from "drizzle-orm";
 
 import { usersTable } from "./user.model.js";
 
-// =================== ENUMS ===================
-
 // Found item workflow
 export const foundItemStatusEnum = pgEnum("found_item_status", [
   "found",
@@ -34,8 +32,6 @@ export const lostReportStatusEnum = pgEnum("lost_report_status", [
   "matched",
   "resolved",
 ]);
-
-// =================== FOUND ITEMS ===================
 
 export const foundItemsTable = pgTable("found_items", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -65,8 +61,6 @@ export const foundItemsTable = pgTable("found_items", {
     .defaultNow(),
 });
 
-// =================== CLAIMS ===================
-
 export const claimsTable = pgTable("claims", {
   id: uuid("id").primaryKey().defaultRandom(),
 
@@ -93,8 +87,6 @@ export const claimsTable = pgTable("claims", {
     .defaultNow(),
 });
 
-// =================== LOST REPORTS ===================
-
 export const lostReportsTable = pgTable("lost_reports", {
   id: uuid("id").primaryKey().defaultRandom(),
 
@@ -107,9 +99,7 @@ export const lostReportsTable = pgTable("lost_reports", {
   report_details: json("report_details").notNull(), // user description
   date_lost: timestamp("date_lost", { withTimezone: true }).notNull(),
   location_lost: text("location_lost").notNull(),
-
-  description: text("description"),
-
+  image_urls: json("image_urls"), // array of URLs
   status: lostReportStatusEnum("status").notNull().default("open"),
 
   created_at: timestamp("created_at", { withTimezone: true })
@@ -120,8 +110,6 @@ export const lostReportsTable = pgTable("lost_reports", {
     .notNull()
     .defaultNow(),
 });
-
-// =================== RELATIONS ===================
 
 export const foundItemsRelations = relations(
   foundItemsTable,

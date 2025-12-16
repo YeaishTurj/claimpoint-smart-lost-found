@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Users,
   Package,
@@ -5,8 +6,30 @@ import {
   TrendingUp,
   UserPlus,
 } from "lucide-react";
+import { ProfileCard } from "./ProfileCard";
 
-export function AdminDashboard({ foundItems }) {
+export function AdminDashboard({ foundItems, authToken }) {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!authToken) return;
+      try {
+        const response = await fetch("/api/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data.user);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, [authToken]);
   const stats = [
     {
       label: "Total Users",
@@ -37,11 +60,22 @@ export function AdminDashboard({ foundItems }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Welcome, {profile?.full_name || "Admin"}!
+        </h1>
         <p className="text-gray-400">
           Manage users, staff, and oversee all system operations
         </p>
       </div>
+
+      {/* Profile Card */}
+      {profile && (
+        <ProfileCard
+          profile={profile}
+          authToken={authToken}
+          onProfileUpdate={setProfile}
+        />
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

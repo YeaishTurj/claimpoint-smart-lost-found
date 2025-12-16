@@ -15,6 +15,7 @@ import { BrowseFoundItemsPage } from "./pages/BrowseFoundItemsPage";
 import { AddStaffPage } from "./pages/AddStaffPage";
 import { UserManagementPage } from "./pages/UserManagementPage";
 import { AllClaimsPage } from "./pages/AllClaimsPage";
+import { ReportLostItemPage } from "./pages/ReportLostItemPage";
 import api from "./services/api";
 
 function App() {
@@ -334,6 +335,15 @@ function App() {
       );
     }
 
+    if (currentPage === "report-lost-item") {
+      return (
+        <ReportLostItemPage
+          authToken={authToken}
+          onBack={() => setCurrentPage("user-dashboard")}
+        />
+      );
+    }
+
     // Default home page
     return (
       <>
@@ -357,13 +367,21 @@ function App() {
                   <StaffDashboard
                     foundItems={foundItems}
                     onRecordItemClick={() => setShowRecordItemForm(true)}
+                    authToken={authToken}
                   />
                 )}
                 {userRole === "ADMIN" && (
-                  <AdminDashboard foundItems={foundItems} />
+                  <AdminDashboard
+                    foundItems={foundItems}
+                    authToken={authToken}
+                  />
                 )}
                 {userRole === "USER" && (
-                  <UserDashboard foundItems={foundItems} />
+                  <UserDashboard
+                    foundItems={foundItems}
+                    authToken={authToken}
+                    onNavigate={setCurrentPage}
+                  />
                 )}
 
                 {/* Items List Section */}

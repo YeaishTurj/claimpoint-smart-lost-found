@@ -1,6 +1,29 @@
+import { useState, useEffect } from "react";
 import { Package, FileText, CheckSquare, TrendingUp } from "lucide-react";
+import { ProfileCard } from "./ProfileCard";
 
-export function StaffDashboard({ foundItems, onRecordItemClick }) {
+export function StaffDashboard({ foundItems, onRecordItemClick, authToken }) {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!authToken) return;
+      try {
+        const response = await fetch("/api/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data.user);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, [authToken]);
   const stats = [
     {
       label: "Total Found Items",
@@ -31,11 +54,22 @@ export function StaffDashboard({ foundItems, onRecordItemClick }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Staff Dashboard</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Welcome, {profile?.full_name || "Staff"}!
+        </h1>
         <p className="text-gray-400">
           Manage found items, review claims, and track your recordings
         </p>
       </div>
+
+      {/* Profile Card */}
+      {profile && (
+        <ProfileCard
+          profile={profile}
+          authToken={authToken}
+          onProfileUpdate={setProfile}
+        />
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

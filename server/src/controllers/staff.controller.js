@@ -108,3 +108,19 @@ export const addFoundItem = async (req, res) => {
   }
 };
 
+export const GetUserLostReports = async (req, res) => {
+  try {
+    const user_id = req.user?.id;
+    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
+
+    const lostReports = await db
+      .select()
+      .from(lostReportsTable)
+      .orderBy(desc(lostReportsTable.created_at));
+
+    res.status(200).json({ lostReports });
+  } catch (error) {
+    console.error("Error fetching lost reports:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
