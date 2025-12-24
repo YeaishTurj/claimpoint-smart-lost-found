@@ -5,6 +5,10 @@ import { ItemDetailsCard } from "./ItemDetailsCard";
 export function ItemsList({ items, loading, userRole, authToken }) {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [showDetailsCard, setShowDetailsCard] = useState(false);
+  const [showClaimForm, setShowClaimForm] = useState(false);
+  const [claimingItemId, setClaimingItemId] = useState(null);
+  const [claimLoading, setClaimLoading] = useState(false);
+  const [claimError, setClaimError] = useState(null);
   if (loading) {
     return (
       <section id="items" className="space-y-4">
@@ -145,9 +149,28 @@ export function ItemsList({ items, loading, userRole, authToken }) {
                   Details
                 </button>
                 {(!userRole || userRole === "USER") && (
-                  <button className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition">
+                  <button
+                    className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition"
+                    onClick={() => {
+                      setClaimingItemId(item.id);
+                      setShowClaimForm(true);
+                      setClaimError(null);
+                    }}
+                  >
                     Claim
                   </button>
+                )}
+                {/* Claim Item Modal */}
+                {showClaimForm && claimingItemId && (
+                  <ClaimItemModal
+                    itemId={claimingItemId}
+                    authToken={authToken}
+                    onClose={() => {
+                      setShowClaimForm(false);
+                      setClaimingItemId(null);
+                      setClaimError(null);
+                    }}
+                  />
                 )}
               </div>
             </div>

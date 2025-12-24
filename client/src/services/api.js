@@ -2,6 +2,39 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const api = {
+  userClaimItem: async (token, itemId, claimDetails) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/user/claim-item/${itemId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ claim_details: claimDetails }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to claim item");
+    return data;
+  },
+  // ...existing code...
+  deleteUserLostReport: async (token, reportId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/user/lost-reports/${reportId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to delete lost report");
+    return data;
+  },
   // Auth endpoints
   register: async (userData) => {
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -170,10 +203,13 @@ const api = {
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    const response = await fetch(`${API_BASE_URL}/api/items/lost-reports/${id}`, {
-      method: "GET",
-      headers,
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/items/lost-reports/${id}`,
+      {
+        method: "GET",
+        headers,
+      }
+    );
     const data = await response.json();
     if (!response.ok)
       throw new Error(data.message || "Failed to fetch lost report");
