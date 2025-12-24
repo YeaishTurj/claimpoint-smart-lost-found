@@ -3,6 +3,7 @@ import express from "express";
 import {
   ReportLostItem,
   GetUserLostReports,
+  UpdateUserLostReport
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -11,5 +12,7 @@ const router = express.Router();
 router.post("/report-lost-item", ReportLostItem);
 
 router.get("/lost-reports", GetUserLostReports);
+
+router.patch("/lost-reports/:id", UpdateUserLostReport);
 
 export default router;

@@ -389,6 +389,7 @@ function App() {
                   items={foundItems}
                   loading={itemsLoading}
                   userRole={userRole}
+                  authToken={authToken}
                 />
               </div>
             ) : (

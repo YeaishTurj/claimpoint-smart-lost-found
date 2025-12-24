@@ -1,6 +1,10 @@
-import { MapPin, Calendar, AlertCircle } from "lucide-react";
+import { MapPin, Calendar, AlertCircle, Eye } from "lucide-react";
+import { useState } from "react";
+import { ItemDetailsCard } from "./ItemDetailsCard";
 
-export function ItemsList({ items, loading, userRole }) {
+export function ItemsList({ items, loading, userRole, authToken }) {
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [showDetailsCard, setShowDetailsCard] = useState(false);
   if (loading) {
     return (
       <section id="items" className="space-y-4">
@@ -128,16 +132,40 @@ export function ItemsList({ items, loading, userRole }) {
                 </div>
               )}
 
-              {/* Action Button - Only show for regular users */}
-              {(!userRole || userRole === "USER") && (
-                <button className="w-full mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition">
-                  Claim Item
+              {/* Action Buttons */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => {
+                    setSelectedItemId(item.id);
+                    setShowDetailsCard(true);
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500/30 font-semibold transition flex items-center justify-center gap-2"
+                >
+                  <Eye size={16} />
+                  Details
                 </button>
-              )}
+                {(!userRole || userRole === "USER") && (
+                  <button className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition">
+                    Claim
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
+
+      {showDetailsCard && selectedItemId && (
+        <ItemDetailsCard
+          itemId={selectedItemId}
+          type="found"
+          authToken={authToken}
+          onClose={() => {
+            setShowDetailsCard(false);
+            setSelectedItemId(null);
+          }}
+        />
+      )}
     </section>
   );
 }

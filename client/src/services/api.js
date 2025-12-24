@@ -133,6 +133,53 @@ const api = {
     return data;
   },
 
+  getUserLostReports: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/lost-reports`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to fetch lost reports");
+    return data;
+  },
+
+  updateUserLostReport: async (token, reportId, updateData) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/user/lost-reports/${reportId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updateData),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to update lost report");
+    return data;
+  },
+
+  getLostReportById: async (id, token = null) => {
+    const headers = { "Content-Type": "application/json" };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const response = await fetch(`${API_BASE_URL}/api/items/lost-reports/${id}`, {
+      method: "GET",
+      headers,
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to fetch lost report");
+    return data;
+  },
+
   // Admin endpoints
   addStaff: async (staffData, token) => {
     const response = await fetch(`${API_BASE_URL}/api/admin/add-staff`, {

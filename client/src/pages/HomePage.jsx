@@ -136,6 +136,8 @@ export function HomePage() {
           items={foundItems}
           itemsLoading={itemsLoading}
           formatDate={formatDate}
+          authToken={authToken}
+          userRole={null}
         />
       </main>
 

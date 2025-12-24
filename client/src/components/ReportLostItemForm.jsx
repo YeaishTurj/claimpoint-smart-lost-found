@@ -1,8 +1,14 @@
 import { AlertCircle, Upload, X, Loader, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 
-export function ReportLostItemForm({ authToken, onSuccess, onClose }) {
+export function ReportLostItemForm({
+  authToken,
+  onSuccess,
+  onClose,
+  mode = "create",
+  report = null,
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -17,6 +23,37 @@ export function ReportLostItemForm({ authToken, onSuccess, onClose }) {
   const [reportDetails, setReportDetails] = useState([{ key: "", value: "" }]);
 
   const [previewImages, setPreviewImages] = useState([]);
+
+  const toLocalDateTimeInput = (value) => {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return "";
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+  };
+
+  useEffect(() => {
+    if (mode !== "edit" || !report) return;
+
+    const detailEntries =
+      report.report_details && typeof report.report_details === "object"
+        ? Object.entries(report.report_details)
+        : [];
+
+    setFormData({
+      item_type: report.item_type || "",
+      date_lost: report.date_lost ? toLocalDateTimeInput(report.date_lost) : "",
+      location_lost: report.location_lost || "",
+      image_urls: report.image_urls || [],
+    });
+
+    setReportDetails(
+      detailEntries.length
+        ? detailEntries.map(([key, value]) => ({ key, value }))
+        : [{ key: "", value: "" }]
+    );
+
+    setPreviewImages(report.image_urls || []);
+  }, [mode, report]);
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -127,10 +164,19 @@ export function ReportLostItemForm({ authToken, onSuccess, onClose }) {
         image_urls: formData.image_urls,
       };
 
-      await api.reportLostItem(authToken, submitData);
-      onSuccess();
+      const response =
+        mode === "edit" && report?.id
+          ? await api.updateUserLostReport(authToken, report.id, submitData)
+          : await api.reportLostItem(authToken, submitData);
+
+      onSuccess?.(response?.report || null);
     } catch (err) {
-      setError(err.message || "Failed to report lost item. Please try again.");
+      setError(
+        err.message ||
+          (mode === "edit"
+            ? "Failed to update lost report. Please try again."
+            : "Failed to report lost item. Please try again.")
+      );
       console.error("Form submission error:", err);
     } finally {
       setLoading(false);
@@ -154,7 +200,9 @@ export function ReportLostItemForm({ authToken, onSuccess, onClose }) {
             <p className="text-xs font-semibold uppercase tracking-widest text-red-300">
               Lost Item Report
             </p>
-            <h3 className="text-2xl font-bold text-white">Report Lost Item</h3>
+            <h3 className="text-2xl font-bold text-white">
+              {mode === "edit" ? "Update Lost Report" : "Report Lost Item"}
+            </h3>
           </div>
         </div>
 
@@ -341,10 +389,10 @@ export function ReportLostItemForm({ authToken, onSuccess, onClose }) {
               {loading ? (
                 <>
                   <Loader size={16} className="animate-spin" />
-                  Reporting...
+                  {mode === "edit" ? "Updating..." : "Reporting..."}
                 </>
               ) : (
-                "Report Lost Item"
+                mode === "edit" ? "Update Lost Report" : "Report Lost Item"
               )}
             </button>
             <button

@@ -1,6 +1,6 @@
 import { ItemsList } from "./ItemsList";
 
-export function ItemsSection({ itemsError, items, itemsLoading, formatDate }) {
+export function ItemsSection({ itemsError, items, itemsLoading, formatDate, authToken, userRole }) {
   return (
     <section
       id="found-items"
@@ -30,6 +30,8 @@ export function ItemsSection({ itemsError, items, itemsLoading, formatDate }) {
         loading={itemsLoading}
         error={itemsError}
         formatDate={formatDate}
+        authToken={authToken}
+        userRole={userRole}
       />
     </section>
   );

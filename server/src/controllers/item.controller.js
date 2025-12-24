@@ -1,4 +1,4 @@
-import { db, foundItemsTable } from "../index.js";
+import { db, foundItemsTable, lostReportsTable } from "../index.js";
 import { eq } from "drizzle-orm";
 
 export const getAllFoundItems = async (req, res) => {
@@ -64,5 +64,42 @@ export const getFoundItemById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching found item by ID:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getLostReportById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    try{
+      const userRole = req.user?.role;
+      if(!userRole){
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const [lostReports] = await db
+        .select()
+        .from(lostReportsTable)
+        .where(eq(lostReportsTable.id, id));
+  
+      if (!lostReports) {
+        return res.status(404).json({ message: "Lost report not found" });
+      }
+  
+      // Filter response based on user role
+      if (userRole === "USER") {
+        // Regular users can only access their own reports
+        if (lostReports.user_id !== req.user.id) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      }
+  
+      res.status(200).json(lostReports);
+    }
+    catch (error) {
+      console.error("Error fetching lost report by ID:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  } catch (error) {
+    console.error("Error fetching lost report by ID:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

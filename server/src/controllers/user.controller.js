@@ -89,3 +89,75 @@ export const GetUserLostReports = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const UpdateUserLostReport = async (req, res) => {
+  try {
+    const user_id = req.user?.id;
+    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
+
+    const reportId = req.params.id;
+    if (!reportId || typeof reportId !== "string") {
+      return res.status(400).json({ message: "Invalid report ID" });
+    }
+
+    const { item_type, report_details, date_lost, location_lost, image_urls } =
+      req.body;
+
+    const existingReport = await db
+      .select()
+      .from(lostReportsTable)
+      .where(
+        eq(lostReportsTable.id, reportId),
+        eq(lostReportsTable.user_id, user_id)
+      )
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    if (!existingReport) {
+      return res.status(404).json({ message: "Lost report not found" });
+    }
+
+    const updatedFields = {};
+
+    if (item_type) updatedFields.item_type = item_type;
+
+    if (report_details) {
+      const reportDetailsObj = coerceToObject(report_details);
+      if (!reportDetailsObj) {
+        return res.status(400).json({ message: "Invalid report details format" });
+      }
+      updatedFields.report_details = reportDetailsObj;
+    }
+
+    if (date_lost) {
+      const parsedDate = new Date(date_lost);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ message: "Invalid date_lost format" });
+      }
+      updatedFields.date_lost = parsedDate;
+    }
+
+    if (location_lost) updatedFields.location_lost = location_lost;
+
+    if (image_urls) {
+      updatedFields.image_urls = Array.isArray(image_urls) ? image_urls : [];
+    }
+
+    updatedFields.updated_at = new Date();
+
+    const [updatedReport] = await db.update(lostReportsTable)
+      .set(updatedFields)
+      .where(
+        eq(lostReportsTable.id, reportId),
+        eq(lostReportsTable.user_id, user_id)
+      )
+      .returning();
+
+    res
+      .status(200)
+      .json({ message: "Lost report updated successfully", report: updatedReport });
+  } catch (error) {
+    console.error("Error updating lost report:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
