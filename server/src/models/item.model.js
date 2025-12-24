@@ -74,6 +74,8 @@ export const claimsTable = pgTable("claims", {
 
   claim_details: json("claim_details").notNull(), // what user claims
 
+  image_urls: json("image_urls"), // array of URLs provided by user
+
   match_percentage: integer("match_percentage").default(0),
 
   status: claimStatusEnum("status").notNull().default("pending"),

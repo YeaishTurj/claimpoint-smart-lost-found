@@ -1,18 +1,24 @@
 import express from "express";
 
 import {
-  ReportLostItem,
-  GetUserLostReports,
-  UpdateUserLostReport
+  reportLostItem,
+  getUserLostReports,
+  updateUserLostReport,
+  deleteUserLostReport,
+  userClaimItem,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
 // Route: Report a lost item
-router.post("/report-lost-item", ReportLostItem);
+router.post("/report-lost-item", reportLostItem);
 
-router.get("/lost-reports", GetUserLostReports);
+router.get("/lost-reports", getUserLostReports);
 
-router.patch("/lost-reports/:id", UpdateUserLostReport);
+router.patch("/lost-reports/:id", updateUserLostReport);
+
+router.delete("/lost-reports/:id", deleteUserLostReport);
+
+router.post("/claim-item/:id", userClaimItem);
 
 export default router;

@@ -108,7 +108,7 @@ export const addFoundItem = async (req, res) => {
   }
 };
 
-export const GetUserLostReports = async (req, res) => {
+export const getUserLostReports = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) return res.status(401).json({ message: "Unauthorized" });
