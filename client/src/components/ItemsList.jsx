@@ -60,7 +60,7 @@ export function ItemsList({ items, loading, userRole, authToken }) {
           >
             {/* Item Image */}
             {item.image_urls && item.image_urls.length > 0 ? (
-              <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
+              <div className="relative h-40 overflow-hidden bg-linear-to-br from-slate-700 to-slate-900">
                 <img
                   src={item.image_urls[0]}
                   alt={item.item_type}
@@ -73,7 +73,7 @@ export function ItemsList({ items, loading, userRole, authToken }) {
                 </div>
               </div>
             ) : (
-              <div className="h-40 bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+              <div className="h-40 bg-linear-to-br from-slate-700 to-slate-900 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-4xl mb-2">📦</div>
                   <p className="text-sm text-gray-400">No image</p>
