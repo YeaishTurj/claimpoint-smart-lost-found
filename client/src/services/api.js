@@ -2,7 +2,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const api = {
-  userClaimItem: async (token, itemId, claimDetails) => {
+  userClaimItem: async (token, itemId, claimDetails, imageUrls = []) => {
     const response = await fetch(
       `${API_BASE_URL}/api/user/claim-item/${itemId}`,
       {
@@ -11,7 +11,10 @@ const api = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ claim_details: claimDetails }),
+        body: JSON.stringify({
+          claim_details: claimDetails,
+          image_urls: imageUrls,
+        }),
       }
     );
     const data = await response.json();

@@ -1,9 +1,11 @@
-import { useState } from "react";
-import api from "../services/api";
+import React, { useState } from "react";
 import { X, Loader } from "lucide-react";
+import api from "../services/api";
+import { ClaimItemImagesUpload } from "./ClaimItemImagesUpload";
 
 export function ClaimItemModal({ itemId, authToken, onClose }) {
   const [fields, setFields] = useState([{ key: "", value: "" }]);
+  const [imageUrls, setImageUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -31,7 +33,7 @@ export function ClaimItemModal({ itemId, authToken, onClose }) {
         setLoading(false);
         return;
       }
-      await api.userClaimItem(authToken, itemId, claimDetails);
+      await api.userClaimItem(authToken, itemId, claimDetails, imageUrls);
       setSuccess(true);
     } catch (err) {
       setError(err.message || "Failed to submit claim. Try again.");
@@ -97,6 +99,7 @@ export function ClaimItemModal({ itemId, authToken, onClose }) {
                 + Add Another Detail
               </button>
             </div>
+            <ClaimItemImagesUpload onImagesChange={setImageUrls} />
             {error && (
               <div className="text-red-400 text-xs font-semibold">{error}</div>
             )}
