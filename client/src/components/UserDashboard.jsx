@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Package, FileText, ClipboardList, Search, Eye } from "lucide-react";
+import { Package, FileText, ClipboardList, Search, Eye, Trash2 } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
 import api from "../services/api";
 import { ReportLostItemForm } from "./ReportLostItemForm";
@@ -13,6 +13,21 @@ export function UserDashboard({ foundItems, authToken, onNavigate }) {
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState(null);
   const [showDetailsCard, setShowDetailsCard] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const handleDeleteReport = async (reportId) => {
+    if (!authToken) return;
+    const confirmed = window.confirm("Are you sure you want to delete this lost report? This action cannot be undone.");
+    if (!confirmed) return;
+    setDeletingId(reportId);
+    try {
+      await api.deleteUserLostReport(authToken, reportId);
+      await fetchLostReports();
+    } catch (error) {
+      console.error("Error deleting report:", error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -213,6 +228,15 @@ export function UserDashboard({ foundItems, authToken, onNavigate }) {
                       >
                         Edit
                       </button>
+                      <button
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="text-xs px-2 py-1 rounded-lg border border-red-500/40 text-red-300 hover:bg-red-500/10 transition flex items-center gap-1"
+                        title="Delete Report"
+                        disabled={deletingId === report.id}
+                      >
+                        <Trash2 size={14} />
+                        {deletingId === report.id ? "Deleting..." : "Delete"}
+                      </button>
                     </div>
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-2 capitalize">
@@ -274,4 +298,4 @@ export function UserDashboard({ foundItems, authToken, onNavigate }) {
       )}
     </>
   );
-}
+} 
