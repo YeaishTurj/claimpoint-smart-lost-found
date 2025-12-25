@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ReportLostItemForm } from "../components/ReportLostItemForm";
+import { ReportLostItemForm } from "../../components/user.components/ReportLostItemForm";
 
 export function ReportLostItemPage({ authToken, onBack }) {
   const [showForm, setShowForm] = useState(true);
@@ -17,10 +17,10 @@ export function ReportLostItemPage({ authToken, onBack }) {
     onBack();
   };
 
-  if (successMessage) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
+  return (
+    <div className="max-w-3xl mx-auto pt-24 px-6">
+      {successMessage ? (
+        <div className="text-center py-20">
           <div className="mb-4">
             <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
               <svg
@@ -39,13 +39,7 @@ export function ReportLostItemPage({ authToken, onBack }) {
           <h2 className="text-2xl font-bold text-white mb-2">Success!</h2>
           <p className="text-gray-400">{successMessage}</p>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-950">
-      {showForm && (
+      ) : (
         <ReportLostItemForm
           authToken={authToken}
           onSuccess={handleSuccess}

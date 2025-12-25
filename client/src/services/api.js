@@ -2,6 +2,31 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const api = {
+  getUserClaimDetails: async (token, claimId) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/claims/${claimId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to fetch claim details");
+    return data;
+  },
+  getAllClaimsByUser: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/claims`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to fetch claims");
+    return data;
+  },
   userClaimItem: async (token, itemId, claimDetails, imageUrls = []) => {
     const response = await fetch(
       `${API_BASE_URL}/api/user/claim-item/${itemId}`,
@@ -231,6 +256,31 @@ const api = {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Failed to add staff");
+    return data;
+  },
+  deleteUserClaim: async (token, claimId) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/claims/${claimId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to delete claim");
+    return data;
+  },
+  updateUserClaim: async (token, claimId, claimData) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/claims/${claimId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(claimData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to update claim");
     return data;
   },
 };

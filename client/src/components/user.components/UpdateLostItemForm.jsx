@@ -1,14 +1,8 @@
 import { AlertCircle, Upload, X, Loader, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import api from "../services/api";
+import api from "../../services/api";
 
-export function ReportLostItemForm({
-  authToken,
-  onSuccess,
-  onClose,
-  mode = "create",
-  report = null,
-}) {
+export function UpdateLostItemForm({ authToken, report, onSuccess, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -21,7 +15,6 @@ export function ReportLostItemForm({
   });
 
   const [reportDetails, setReportDetails] = useState([{ key: "", value: "" }]);
-
   const [previewImages, setPreviewImages] = useState([]);
 
   const toLocalDateTimeInput = (value) => {
@@ -32,39 +25,32 @@ export function ReportLostItemForm({
   };
 
   useEffect(() => {
-    if (mode !== "edit" || !report) return;
-
+    if (!report) return;
     const detailEntries =
       report.report_details && typeof report.report_details === "object"
         ? Object.entries(report.report_details)
         : [];
-
     setFormData({
       item_type: report.item_type || "",
       date_lost: report.date_lost ? toLocalDateTimeInput(report.date_lost) : "",
       location_lost: report.location_lost || "",
       image_urls: report.image_urls || [],
     });
-
     setReportDetails(
       detailEntries.length
         ? detailEntries.map(([key, value]) => ({ key, value }))
         : [{ key: "", value: "" }]
     );
-
     setPreviewImages(report.image_urls || []);
-  }, [mode, report]);
+  }, [report]);
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-
     setUploadingImages(true);
     setError(null);
-
     try {
       const uploadedUrls = [];
-
       for (const file of files) {
         const cloudinaryFormData = new FormData();
         cloudinaryFormData.append("file", file);
@@ -72,7 +58,6 @@ export function ReportLostItemForm({
           "upload_preset",
           import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
         );
-
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${
             import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
@@ -82,21 +67,17 @@ export function ReportLostItemForm({
             body: cloudinaryFormData,
           }
         );
-
         if (!response.ok) {
           throw new Error("Image upload failed");
         }
-
         const data = await response.json();
         uploadedUrls.push(data.secure_url);
-
         const reader = new FileReader();
         reader.onload = (event) => {
           setPreviewImages((prev) => [...prev, event.target.result]);
         };
         reader.readAsDataURL(file);
       }
-
       setFormData((prev) => ({
         ...prev,
         image_urls: [...prev.image_urls, ...uploadedUrls],
@@ -135,7 +116,6 @@ export function ReportLostItemForm({
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       if (
         !formData.item_type ||
@@ -144,18 +124,13 @@ export function ReportLostItemForm({
       ) {
         throw new Error("Please fill in all required fields");
       }
-
-      // Convert datetime-local to ISO string
       const dateLostISO = new Date(formData.date_lost).toISOString();
-
-      // Build report_details object from fields
       const report_details = {};
       reportDetails.forEach((field) => {
         if (field.key && field.value) {
           report_details[field.key] = field.value;
         }
       });
-
       const submitData = {
         item_type: formData.item_type,
         report_details,
@@ -163,19 +138,15 @@ export function ReportLostItemForm({
         location_lost: formData.location_lost,
         image_urls: formData.image_urls,
       };
-
-      const response =
-        mode === "edit" && report?.id
-          ? await api.updateUserLostReport(authToken, report.id, submitData)
-          : await api.reportLostItem(authToken, submitData);
-
+      const response = await api.updateUserLostReport(
+        authToken,
+        report.id,
+        submitData
+      );
       onSuccess?.(response?.report || null);
     } catch (err) {
       setError(
-        err.message ||
-          (mode === "edit"
-            ? "Failed to update lost report. Please try again."
-            : "Failed to report lost item. Please try again.")
+        err.message || "Failed to update lost report. Please try again."
       );
       console.error("Form submission error:", err);
     } finally {
@@ -184,47 +155,31 @@ export function ReportLostItemForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 rounded-xl border border-white/10 w-full max-w-6xl shadow-2xl shadow-black/50 relative h-[85vh] flex flex-col">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition z-10"
-        >
-          <X size={20} />
-        </button>
-
-        {/* Header */}
-        <div className="flex items-center gap-2 p-6 border-b border-white/10">
-          <AlertCircle className="text-red-400" size={24} />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-red-300">
-              Lost Item Report
-            </p>
-            <h3 className="text-2xl font-bold text-white">
-              {mode === "edit" ? "Update Lost Report" : "Report Lost Item"}
-            </h3>
-          </div>
+    <div className="bg-slate-900 rounded-xl border border-white/10 w-full max-w-4xl mx-auto shadow-2xl shadow-black/50 relative mt-8 mb-12 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center gap-2 p-6 border-b border-white/10">
+        <AlertCircle className="text-blue-400" size={24} />
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-300">
+            Update Lost Item
+          </p>
+          <h3 className="text-2xl font-bold text-white">Update Lost Report</h3>
         </div>
-
-        {error && (
-          <div className="mx-6 mt-4 text-sm text-red-400 bg-red-500/10 rounded-lg p-3 border border-red-500/30">
-            ⚠ {error}
-          </div>
-        )}
-
-        {/* Scrollable Form Content */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex-1 overflow-hidden flex flex-col"
-        >
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <div className="max-w-4xl mx-auto space-y-6">
+      </div>
+      {error && (
+        <div className="mx-6 mt-4 text-sm text-red-400 bg-red-500/10 rounded-lg p-3 border border-red-500/30">
+          ⚠ {error}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+        <div className="flex-1 px-6 py-4">
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
               {/* Basic Info */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-red-300 uppercase tracking-wider">
+                <h4 className="text-sm font-semibold text-blue-300 uppercase tracking-wider">
                   Basic Information
                 </h4>
-
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-medium text-gray-300">
                     Item Type *
@@ -236,11 +191,10 @@ export function ReportLostItemForm({
                       setFormData({ ...formData, item_type: e.target.value })
                     }
                     placeholder="e.g., Electronics, Clothing, Bag, Wallet, Document"
-                    className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                    className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     required
                   />
                 </label>
-
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-medium text-gray-300">
                     Date Lost *
@@ -251,11 +205,10 @@ export function ReportLostItemForm({
                     onChange={(e) =>
                       setFormData({ ...formData, date_lost: e.target.value })
                     }
-                    className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                    className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     required
                   />
                 </label>
-
                 <label className="flex flex-col gap-1">
                   <span className="text-xs font-medium text-gray-300">
                     Location Lost *
@@ -270,12 +223,11 @@ export function ReportLostItemForm({
                       })
                     }
                     placeholder="e.g., Airport Terminal 2, Gate 5"
-                    className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                    className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     required
                   />
                 </label>
               </div>
-
               {/* Report Details */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -295,7 +247,6 @@ export function ReportLostItemForm({
                     + Add Field
                   </button>
                 </div>
-
                 {reportDetails.map((field, index) => (
                   <div key={index} className="flex gap-2 items-start">
                     <input
@@ -326,85 +277,80 @@ export function ReportLostItemForm({
                   </div>
                 ))}
               </div>
-
-              {/* Image Upload */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-red-300 uppercase tracking-wider">
-                  Images (Optional)
-                </h4>
-
-                <label className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-white/20 bg-white/5 p-4 cursor-pointer hover:border-red-500 hover:bg-white/10 transition">
-                  <Upload size={20} className="text-red-400" />
-                  <span className="text-xs text-gray-400">
-                    Click to upload images of the lost item
-                  </span>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={uploadingImages}
-                  />
-                </label>
-
-                {uploadingImages && (
-                  <div className="flex items-center gap-2 text-xs text-red-400">
-                    <Loader size={14} className="animate-spin" />
-                    Uploading...
-                  </div>
-                )}
-
-                {previewImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {previewImages.map((img, idx) => (
-                      <div key={idx} className="relative">
-                        <img
-                          src={img}
-                          alt={`Preview ${idx + 1}`}
-                          className="w-full h-20 object-cover rounded-lg border border-white/10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(idx)}
-                          className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 rounded-full p-0.5 transition"
-                        >
-                          <X size={12} className="text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            </div>
+            {/* Image Upload */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-blue-300 uppercase tracking-wider">
+                Images (Optional)
+              </h4>
+              <label className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-white/20 bg-white/5 p-4 cursor-pointer hover:border-blue-500 hover:bg-white/10 transition">
+                <Upload size={20} className="text-blue-400" />
+                <span className="text-xs text-gray-400">
+                  Click to upload images of the lost item
+                </span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploadingImages}
+                />
+              </label>
+              {uploadingImages && (
+                <div className="flex items-center gap-2 text-xs text-blue-400">
+                  <Loader size={14} className="animate-spin" />
+                  Uploading...
+                </div>
+              )}
+              {previewImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {previewImages.map((img, idx) => (
+                    <div key={idx} className="relative">
+                      <img
+                        src={img}
+                        alt={`Preview ${idx + 1}`}
+                        className="w-full h-20 object-cover rounded-lg border border-white/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 rounded-full p-0.5 transition"
+                      >
+                        <X size={12} className="text-white" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Footer with Buttons */}
-          <div className="flex gap-3 p-6 border-t border-white/10">
-            <button
-              type="submit"
-              disabled={loading || uploadingImages}
-              className="flex-1 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-60 hover:shadow-lg hover:shadow-red-500/50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader size={16} className="animate-spin" />
-                  {mode === "edit" ? "Updating..." : "Reporting..."}
-                </>
-              ) : (
-                mode === "edit" ? "Update Lost Report" : "Report Lost Item"
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-lg border border-white/20 px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/10 transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+        {/* Footer with Buttons */}
+        <div className="flex gap-3 p-6 border-t border-white/10">
+          <button
+            type="submit"
+            disabled={loading || uploadingImages}
+            className="flex-1 rounded-lg bg-gradient-to-r from-blue-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-60 hover:shadow-lg hover:shadow-blue-500/50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader size={16} className="animate-spin" />
+                Updating...
+              </>
+            ) : (
+              "Update Lost Report"
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-blue-500/30 px-4 py-2.5 text-sm font-semibold text-blue-300 hover:bg-blue-500/10 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

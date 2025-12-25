@@ -3,20 +3,22 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import { AuthSection } from "./components/AuthSection";
 import { OTPVerification } from "./components/OTPVerification";
-import { RecordFoundItemForm } from "./components/RecordFoundItemForm";
+import { RecordFoundItemForm } from "./components/staff.components/RecordFoundItemForm";
 import { ItemsList } from "./components/ItemsList";
 import { StaffDashboard } from "./components/StaffDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
-import { UserDashboard } from "./components/UserDashboard";
+import { UserDashboard } from "./components/user.components/UserDashboard";
 import { HowItWorksPage } from "./pages/HowItWorksPage";
 import { AboutPage } from "./pages/AboutPage";
 import { ContactPage } from "./pages/ContactPage";
-import { BrowseFoundItemsPage } from "./pages/BrowseFoundItemsPage";
-import { AddStaffPage } from "./pages/AddStaffPage";
-import { UserManagementPage } from "./pages/UserManagementPage";
+import { BrowseFoundItemsPage } from "./pages/user.pages/BrowseFoundItemsPage";
+import { AddStaffPage } from "./pages/admin.pages/AddStaffPage";
+import { UserManagementPage } from "./pages/admin.pages/UserManagementPage";
 import { AllClaimsPage } from "./pages/AllClaimsPage";
-import { ReportLostItemPage } from "./pages/ReportLostItemPage";
+import { ReportLostItemPage } from "./pages/user.pages/ReportLostItemPage";
 import api from "./services/api";
+import { MyClaimsPage } from "./pages/user.pages/MyClaimsPage";
+import { MyReportsPage } from "./pages/user.pages/MyReportsPage";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -25,10 +27,10 @@ function App() {
   );
   const [authError, setAuthError] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(
     localStorage.getItem("userRole") || null
   );
-  const [user, setUser] = useState(null);
   const [foundItems, setFoundItems] = useState([]);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -36,12 +38,7 @@ function App() {
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
   const [showRecordItemForm, setShowRecordItemForm] = useState(false);
-
-  const [loginForm, setLoginForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
     full_name: "",
     email: "",
@@ -49,25 +46,21 @@ function App() {
     password: "",
   });
 
-  // Handle hash-based navigation
+  // Add missing functions and effects here (copied from previous correct version)
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1) || "home";
+      const hash = (window.location.hash.slice(1) || "home").toLowerCase();
       setCurrentPage(hash);
     };
-
     window.addEventListener("hashchange", handleHashChange);
     handleHashChange();
-
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Fetch found items on component mount or when auth token changes
   useEffect(() => {
     fetchFoundItems();
   }, [authToken]);
 
-  // Verify user is still logged in
   useEffect(() => {
     if (authToken) {
       verifyToken();
@@ -101,20 +94,16 @@ function App() {
   const handleLogin = async (formData) => {
     setAuthLoading(true);
     setAuthError(null);
-
     try {
       const response = await api.login(formData.email, formData.password);
       const token = response.token;
-
       setAuthToken(token);
       localStorage.setItem("authToken", token);
-
       // Get user profile
       const profileData = await api.getProfile(token);
       setUser(profileData.user);
       setUserRole(profileData.user.role);
       localStorage.setItem("userRole", profileData.user.role);
-
       setLoginForm({ email: "", password: "" });
       setAuthError(null);
       setShowAuthModal(false);
@@ -131,7 +120,6 @@ function App() {
   const handleRegister = async (formData) => {
     setAuthLoading(true);
     setAuthError(null);
-
     try {
       await api.register({
         full_name: formData.full_name,
@@ -139,8 +127,6 @@ function App() {
         phone: formData.phone,
         password: formData.password,
       });
-
-      // Show OTP verification screen
       setPendingEmail(formData.email);
       setShowOTPVerification(true);
       setAuthError(null);
@@ -155,35 +141,22 @@ function App() {
   const handleVerifyOTP = async (otp) => {
     setAuthLoading(true);
     setAuthError(null);
-
     try {
       await api.verifyEmail(otp, pendingEmail);
-
-      // Auto-login after email verification
       const loginResponse = await api.login(
         pendingEmail,
         registerForm.password
       );
       const token = loginResponse.token;
-
       setAuthToken(token);
       localStorage.setItem("authToken", token);
-
-      // Get user profile
       const profileData = await api.getProfile(token);
       setUser(profileData.user);
       setUserRole(profileData.user.role);
       localStorage.setItem("userRole", profileData.user.role);
-
-      // Reset forms and close modal
       setShowOTPVerification(false);
       setShowAuthModal(false);
-      setRegisterForm({
-        full_name: "",
-        email: "",
-        phone: "",
-        password: "",
-      });
+      setRegisterForm({ full_name: "", email: "", phone: "", password: "" });
       setPendingEmail("");
       setCurrentPage("home");
       window.location.hash = "#home";
@@ -211,31 +184,14 @@ function App() {
     setUser(null);
     setAuthError(null);
     setLoginForm({ email: "", password: "" });
-    setRegisterForm({
-      full_name: "",
-      email: "",
-      phone: "",
-      password: "",
-    });
+    setRegisterForm({ full_name: "", email: "", phone: "", password: "" });
     localStorage.removeItem("authToken");
     localStorage.removeItem("userRole");
     setCurrentPage("home");
     window.location.hash = "#home";
   };
-
-  const openAuthModal = (mode) => {
-    setAuthModalMode(mode);
-    setShowAuthModal(true);
-    setAuthError(null);
-  };
-
-  const closeAuthModal = () => {
-    setShowAuthModal(false);
-    setAuthError(null);
-  };
-
-  // Page Rendering Logic
   const renderPage = () => {
+    // console.log("Rendering page:", currentPage);
     // Different pages
     if (currentPage === "how-it-works") {
       return (
@@ -250,7 +206,6 @@ function App() {
         />
       );
     }
-
     if (currentPage === "about") {
       return (
         <AboutPage
@@ -264,7 +219,6 @@ function App() {
         />
       );
     }
-
     if (currentPage === "contact") {
       return (
         <ContactPage
@@ -278,21 +232,6 @@ function App() {
         />
       );
     }
-
-    if (currentPage === "browse-items") {
-      return (
-        <BrowseFoundItemsPage
-          authToken={authToken}
-          user={user}
-          userRole={userRole}
-          onLogout={handleLogout}
-          onSignInClick={() => openAuthModal("login")}
-          onRegisterClick={() => openAuthModal("register")}
-          onRecordItemClick={() => setShowRecordItemForm(true)}
-        />
-      );
-    }
-
     if (currentPage === "add-staff") {
       return (
         <AddStaffPage
@@ -306,7 +245,6 @@ function App() {
         />
       );
     }
-
     if (currentPage === "user-management") {
       return (
         <UserManagementPage
@@ -320,7 +258,6 @@ function App() {
         />
       );
     }
-
     if (currentPage === "all-claims") {
       return (
         <AllClaimsPage
@@ -334,20 +271,9 @@ function App() {
         />
       );
     }
-
-    if (currentPage === "report-lost-item") {
+    if (currentPage === "browsefounditems" || currentPage === "browse-items") {
       return (
-        <ReportLostItemPage
-          authToken={authToken}
-          onBack={() => setCurrentPage("user-dashboard")}
-        />
-      );
-    }
-
-    // Default home page
-    return (
-      <>
-        <Navbar
+        <BrowseFoundItemsPage
           authToken={authToken}
           user={user}
           userRole={userRole}
@@ -356,53 +282,101 @@ function App() {
           onRegisterClick={() => openAuthModal("register")}
           onRecordItemClick={() => setShowRecordItemForm(true)}
         />
-        <div className="max-w-7xl mx-auto pt-20 px-6">
-          {!authToken && <HeroSection />}
-
-          <div className="mt-20 mb-10" id="items">
-            {authToken ? (
-              <div className="space-y-8">
-                {/* Role-based Dashboard */}
-                {userRole === "STAFF" && (
-                  <StaffDashboard
-                    foundItems={foundItems}
-                    onRecordItemClick={() => setShowRecordItemForm(true)}
-                    authToken={authToken}
-                  />
-                )}
-                {userRole === "ADMIN" && (
-                  <AdminDashboard
-                    foundItems={foundItems}
-                    authToken={authToken}
-                  />
-                )}
-                {userRole === "USER" && (
-                  <UserDashboard
-                    foundItems={foundItems}
-                    authToken={authToken}
-                    onNavigate={setCurrentPage}
-                  />
-                )}
-
-                {/* Items List Section */}
-                <ItemsList
-                  items={foundItems}
-                  loading={itemsLoading}
-                  userRole={userRole}
+      );
+    }
+    if (
+      currentPage === "reportlostitem" ||
+      currentPage === "report-lost-item"
+    ) {
+      return (
+        <ReportLostItemPage
+          authToken={authToken}
+          onBack={() => setCurrentPage("dashboard")}
+        />
+      );
+    }
+    if (currentPage === "myclaims" || currentPage === "my-claims") {
+      return (
+        <MyClaimsPage
+          foundItems={foundItems}
+          authToken={authToken}
+          onNavigate={setCurrentPage}
+        />
+      );
+    }
+    if (currentPage === "myreports" || currentPage === "my-reports") {
+      return (
+        <MyReportsPage
+          foundItems={foundItems}
+          authToken={authToken}
+          onNavigate={setCurrentPage}
+        />
+      );
+    }
+    // Default home page
+    return (
+      <>
+        {!authToken && <HeroSection />}
+        <div className="mt-20 mb-10" id="items">
+          {authToken ? (
+            <div className="space-y-8">
+              {/* Role-based Dashboard */}
+              {userRole === "STAFF" && (
+                <StaffDashboard
+                  foundItems={foundItems}
+                  onRecordItemClick={() => setShowRecordItemForm(true)}
                   authToken={authToken}
                 />
-              </div>
-            ) : (
-              <></>
-            )}
-          </div>
+              )}
+              {userRole === "ADMIN" && (
+                <AdminDashboard foundItems={foundItems} authToken={authToken} />
+              )}
+              {userRole === "USER" && (
+                <UserDashboard
+                  foundItems={foundItems}
+                  authToken={authToken}
+                  onNavigate={setCurrentPage}
+                />
+              )}
+              {/* Items List Section */}
+              <ItemsList
+                items={foundItems}
+                loading={itemsLoading}
+                userRole={userRole}
+                authToken={authToken}
+              />
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </>
     );
   };
 
+  const openAuthModal = (mode) => {
+    setAuthModalMode(mode);
+    setShowAuthModal(true);
+    setAuthError(null);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthError(null);
+  };
+
   return (
     <>
+      <Navbar
+        authToken={authToken}
+        user={user}
+        userRole={userRole}
+        onLogout={handleLogout}
+        onSignInClick={() => openAuthModal("login")}
+        onRegisterClick={() => openAuthModal("register")}
+        onRecordItemClick={() => setShowRecordItemForm(true)}
+        onNavigate={setCurrentPage}
+      />
       {renderPage()}
 
       {/* Auth Modal */}

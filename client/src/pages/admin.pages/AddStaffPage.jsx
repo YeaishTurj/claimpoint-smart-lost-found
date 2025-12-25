@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Navbar from "../components/Navbar";
-import api from "../services/api";
+import Navbar from "../../components/Navbar";
+import api from "../../services/api";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 export function AddStaffPage({

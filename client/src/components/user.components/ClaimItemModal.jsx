@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Loader } from "lucide-react";
-import api from "../services/api";
+import api from "../../services/api";
 import { ClaimItemImagesUpload } from "./ClaimItemImagesUpload";
 
 export function ClaimItemModal({ itemId, authToken, onClose }) {

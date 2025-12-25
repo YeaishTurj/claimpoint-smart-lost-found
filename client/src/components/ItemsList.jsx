@@ -1,7 +1,7 @@
 import { MapPin, Calendar, AlertCircle, Eye } from "lucide-react";
 import { useState } from "react";
 import { ItemDetailsCard } from "./ItemDetailsCard";
-import { ClaimItemModal } from "./ClaimItemModal";
+import { ClaimItemModal } from "./user.components/ClaimItemModal";
 
 export function ItemsList({ items, loading, userRole, authToken }) {
   const [selectedItemId, setSelectedItemId] = useState(null);
