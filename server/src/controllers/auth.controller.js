@@ -1,26 +1,27 @@
-import { db, usersTable } from "../index.js";
+import { db } from "../index.js";
+import { usersTable, usersPendingTable } from "../models/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import otpGenerator from "otp-generator";
 import { sendVerificationEmail } from "../../services/email.js";
+import generateEmailTemplate from "../utils/emailTemplates.js";
 
 export const register = async (req, res) => {
   const { email, password, full_name, phone } = req.body;
 
   try {
-    // Check if user already exists
+    // 1. Check if user already exists in the FINAL users table
     const [existingUser] = await db
       .select()
       .from(usersTable)
       .where(eq(usersTable.email, email));
-
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({ message: "User already exists and is verified." });
     }
 
-    // Generate OTP verification code
-    // Digits-only OTP (no letters/symbols)
     const verificationCode = otpGenerator.generate(6, {
       digits: true,
       lowerCaseAlphabets: false,
@@ -28,50 +29,53 @@ export const register = async (req, res) => {
       specialChars: false,
     });
 
-    // Set OTP expiry time (5 minutes)
     const expires = new Date();
     expires.setMinutes(expires.getMinutes() + 5);
-
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user object
-    const newUser = {
-      email,
-      password: hashedPassword,
-      full_name,
-      phone,
-      otp_verification_code: verificationCode,
-      otp_expires_at: expires,
-    };
+    // 2. Use Upsert (onConflictDoUpdate) so if they register again within 24h,
+    // we just update their pending record instead of throwing an error.
+    await db
+      .insert(usersPendingTable)
+      .values({
+        email,
+        password: hashedPassword,
+        full_name,
+        phone,
+        otp_verification_code: verificationCode,
+        otp_expires_at: expires,
+      })
+      .onConflictDoUpdate({
+        target: usersPendingTable.email,
+        set: {
+          password: hashedPassword,
+          full_name,
+          phone,
+          otp_verification_code: verificationCode,
+          otp_expires_at: expires,
+          updated_at: new Date(),
+        },
+      });
 
-    // Insert user into database
-    await db.insert(usersTable).values(newUser);
+    // 3. Send Email (Code omitted for brevity, same as yours)
+    try {
+      await sendVerificationEmail(
+        email,
+        "Verify your email",
+        generateEmailTemplate(full_name, verificationCode)
+      );
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      // Continue anyway - user can still verify via OTP even if email fails
+    }
 
-    // Prepare verification email
-    const emailBody = `
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; padding: 0 4px;">
-          <h2 style="margin: 0 0 12px 0; color: #111827;">Verify your email</h2>
-          <p style="margin: 0 0 10px 0;">Hi ${full_name || "there"},</p>
-          <p style="margin: 0 0 12px 0;">Use the one-time code below to verify your ClaimPoint account:</p>
-          <p style="font-size: 22px; font-weight: 800; letter-spacing: 3px; margin: 12px 0 16px 0; color: #111827;">${verificationCode}</p>
-          <p style="margin: 0 0 10px 0;">This code expires in <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
-          <p style="margin: 0 0 10px 0;">If you did not request this, you can safely ignore this email.</p>
-          <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">Questions? Contact support at support@claimpoint.com.</p>
-        </body>
-      </html>
-    `;
-
-    const emailSubject = "Verify your email address";
-
-    // Send verification email
-    await sendVerificationEmail(email, emailSubject, emailBody);
-
-    return res.status(201).json({ message: "User registered successfully" });
+    return res
+      .status(201)
+      .json({ message: "OTP sent to email. Please verify." });
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Registration error:", error.message);
+    console.error("Full error:", error);
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };
 
@@ -79,68 +83,76 @@ export const verifyEmail = async (req, res) => {
   const { code, email } = req.query;
 
   try {
-    // Find user by email
-    const [user] = await db
+    // 1. Find user in the PENDING table
+    const [pendingUser] = await db
       .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
+      .from(usersPendingTable)
+      .where(eq(usersPendingTable.email, email));
 
-    if (!user) {
-      return res.status(400).send(`
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-            <h2 style="color: #b91c1c; margin: 0 0 12px 0;">Verification failed</h2>
-            <p style="margin: 0 0 12px 0;">We could not find that email. Please request a new code and try again.</p>
-            <p style="margin: 0; font-size: 12px; color: #6b7280;">If this keeps happening, contact support.</p>
-          </body>
-        </html>
-      `);
+    if (!pendingUser) {
+      return res
+        .status(400)
+        .json({ message: "No pending registration found." });
     }
 
-    // Check if code matches and is not expired
-    if (
-      user.otp_verification_code !== code ||
-      new Date() > user.otp_expires_at
-    ) {
-      return res.status(400).send(`
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-            <h2 style="color: #b91c1c; margin: 0 0 12px 0;">Invalid or expired code</h2>
-            <p style="margin: 0 0 12px 0;">Your verification link or code is invalid or has expired.</p>
-            <p style="margin: 0 0 16px 0;">Please request a new code and try again.</p>
-            <p style="margin: 0 0 16px 0;">
-              <a href="http://localhost:${process.env.PORT}/api/auth/resend-verification-code?email=${email}" style="color: #2563eb; text-decoration: none;">
-                Request a new code
-              </a>
-            </p>
-            <p style="margin: 0; font-size: 12px; color: #6b7280;">Code validity: 5 minutes from the time it was sent.</p>
-          </body>
-        </html>
-      `);
+    // 2. Check code and expiry
+    const isExpired = new Date() > pendingUser.otp_expires_at;
+    if (pendingUser.otp_verification_code !== code || isExpired) {
+      return res.status(400).json({ message: "Invalid or expired code." });
     }
 
-    // Update user to set email as verified
-    await db
-      .update(usersTable)
-      .set({
-        email_verified: true,
-        otp_verification_code: null,
-        otp_expires_at: null,
-      })
-      .where(eq(usersTable.id, user.id));
+    let newUser;
 
-    return res.status(200).send(`
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-          <h2 style="color: #15803d; margin: 0 0 12px 0;">Email verified successfully</h2>
-          <p style="margin: 0 0 12px 0;">Your email has been verified. You can now log in.</p>
-          <p style="margin: 0; font-size: 12px; color: #6b7280;">You may close this window.</p>
-        </body>
-      </html>
-    `);
+    // 3. Move data using a Transaction
+    await db.transaction(async (tx) => {
+      // Insert into final users table
+      const [insertedUser] = await tx
+        .insert(usersTable)
+        .values({
+          email: pendingUser.email,
+          password: pendingUser.password,
+          full_name: pendingUser.full_name,
+          phone: pendingUser.phone,
+          email_verified: true,
+        })
+        .returning(); // Get the new user ID and Role
+
+      newUser = insertedUser;
+
+      // Delete from pending table
+      await tx
+        .delete(usersPendingTable)
+        .where(eq(usersPendingTable.email, email));
+    });
+
+    // --- AUTOMATIC LOGIN LOGIC ---
+
+    // 4. Generate JWT token
+    const payload = { id: newUser.id, role: newUser.role };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    // 5. Set the Cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // 6. Final Success Response
+    return res.status(200).json({
+      message: "Email verified and logged in successfully!",
+      user: {
+        id: newUser.id,
+        full_name: newUser.full_name,
+        role: newUser.role,
+      },
+    });
   } catch (error) {
-    console.error("Email verification error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Verification error:", error);
+    res.status(500).json({ message: "Server error during verification." });
   }
 };
 
@@ -148,68 +160,43 @@ export const resendVerificationCode = async (req, res) => {
   const { email } = req.query;
 
   try {
-    // Find user by email
-    const [user] = await db
+    const [pendingUser] = await db
       .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
+      .from(usersPendingTable)
+      .where(eq(usersPendingTable.email, email));
 
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
+    if (!pendingUser) {
+      return res
+        .status(400)
+        .json({ message: "No pending registration found." });
     }
 
-    // Generate new OTP verification code
     const newCode = otpGenerator.generate(6, {
       digits: true,
       lowerCaseAlphabets: false,
       upperCaseAlphabets: false,
       specialChars: false,
     });
-
-    // Set new OTP expiry time (5 minutes)
     const expires = new Date();
     expires.setMinutes(expires.getMinutes() + 5);
 
-    // Update user with new OTP code and expiry
     await db
-      .update(usersTable)
+      .update(usersPendingTable)
       .set({
         otp_verification_code: newCode,
         otp_expires_at: expires,
+        updated_at: new Date(),
       })
-      .where(eq(usersTable.id, user.id));
+      .where(eq(usersPendingTable.email, email));
 
-    // Prepare verification email
-    const emailBody = `
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; padding: 0 4px;">
-          <h2 style="margin: 0 0 12px 0; color: #111827;">Your new verification code</h2>
-          <p style="margin: 0 0 10px 0;">Hi ${user.full_name || "there"},</p>
-          <p style="margin: 0 0 12px 0;">Use this one-time code to verify your ClaimPoint account:</p>
-          <p style="font-size: 22px; font-weight: 800; letter-spacing: 3px; margin: 12px 0 16px 0; color: #111827;">${newCode}</p>
-          <p style="margin: 0 0 10px 0;">This code expires in <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
-          <p style="margin: 0 0 10px 0;">If you did not request this, you can ignore this email.</p>
-          <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">Need help? Contact support at support@claimpoint.com.</p>
-        </body>
-      </html>
-    `;
+    await sendVerificationEmail(
+      email,
+      "New Verification Code",
+      generateEmailTemplate(pendingUser.full_name, newCode)
+    );
 
-    const emailSubject = "Resend: Verify your email address";
-
-    // Send verification email
-    await sendVerificationEmail(email, emailSubject, emailBody);
-
-    return res.status(200).send(`
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-          <h2 style="color: #15803d; margin: 0 0 12px 0;">New code sent</h2>
-          <p style="margin: 0 0 12px 0;">A new verification code has been emailed to ${email}.</p>
-          <p style="margin: 0; font-size: 12px; color: #6b7280;">Check your inbox (and spam) and use the latest code within 5 minutes.</p>
-        </body>
-      </html>
-    `);
+    return res.status(200).json({ message: "New code sent." });
   } catch (error) {
-    console.error("Resend verification code error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -218,32 +205,73 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find user by email
+    // 1. Find user by email
     const [user] = await db
       .select()
       .from(usersTable)
       .where(eq(usersTable.email, email));
 
+    // Security tip: Use the same message for "user not found" and "wrong password"
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "User Not Found" });
     }
 
-    // Verify password
+    // 2. Check if the account is active (Important for your schema)
+    if (!user.is_active) {
+      return res
+        .status(403)
+        .json({ message: "Account is deactivated. Please contact support." });
+    }
+
+    // 3. Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Wrong Password" });
     }
 
+    // 4. Generate JWT token
     const payload = { id: user.id, role: user.role };
-
-    // Generate JWT token
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1 week",
+      expiresIn: "7d", // 1 week
     });
 
-    return res.status(200).json({ message: "Login successful", token });
+    // 5. SET HTTP-ONLY COOKIE
+    // This hides the token from JavaScript (XSS Protection)
+    res.cookie("token", token, {
+      httpOnly: true, // Cannot be accessed by frontend JS
+      secure: process.env.NODE_ENV === "production", // Only sent over HTTPS in production
+      sameSite: "strict", // Protecs against CSRF attacks
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    });
+
+    // 6. Return user data (but NOT the token)
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        full_name: user.full_name,
+        role: user.role,
+      },
+    });
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    // 1. Clear the cookie named 'token'
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    // 2. Return success message
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -281,13 +309,30 @@ export const updateProfile = async (req, res) => {
   const { full_name, phone } = req.body;
 
   try {
-    // Update user profile
-    await db
+    // 1. Update and use .returning() to get the updated row back immediately
+    const [updatedUser] = await db
       .update(usersTable)
-      .set({ full_name, phone })
-      .where(eq(usersTable.id, userId));
+      .set({
+        full_name,
+        phone,
+        updated_at: new Date(), // Assuming you have this column in your schema
+      })
+      .where(eq(usersTable.id, userId))
+      .returning({
+        id: usersTable.id,
+        full_name: usersTable.full_name,
+        phone: usersTable.phone,
+        email: usersTable.email,
+      });
 
-    return res.status(200).json({ message: "Profile updated successfully" });
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(500).json({ message: "Server error" });
@@ -299,7 +344,7 @@ export const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    // Find user by ID
+    // 1. Find user by ID
     const [user] = await db
       .select()
       .from(usersTable)
@@ -309,7 +354,7 @@ export const changePassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Verify current password
+    // 2. Verify current password
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password
@@ -318,16 +363,38 @@ export const changePassword = async (req, res) => {
       return res.status(400).json({ message: "Current password is incorrect" });
     }
 
-    // Hash new password
+    // 3. Security Check: Is the new password the same as the old one?
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res
+        .status(400)
+        .json({ message: "New password cannot be the same as the old one" });
+    }
+
+    // 4. Hash new password
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update user's password
+    // 5. Update password in DB
     await db
       .update(usersTable)
-      .set({ password: hashedNewPassword })
+      .set({
+        password: hashedNewPassword,
+        updated_at: new Date(),
+      })
       .where(eq(usersTable.id, userId));
 
-    return res.status(200).json({ message: "Password changed successfully" });
+    // 6. LOGOUT (Optional but Recommended for Security)
+    // This forces the user to log in again with the new password
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      message:
+        "Password changed successfully. Please log in with your new password.",
+    });
   } catch (error) {
     console.error("Change password error:", error);
     res.status(500).json({ message: "Server error" });

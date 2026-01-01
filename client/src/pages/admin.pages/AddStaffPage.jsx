@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Navbar from "../../components/Navbar";
 import api from "../../services/api";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
@@ -77,7 +76,6 @@ export function AddStaffPage({
 
   return (
     <>
-      <Navbar {...navbarProps} />
       <div className="max-w-4xl mx-auto pt-20 px-6 pb-12">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">

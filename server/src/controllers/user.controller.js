@@ -1,12 +1,11 @@
+import { db } from "../index.js";
+import { eq, desc, and } from "drizzle-orm";
 import {
-  db,
   lostReportsTable,
   claimsTable,
   foundItemsTable,
-} from "../index.js";
-import { eq, desc } from "drizzle-orm";
+} from "../models/index.js";
 
-// Ensure details are stored as JSON objects (handle stringified payloads too)
 const coerceToObject = (value) => {
   if (value && typeof value === "string") {
     try {
@@ -29,7 +28,8 @@ const coerceToObject = (value) => {
 export const reportLostItem = async (req, res) => {
   try {
     const user_id = req.user?.id;
-    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
+    if (!user_id)
+      return res.status(401).json({ message: "Your are not logged in" });
 
     const { item_type, report_details, date_lost, location_lost, image_urls } =
       req.body;
@@ -62,7 +62,7 @@ export const reportLostItem = async (req, res) => {
         date_lost: parsedDate,
         location_lost,
         image_urls: imageUrls,
-        status: "open",
+        status: "OPEN",
         created_at: new Date(),
         updated_at: new Date(),
       })
@@ -77,10 +77,11 @@ export const reportLostItem = async (req, res) => {
   }
 };
 
-export const getUserLostReports = async (req, res) => {
+export const getMyReports = async (req, res) => {
   try {
     const user_id = req.user?.id;
-    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
+    if (!user_id)
+      return res.status(401).json({ message: "You are not logged in" });
 
     const lostReports = await db
       .select()
@@ -95,7 +96,7 @@ export const getUserLostReports = async (req, res) => {
   }
 };
 
-export const getUserLostReportDetails = async (req, res) => {
+export const getMyReportDetails = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) return res.status(401).json({ message: "Unauthorized" });
@@ -126,7 +127,7 @@ export const getUserLostReportDetails = async (req, res) => {
   }
 };
 
-export const updateUserLostReport = async (req, res) => {
+export const updateMyReport = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) return res.status(401).json({ message: "Unauthorized" });
@@ -151,6 +152,12 @@ export const updateUserLostReport = async (req, res) => {
 
     if (!existingReport) {
       return res.status(404).json({ message: "Lost report not found" });
+    }
+
+    if (existingReport.status !== "OPEN") {
+      return res.status(400).json({
+        message: "Cannot edit a report that is already resolved or matched.",
+      });
     }
 
     const updatedFields = {};
@@ -202,7 +209,7 @@ export const updateUserLostReport = async (req, res) => {
   }
 };
 
-export const deleteUserLostReport = async (req, res) => {
+export const deleteMyReport = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) return res.status(401).json({ message: "Unauthorized" });
@@ -240,195 +247,204 @@ export const deleteUserLostReport = async (req, res) => {
   }
 };
 
-export const userClaimItem = async (req, res) => {
+export const myClaimSubmit = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) return res.status(401).json({ message: "Unauthorized" });
-
     const claimedItemId = req.params.id;
-    if (!claimedItemId || typeof claimedItemId !== "string") {
-      return res.status(400).json({ message: "Invalid item ID" });
-    }
+    const { user_provided_proof, image_urls } = req.body; // user_provided_proof is their explanation
 
-    const { claim_details, image_urls } = req.body;
-    const claimDetailsObj = coerceToObject(claim_details);
-    if (!claimDetailsObj) {
-      return res.status(400).json({ message: "Invalid claim details format" });
-    }
+    // 1. Fetch the item to get its public details
+    const [item] = await db
+      .select()
+      .from(foundItemsTable)
+      .where(eq(foundItemsTable.id, claimedItemId));
 
-    // Ensure image_urls is an array
-    const imageUrlsArr = Array.isArray(image_urls) ? image_urls : [];
+    if (!item) return res.status(404).json({ message: "Item not found" });
+    if (item.status !== "FOUND")
+      return res.status(400).json({ message: "Item is unavailable" });
 
+    // 2. Prevent Duplicate Claims
+    const [existingClaim] = await db
+      .select()
+      .from(claimsTable)
+      .where(
+        and(
+          eq(claimsTable.found_item_id, claimedItemId),
+          eq(claimsTable.user_id, user_id)
+        )
+      );
+
+    if (existingClaim)
+      return res.status(400).json({ message: "Already claimed" });
+
+    // 3. Construct the claim_details object
+    // We combine what the user said with a snapshot of the public info
+    const claimDetailsObj = {
+      user_proof: user_provided_proof,
+      item_snapshot: item.public_details, // Captures the public details at time of claim
+    };
+
+    // 4. Insert
     const [newClaim] = await db
       .insert(claimsTable)
       .values({
         user_id,
         found_item_id: claimedItemId,
-        claim_details: claimDetailsObj,
-        image_urls: imageUrlsArr,
-        match_percentage: 0,
-        status: "pending",
-        created_at: new Date(),
-        updated_at: new Date(),
+        claim_details: claimDetailsObj, // Now contains both sets of info
+        image_urls: Array.isArray(image_urls) ? image_urls : [],
+        status: "PENDING",
       })
       .returning();
 
-    res
+    return res
       .status(201)
-      .json({ message: "Item claim submitted successfully", claim: newClaim });
+      .json({ message: "Claim submitted", claim: newClaim });
   } catch (error) {
-    console.error("Error submitting item claim:", error);
+    console.error("Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const getAllClaimsByUser = async (req, res) => {
+export const getMyClaims = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) return res.status(401).json({ message: "Unauthorized" });
 
+    // 1. Fetch claims with a join, but select ONLY safe columns from foundItemsTable
     const claims = await db
-      .select()
+      .select({
+        claim_id: claimsTable.id,
+        status: claimsTable.status,
+        match_percentage: claimsTable.match_percentage,
+        created_at: claimsTable.created_at,
+        // Only public info from the item
+        item_type: foundItemsTable.item_type,
+        item_images: foundItemsTable.image_urls,
+        item_location: foundItemsTable.location_found,
+      })
       .from(claimsTable)
-      .where(eq(claimsTable.user_id, user_id))
       .leftJoin(
         foundItemsTable,
         eq(claimsTable.found_item_id, foundItemsTable.id)
       )
+      .where(eq(claimsTable.user_id, user_id))
       .orderBy(desc(claimsTable.created_at));
 
-    // Format claims for frontend
+    // 2. Format the data for a clean Frontend experience
+    const defaultImage = "https://via.placeholder.com/150?text=No+Image";
 
-    const defaultImage = "https://via.placeholder.com/80x80?text=No+Image";
     const formattedClaims = claims.map((row) => ({
-      id: row.claims.id,
-      item_type: row.found_items?.item_type || `Claim #${row.claims.id}`,
-      displayImage: row.found_items?.image_urls?.[0] || defaultImage,
-      image_urls: row.claims.image_urls,
-      status: row.claims.status,
-      match_percentage: row.claims.match_percentage,
+      id: row.claim_id,
+      item_name: row.item_type || "Unknown Item",
+      location: row.item_location || "N/A",
+      // Use the first image from the found item as the thumbnail
+      thumbnail:
+        Array.isArray(row.item_images) && row.item_images.length > 0
+          ? row.item_images[0]
+          : defaultImage,
+      status: row.status,
+      match_score: row.match_percentage,
+      date_submitted: row.created_at,
     }));
 
-    res.status(200).json({ claims: formattedClaims });
+    return res.status(200).json({
+      success: true,
+      count: formattedClaims.length,
+      claims: formattedClaims,
+    });
   } catch (error) {
     console.error("Error fetching user claims:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const getUserClaimDetails = async (req, res) => {
+export const getMyClaimDetails = async (req, res) => {
   try {
     const user_id = req.user?.id;
-    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
-
     const claimId = req.params.id;
-    if (!claimId || typeof claimId !== "string") {
-      return res.status(400).json({ message: "Invalid claim ID" });
-    }
 
-    const claim = await db
-      .select()
+    // 1. Fetch claim joined with limited public item data
+    const [result] = await db
+      .select({
+        // All claim fields
+        claim: claimsTable,
+        // Only public item fields
+        item_type: foundItemsTable.item_type,
+        location_found: foundItemsTable.location_found,
+        date_found: foundItemsTable.date_found,
+        public_details: foundItemsTable.public_details,
+        item_images: foundItemsTable.image_urls,
+      })
       .from(claimsTable)
-      .where(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id))
-      .limit(1)
-      .then((rows) => rows[0]);
+      .leftJoin(
+        foundItemsTable,
+        eq(claimsTable.found_item_id, foundItemsTable.id)
+      )
+      .where(
+        and(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id))
+      );
 
-    if (!claim) {
+    if (!result) {
       return res.status(404).json({ message: "Claim not found" });
     }
 
-    res.status(200).json({ claim });
+    // 2. Return a structured response
+    // We group item info together so the frontend can easily display it
+    return res.status(200).json({
+      success: true,
+      claim: {
+        ...result.claim,
+        item_info: {
+          type: result.item_type,
+          location: result.location_found,
+          date: result.date_found,
+          public_details: result.public_details,
+          images: result.item_images,
+        },
+      },
+    });
   } catch (error) {
     console.error("Error fetching claim details:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const deleteUserClaim = async (req, res) => {
+export const deleteMyClaim = async (req, res) => {
   try {
     const user_id = req.user?.id;
-    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
-
     const claimId = req.params.id;
-    if (!claimId || typeof claimId !== "string") {
-      return res.status(400).json({ message: "Invalid claim ID" });
-    }
 
-    const existingClaim = await db
+    // 1. Fetch the claim and verify ownership
+    const [existingClaim] = await db
       .select()
       .from(claimsTable)
-      .where(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id))
-      .limit(1)
-      .then((rows) => rows[0]);
+      .where(
+        and(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id))
+      );
 
     if (!existingClaim) {
-      return res.status(404).json({ message: "Claim not found" });
+      return res
+        .status(404)
+        .json({ message: "Claim not found or unauthorized" });
     }
 
-    await db
-      .delete(claimsTable)
-      .where(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id));
-
-    res.status(200).json({ message: "Claim deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting claim:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const updateUserClaim = async (req, res) => {
-  try {
-    const user_id = req.user?.id;
-    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
-
-    const claimId = req.params.id;
-    if (!claimId || typeof claimId !== "string") {
-      return res.status(400).json({ message: "Invalid claim ID" });
+    // 2. CRITICAL: Only allow deletion if the status is PENDING
+    // This protects the "audit trail" once a staff member has made a decision
+    if (existingClaim.status !== "PENDING") {
+      return res.status(400).json({
+        message: `You cannot delete a claim that has already been ${existingClaim.status.toLowerCase()}.`,
+      });
     }
 
-    const { claim_details, image_urls } = req.body;
+    // 3. Perform the deletion
+    await db.delete(claimsTable).where(eq(claimsTable.id, claimId));
 
-    const existingClaim = await db
-      .select()
-      .from(claimsTable)
-      .where(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id))
-      .limit(1)
-      .then((rows) => rows[0]);
-
-    if (!existingClaim) {
-      return res.status(404).json({ message: "Claim not found" });
-    }
-
-    const updatedFields = {};
-
-    if (claim_details) {
-      const claimDetailsObj = coerceToObject(claim_details);
-      if (!claimDetailsObj) {
-        return res
-          .status(400)
-          .json({ message: "Invalid claim details format" });
-      }
-      updatedFields.claim_details = claimDetailsObj;
-    }
-
-    if (image_urls) {
-      updatedFields.image_urls = Array.isArray(image_urls) ? image_urls : [];
-    }
-
-    updatedFields.updated_at = new Date();
-
-    const [updatedClaim] = await db
-      .update(claimsTable)
-      .set(updatedFields)
-      .where(eq(claimsTable.id, claimId), eq(claimsTable.user_id, user_id))
-      .returning();
-
-    res.status(200).json({
-      message: "Claim updated successfully",
-      claim: updatedClaim,
+    return res.status(200).json({
+      message: "Claim cancelled successfully.",
     });
   } catch (error) {
-    console.error("Error updating claim:", error);
+    console.error("Error deleting claim:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

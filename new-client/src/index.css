@@ -1,0 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+@import "tailwindcss";
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    font-family: "Space Grotesk", "Soehne", "Neue Haas Grotesk", system-ui,
+      -apple-system, "Segoe UI", sans-serif;
+  }
+}

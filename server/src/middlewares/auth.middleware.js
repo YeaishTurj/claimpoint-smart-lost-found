@@ -1,28 +1,34 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
+import { eq } from "drizzle-orm";
+import { db } from "../index.js";
+import { usersTable } from "../models/index.js";
 
-export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
+export const authenticateToken = async (req, res, next) => {
+  const token = req.cookies.token;
 
-  if (!authHeader) {
-    return res.status(401).json({ message: "Authorization header missing" });
-  }
-
-  if (!authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Invalid authorization format" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Token missing" });
-  }
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // CRITICAL: Check DB to see if user was deactivated while they were logged in
+    const [user] = await db
+      .select({ is_active: usersTable.is_active })
+      .from(usersTable)
+      .where(eq(usersTable.id, decoded.id));
+
+    if (!user || !user.is_active) {
+      res.clearCookie("token"); // Kick them out
+      return res
+        .status(403)
+        .json({ message: "Account is inactive. Access denied." });
+    }
+
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    res.clearCookie("token");
+    return res.status(403).json({ message: "Invalid session" });
   }
 };

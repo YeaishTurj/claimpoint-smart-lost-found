@@ -40,6 +40,7 @@ const Navbar = ({
         { label: "Contact", href: "#contact", icon: null },
       ];
     }
+    // console.log(authToken);
 
     // General User Navigation
     if (userRole === "USER") {
@@ -120,26 +121,41 @@ const Navbar = ({
                   <button
                     onClick={() => {
                       // ...existing code...
-                      if (item.action === "dashboard" && typeof onNavigate === "function") {
+                      if (
+                        item.action === "dashboard" &&
+                        typeof onNavigate === "function"
+                      ) {
                         onNavigate("dashboard");
                         window.location.hash = "#dashboard";
                       }
                       if (item.action === "recordItem" && onRecordItemClick) {
                         onRecordItemClick();
                       }
-                      if (item.action === "browseFoundItems" && typeof onNavigate === "function") {
+                      if (
+                        item.action === "browseFoundItems" &&
+                        typeof onNavigate === "function"
+                      ) {
                         onNavigate("browsefounditems");
                         window.location.hash = "#browsefounditems";
                       }
-                      if (item.action === "reportLostItem" && typeof onNavigate === "function") {
+                      if (
+                        item.action === "reportLostItem" &&
+                        typeof onNavigate === "function"
+                      ) {
                         onNavigate("reportlostitem");
                         window.location.hash = "#reportlostitem";
                       }
-                      if (item.action === "myReports" && typeof onNavigate === "function") {
+                      if (
+                        item.action === "myReports" &&
+                        typeof onNavigate === "function"
+                      ) {
                         onNavigate("myreports");
                         window.location.hash = "#myreports";
                       }
-                      if (item.action === "myClaims" && typeof onNavigate === "function") {
+                      if (
+                        item.action === "myClaims" &&
+                        typeof onNavigate === "function"
+                      ) {
                         onNavigate("myclaims");
                         window.location.hash = "#myclaims";
                       }

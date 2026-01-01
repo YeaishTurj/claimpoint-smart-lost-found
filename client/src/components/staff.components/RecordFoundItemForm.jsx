@@ -126,14 +126,14 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
       }
 
       const public_details = {};
-      const full_details = {};
+      const hidden_details = {};
 
       detailFields.forEach((field) => {
         if (field.key && field.value) {
           if (field.isPublic) {
             public_details[field.key] = field.value;
           } else {
-            full_details[field.key] = field.value;
+            hidden_details[field.key] = field.value;
           }
         }
       });
@@ -141,7 +141,7 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
       const submitData = {
         ...formData,
         public_details,
-        full_details,
+        hidden_details,
       };
 
       await api.recordFoundItem(authToken, submitData);

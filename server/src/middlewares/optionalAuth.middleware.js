@@ -1,29 +1,27 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
 
-export const optionalAuthenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
+export const optionalAuthenticateToken = async (req, res, next) => {
+  // 1. Look for the token in cookies
+  const token = req.cookies?.token;
 
-  if (!authHeader) {
+  // 2. If no token, just set user to null and move on
+  if (!token) {
     req.user = null;
     return next();
   }
 
-  if (!authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Invalid authorization format" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Token missing" });
-  }
-
   try {
+    // 3. Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 4. Attach the user to the request
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    // If the token is invalid/expired, we don't block the request (since it's optional),
+    // but we treat them as an unauthenticated guest.
+    req.user = null;
+    next();
   }
 };

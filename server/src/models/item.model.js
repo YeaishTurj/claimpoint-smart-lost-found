@@ -13,24 +13,24 @@ import { usersTable } from "./user.model.js";
 
 // Found item workflow
 export const foundItemStatusEnum = pgEnum("found_item_status", [
-  "found",
-  "claimed",
-  "returned",
+  "FOUND",
+  "CLAIMED",
+  "RETURNED",
 ]);
 
 // Claim workflow
 export const claimStatusEnum = pgEnum("claim_status", [
-  "pending",
-  "approved",
-  "rejected",
-  "collected",
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "COLLECTED",
 ]);
 
 // Lost report workflow
 export const lostReportStatusEnum = pgEnum("lost_report_status", [
-  "open",
-  "matched",
-  "resolved",
+  "OPEN",
+  "MATCHED",
+  "RESOLVED",
 ]);
 
 export const foundItemsTable = pgTable("found_items", {
@@ -45,12 +45,12 @@ export const foundItemsTable = pgTable("found_items", {
   date_found: timestamp("date_found", { withTimezone: true }).notNull(),
   location_found: text("location_found").notNull(),
 
-  full_details: json("full_details").notNull(), // backend-only details
+  hidden_details: json("hidden_details").notNull(), // backend-only details
   public_details: json("public_details").notNull(), // safe public info
 
   image_urls: json("image_urls"), // array of URLs
 
-  status: foundItemStatusEnum("status").notNull().default("found"),
+  status: foundItemStatusEnum("status").notNull().default("FOUND"),
 
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -78,7 +78,7 @@ export const claimsTable = pgTable("claims", {
 
   match_percentage: integer("match_percentage").default(0),
 
-  status: claimStatusEnum("status").notNull().default("pending"),
+  status: claimStatusEnum("status").notNull().default("PENDING"),
 
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -102,7 +102,7 @@ export const lostReportsTable = pgTable("lost_reports", {
   date_lost: timestamp("date_lost", { withTimezone: true }).notNull(),
   location_lost: text("location_lost").notNull(),
   image_urls: json("image_urls"), // array of URLs
-  status: lostReportStatusEnum("status").notNull().default("open"),
+  status: lostReportStatusEnum("status").notNull().default("OPEN"),
 
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()

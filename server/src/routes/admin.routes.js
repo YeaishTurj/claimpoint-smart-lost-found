@@ -1,41 +1,27 @@
 import express from "express";
-import { authenticateToken } from "../middlewares/auth.middleware.js";
-import { roleAuthorization } from "../middlewares/roleAuth.middleware.js";
 import {
   addStaff,
+  updateStaff,
   getAllUsers,
+  getAllStaffs,
   deactivateUser,
   activateUser,
+  deleteUser,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
-router.post(
-  "/add-staff",
-  authenticateToken,
-  roleAuthorization("ADMIN"),
-  addStaff
-);
+// Staff Management
+router.post("/staffs", addStaff);
+router.patch("/staffs/:staffId", updateStaff);
+router.get("/staffs", getAllStaffs);
 
-router.get(
-  "/get-all-users",
-  authenticateToken,
-  roleAuthorization("ADMIN"),
-  getAllUsers
-);
+// User Management
+router.get("/users", getAllUsers);
 
-router.patch(
-  "/deactivate-user/:userId",
-  authenticateToken,
-  roleAuthorization("ADMIN"),
-  deactivateUser
-);
-
-router.patch(
-  "/activate-user/:userId",
-  authenticateToken,
-  roleAuthorization("ADMIN"),
-  activateUser
-);
+// User Status Management
+router.patch("/users/:userId/deactivate", deactivateUser);
+router.patch("/users/:userId/activate", activateUser);
+router.delete("/users/:userId", deleteUser);
 
 export default router;

@@ -1,0 +1,3 @@
+general user
+-register an account - done
+-verify email address

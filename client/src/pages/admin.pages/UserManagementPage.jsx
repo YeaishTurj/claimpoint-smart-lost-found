@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Navbar from "../../components/Navbar";
 import {
   Users,
   Search,
@@ -150,7 +149,6 @@ export function UserManagementPage({
 
   return (
     <>
-      <Navbar {...navbarProps} />
       <div className="max-w-7xl mx-auto pt-20 px-6 pb-12">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">

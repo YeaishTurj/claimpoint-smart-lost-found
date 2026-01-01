@@ -9,12 +9,20 @@ import userRoutes from "./src/routes/user.routes.js";
 import { roleAuthorization } from "./src/middlewares/roleAuth.middleware.js";
 import { authenticateToken } from "./src/middlewares/auth.middleware.js";
 import { optionalAuthenticateToken } from "./src/middlewares/optionalAuth.middleware.js";
+import { initCronJobs } from "./src/utils/cron.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
-app.use(cors());
-
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
+
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use(
@@ -40,6 +48,8 @@ const PORT = process.env.PORT;
 app.get("/", (req, res) => {
   res.send("ClaimPoint Smart Lost & Found Backend is running.");
 });
+
+initCronJobs();
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -2,38 +2,34 @@ import express from "express";
 
 import {
   reportLostItem,
-  getUserLostReports,
-  getUserLostReportDetails,
-  updateUserLostReport,
-  deleteUserLostReport,
-  userClaimItem,
-  getAllClaimsByUser,
-  getUserClaimDetails,
-  deleteUserClaim,
-  updateUserClaim,
+  getMyReports,
+  getMyReportDetails,
+  updateMyReport,
+  deleteMyReport,
+  myClaimSubmit,
+  getMyClaims,
+  getMyClaimDetails,
+  deleteMyClaim,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
-// Route: Report a lost item
-router.post("/report-lost-item", reportLostItem);
+router.post("/lost-reports", reportLostItem);
 
-router.get("/lost-reports", getUserLostReports);
+router.get("/lost-reports", getMyReports);
 
-router.get("/lost-reports/:id", getUserLostReportDetails);
+router.get("/lost-reports/:id", getMyReportDetails);
 
-router.patch("/lost-reports/:id", updateUserLostReport);
+router.patch("/lost-reports/:id", updateMyReport);
 
-router.delete("/lost-reports/:id", deleteUserLostReport);
+router.delete("/lost-reports/:id", deleteMyReport);
 
-router.post("/claim-item/:id", userClaimItem);
+router.post("/claims/:id", myClaimSubmit);
 
-router.get("/claims", getAllClaimsByUser);
+router.get("/claims", getMyClaims);
 
-router.get("/claims/:id", getUserClaimDetails);
+router.get("/claims/:id", getMyClaimDetails);
 
-router.delete("/claims/:id", deleteUserClaim);
-
-router.patch("/claims/:id", updateUserClaim);
+router.delete("/claims/:id", deleteMyClaim);
 
 export default router;

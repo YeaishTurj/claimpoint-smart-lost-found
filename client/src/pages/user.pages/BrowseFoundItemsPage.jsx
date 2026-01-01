@@ -1,17 +1,8 @@
 import { ItemsList } from "../../components/ItemsList";
-import Navbar from "../../components/Navbar";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 
-export function BrowseFoundItemsPage({
-  authToken,
-  user,
-  userRole,
-  onLogout,
-  onSignInClick,
-  onRegisterClick,
-  onRecordItemClick,
-}) {
+export function BrowseFoundItemsPage({ authToken, userRole }) {
   const [foundItems, setFoundItems] = useState([]);
   const [itemsLoading, setItemsLoading] = useState(false);
 

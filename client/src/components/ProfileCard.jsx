@@ -10,9 +10,14 @@ import {
   Lock,
   Eye,
   EyeOff,
+  User,
+  Shield,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
 export function ProfileCard({ profile, authToken, onProfileUpdate }) {
+  console.log(authToken);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,9 +67,10 @@ export function ProfileCard({ profile, authToken, onProfileUpdate }) {
         throw new Error("Failed to update profile");
       }
 
-      // Update parent component's profile
       onProfileUpdate({ ...profile, ...formData });
+      setSuccessMessage("Profile updated successfully!");
       setIsEditing(false);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err.message || "Error updating profile");
       console.error("Error updating profile:", err);
@@ -94,13 +100,16 @@ export function ProfileCard({ profile, authToken, onProfileUpdate }) {
     setError("");
     setSuccessMessage("");
 
-    // Validation
     if (!passwordData.currentPassword.trim()) {
       setError("Current password is required");
       return;
     }
     if (!passwordData.newPassword.trim()) {
       setError("New password is required");
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      setError("New password must be at least 6 characters");
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -139,6 +148,7 @@ export function ProfileCard({ profile, authToken, onProfileUpdate }) {
         confirmPassword: "",
       });
       setIsChangingPassword(false);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err.message || "Error changing password");
       console.error("Error changing password:", err);
@@ -160,274 +170,374 @@ export function ProfileCard({ profile, authToken, onProfileUpdate }) {
 
   if (!profile) {
     return (
-      <div className="p-6 rounded-xl border border-slate-700/50 bg-slate-800/50">
-        <p className="text-gray-400">Loading profile...</p>
+      <div className="p-8 rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+          <p className="text-gray-400">Loading profile...</p>
+        </div>
       </div>
     );
   }
 
+  const getRoleBadge = () => {
+    const badges = {
+      ADMIN: {
+        color: "from-purple-500 to-pink-500",
+        icon: Shield,
+        label: "Administrator",
+      },
+      STAFF: {
+        color: "from-blue-500 to-cyan-500",
+        icon: User,
+        label: "Staff Member",
+      },
+      USER: {
+        color: "from-green-500 to-emerald-500",
+        icon: User,
+        label: "Regular User",
+      },
+    };
+    return badges[profile.role] || badges.USER;
+  };
+
+  const roleBadge = getRoleBadge();
+  const RoleIcon = roleBadge.icon;
+
   return (
-    <div className="p-6 rounded-xl border border-slate-700/50 bg-slate-800/50">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-1">
-            {profile.full_name || "User Profile"}
-          </h2>
-          <p className="text-sm text-gray-400">{profile.role} Account</p>
-        </div>
-        {!isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:bg-blue-500/30 transition"
-          >
-            <Edit2 size={16} />
-            Edit
-          </button>
-        )}
-      </div>
+    <div className="relative">
+      {/* Background gradient decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl blur-xl"></div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30">
-          {error}
-        </div>
-      )}
+      <div className="relative p-8 rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm shadow-2xl">
+        {/* Header with gradient background */}
+        <div className="relative mb-8 pb-6 border-b border-slate-700/50">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-t-xl -m-8 mb-0"></div>
 
-      {isEditing ? (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Phone
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={handleSave}
-              disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Check size={16} />
-              {isLoading ? "Saving..." : "Save"}
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <X size={16} />
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <Mail size={18} className="text-blue-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-gray-400">Email</p>
-              <p className="text-white">{profile.email}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Phone size={18} className="text-purple-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-gray-400">Phone</p>
-              <p className="text-white">{profile.phone || "Not provided"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <MapPin size={18} className="text-green-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-gray-400">Role</p>
-              <p className="text-white">
-                {profile.role === "ADMIN" && "Administrator"}
-                {profile.role === "STAFF" && "Staff Member"}
-                {profile.role === "USER" && "Regular User"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Calendar size={18} className="text-yellow-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-gray-400">Member Since</p>
-              <p className="text-white">
-                {new Date(profile.created_at).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-slate-700/50">
-            <div className="flex items-center gap-2">
+          <div className="relative flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
               <div
-                className={`w-3 h-3 rounded-full ${
-                  profile.email_verified ? "bg-green-500" : "bg-red-500"
-                }`}
-              ></div>
-              <p className="text-sm text-gray-300">
-                Email {profile.email_verified ? "Verified" : "Not Verified"}
-              </p>
-            </div>
-          </div>
+                className={`w-16 h-16 rounded-full bg-gradient-to-br ${roleBadge.color} flex items-center justify-center shadow-lg`}
+              >
+                <RoleIcon size={32} className="text-white" />
+              </div>
 
-          {/* Change Password Section */}
-          <div className="mt-6 pt-6 border-t border-slate-700/50">
-            {isChangingPassword ? (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white mb-4">
-                  Change Password
-                </h3>
-
-                {error && (
-                  <div className="p-3 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30">
-                    {error}
-                  </div>
-                )}
-
-                {successMessage && (
-                  <div className="p-3 rounded-lg bg-green-500/20 text-green-300 border border-green-500/30">
-                    {successMessage}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Current Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showCurrentPassword ? "text" : "password"}
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Enter current password"
-                      className="w-full px-4 py-2 pr-12 rounded-lg bg-slate-900/50 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowCurrentPassword(!showCurrentPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
-                    >
-                      {showCurrentPassword ? (
-                        <EyeOff size={20} />
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Enter new password"
-                      className="w-full px-4 py-2 pr-12 rounded-lg bg-slate-900/50 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
-                    >
-                      {showNewPassword ? (
-                        <EyeOff size={20} />
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Confirm new password"
-                      className="w-full px-4 py-2 pr-12 rounded-lg bg-slate-900/50 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff size={20} />
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={handleChangePassword}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Check size={16} />
-                    {isLoading ? "Changing..." : "Change Password"}
-                  </button>
-                  <button
-                    onClick={handleCancelPassword}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <X size={16} />
-                    Cancel
-                  </button>
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+                  {profile.full_name || "User Profile"}
+                </h2>
+                <div
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r ${roleBadge.color} text-white text-sm font-semibold shadow-lg`}
+                >
+                  <RoleIcon size={14} />
+                  {roleBadge.label}
                 </div>
               </div>
-            ) : (
+            </div>
+
+            {!isEditing && !isChangingPassword && (
               <button
-                onClick={() => setIsChangingPassword(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-500/30 transition"
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 border border-blue-500/30 hover:from-blue-500/30 hover:to-cyan-500/30 transition-all duration-200 shadow-lg hover:shadow-blue-500/20"
               >
-                <Lock size={16} />
-                Change Password
+                <Edit2 size={16} />
+                Edit Profile
               </button>
             )}
           </div>
         </div>
-      )}
+
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border border-green-500/30 flex items-center gap-3 animate-fade-in shadow-lg">
+            <CheckCircle size={20} />
+            {successMessage}
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 border border-red-500/30 flex items-center gap-3 animate-fade-in shadow-lg">
+            <XCircle size={20} />
+            {error}
+          </div>
+        )}
+
+        {isEditing ? (
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="full_name"
+                value={formData.full_name}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="Enter phone number"
+                className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleSave}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg hover:shadow-green-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Check size={18} />
+                {isLoading ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-700/50 text-gray-300 border border-slate-600/50 hover:bg-slate-700/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <X size={18} />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : isChangingPassword ? (
+          <div className="space-y-5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                <Lock size={20} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Change Password</h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">
+                Current Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter current password"
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-slate-900/70 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">
+                New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter new password (min 6 characters)"
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-slate-900/70 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Confirm new password"
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-slate-900/70 border border-slate-600/50 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleChangePassword}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg hover:shadow-green-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Check size={18} />
+                {isLoading ? "Changing..." : "Change Password"}
+              </button>
+              <button
+                onClick={handleCancelPassword}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-700/50 text-gray-300 border border-slate-600/50 hover:bg-slate-700/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <X size={18} />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Profile Information Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all group">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <Mail size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-1">
+                      Email
+                    </p>
+                    <p className="text-white font-medium truncate">
+                      {profile.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all group">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <Phone size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider mb-1">
+                      Phone
+                    </p>
+                    <p className="text-white font-medium">
+                      {profile.phone || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 hover:border-green-500/40 transition-all group">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <MapPin size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-green-300 uppercase tracking-wider mb-1">
+                      Account Type
+                    </p>
+                    <p className="text-white font-medium">{roleBadge.label}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 hover:border-yellow-500/40 transition-all group">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <Calendar size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-yellow-300 uppercase tracking-wider mb-1">
+                      Member Since
+                    </p>
+                    <p className="text-white font-medium">
+                      {new Date(profile.created_at).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Email Verification Status */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-slate-600/50">
+              <div className="flex items-center gap-3">
+                {profile.email_verified ? (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center animate-pulse">
+                      <CheckCircle size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-green-300">
+                        Email Verified
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Your email has been verified successfully
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                      <XCircle size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-red-300">
+                        Email Not Verified
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Please verify your email address
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Change Password Button */}
+            <div className="pt-4">
+              <button
+                onClick={() => setIsChangingPassword(true)}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 border border-yellow-500/30 hover:from-yellow-500/30 hover:to-orange-500/30 transition-all shadow-lg hover:shadow-yellow-500/20 font-semibold"
+              >
+                <Lock size={18} />
+                Change Password
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

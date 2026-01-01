@@ -188,11 +188,9 @@ function App() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userRole");
     setCurrentPage("home");
-    window.location.hash = "#home";
+    // window.location.hash = "#home";
   };
   const renderPage = () => {
-    // console.log("Rendering page:", currentPage);
-    // Different pages
     if (currentPage === "how-it-works") {
       return (
         <HowItWorksPage

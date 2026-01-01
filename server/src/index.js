@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { usersTable } from "./models/user.model.js";
 import {
+  usersTable,
   foundItemsTable,
   claimsTable,
   lostReportsTable,
-} from "./models/item.model.js";
+} from "./models/index.js";
 
 const db = drizzle(process.env.DATABASE_URL);
 

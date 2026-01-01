@@ -12,7 +12,7 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
     date_found: "",
     location_found: "",
     public_details: {},
-    full_details: {},
+    hidden_details: {},
     image_urls: [],
   });
 
@@ -123,7 +123,7 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
         date_found: new Date(formData.date_found).toISOString(),
         location_found: formData.location_found,
         public_details: formData.public_details,
-        full_details: formData.full_details,
+        hidden_details: formData.hidden_details,
         image_urls: formData.image_urls,
       };
 
@@ -137,7 +137,7 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
           summary: "",
           found_spot: "",
         },
-        full_details: {
+        hidden_details: {
           description: "",
           color: "",
           brand: "",
@@ -317,12 +317,12 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
                   Description
                 </span>
                 <textarea
-                  value={formData.full_details.description}
+                  value={formData.hidden_details.description}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      full_details: {
-                        ...formData.full_details,
+                      hidden_details: {
+                        ...formData.hidden_details,
                         description: e.target.value,
                       },
                     })
@@ -338,12 +338,12 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
                 <span className="text-xs font-medium text-gray-300">Color</span>
                 <input
                   type="text"
-                  value={formData.full_details.color}
+                  value={formData.hidden_details.color}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      full_details: {
-                        ...formData.full_details,
+                      hidden_details: {
+                        ...formData.hidden_details,
                         color: e.target.value,
                       },
                     })
@@ -358,12 +358,12 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
                 <span className="text-xs font-medium text-gray-300">Brand</span>
                 <input
                   type="text"
-                  value={formData.full_details.brand}
+                  value={formData.hidden_details.brand}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      full_details: {
-                        ...formData.full_details,
+                      hidden_details: {
+                        ...formData.hidden_details,
                         brand: e.target.value,
                       },
                     })
@@ -379,12 +379,12 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
                   Condition
                 </span>
                 <select
-                  value={formData.full_details.condition}
+                  value={formData.hidden_details.condition}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      full_details: {
-                        ...formData.full_details,
+                      hidden_details: {
+                        ...formData.hidden_details,
                         condition: e.target.value,
                       },
                     })
@@ -406,12 +406,12 @@ export function RecordFoundItemForm({ authToken, onSuccess, onClose }) {
                 </span>
                 <input
                   type="text"
-                  value={formData.full_details.identifying_marks}
+                  value={formData.hidden_details.identifying_marks}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      full_details: {
-                        ...formData.full_details,
+                      hidden_details: {
+                        ...formData.hidden_details,
                         identifying_marks: e.target.value,
                       },
                     })
