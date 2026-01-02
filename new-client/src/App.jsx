@@ -13,6 +13,10 @@ import {
   MyProfilePage,
   UpdateProfilePage,
   ChangePasswordPage,
+  AddFoundItem,
+  AddStaffPage,
+  ManageUsersPage,
+  UpdateStaffPage,
 } from "./pages/index.js";
 import Footer from "./components/Footer";
 
@@ -42,6 +46,10 @@ const App = () => {
           <Route path="/my-profile" element={<MyProfilePage />} />
           <Route path="/update-profile" element={<UpdateProfilePage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
+          <Route path="/add-found-item" element={<AddFoundItem />} />
+          <Route path="/add-staff" element={<AddStaffPage />} />
+          <Route path="/manage-users" element={<ManageUsersPage />} />
+          <Route path="/update-staff/:staffId" element={<UpdateStaffPage />} />
         </Routes>
       </main>
 

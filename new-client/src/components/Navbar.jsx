@@ -46,13 +46,22 @@ const Navbar = () => {
     setDropdownTimeout(timeout);
   };
 
-  const navLinks = [
-    { to: "/", label: "Home", icon: Home },
-    { to: "/found-items", label: "Browse Items", icon: Search },
-    { to: "/how-it-works", label: "How It Works", icon: HelpCircle },
-    { to: "/about", label: "About", icon: Info },
-    { to: "/contact", label: "Contact", icon: Mail },
-  ];
+  // Conditional navigation links based on user role
+  const navLinks =
+    user?.role === "ADMIN"
+      ? [
+          { to: "/", label: "Home", icon: Home },
+          { to: "/found-items", label: "Browse Items", icon: Search },
+          { to: "/manage-users", label: "Manage Users", icon: User },
+          { to: "/add-staff", label: "Add Staff", icon: User },
+        ]
+      : [
+          { to: "/", label: "Home", icon: Home },
+          { to: "/found-items", label: "Browse Items", icon: Search },
+          { to: "/how-it-works", label: "How It Works", icon: HelpCircle },
+          { to: "/about", label: "About", icon: Info },
+          { to: "/contact", label: "Contact", icon: Mail },
+        ];
 
   const isActive = (path) => location.pathname === path;
 
