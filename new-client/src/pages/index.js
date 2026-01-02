@@ -4,6 +4,8 @@ import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import VerificationPage from "./VerificationPage";
+import BrowseFoundItems from "./BrowseFoundItems";
+import HowItWorks from "./HowItWorks";
 
 export {
   AboutPage,
@@ -12,4 +14,6 @@ export {
   LoginPage,
   RegisterPage,
   VerificationPage,
+  BrowseFoundItems,
+  HowItWorks,
 };

@@ -6,7 +6,6 @@ import {
   getAllStaffs,
   deactivateUser,
   activateUser,
-  deleteUser,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -22,6 +21,5 @@ router.get("/users", getAllUsers);
 // User Status Management
 router.patch("/users/:userId/deactivate", deactivateUser);
 router.patch("/users/:userId/activate", activateUser);
-router.delete("/users/:userId", deleteUser);
 
 export default router;

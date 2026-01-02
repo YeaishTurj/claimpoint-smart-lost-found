@@ -117,7 +117,6 @@ export const getAllStaffs = async (req, res) => {
         id: usersTable.id,
         email: usersTable.email,
         full_name: usersTable.full_name,
-        phone: usersTable.phone,
         email_verified: usersTable.email_verified,
         is_active: usersTable.is_active,
         created_at: usersTable.created_at,
@@ -142,7 +141,6 @@ export const getAllUsers = async (req, res) => {
         id: usersTable.id,
         email: usersTable.email,
         full_name: usersTable.full_name,
-        phone: usersTable.phone,
         email_verified: usersTable.email_verified,
         is_active: usersTable.is_active,
         created_at: usersTable.created_at,
@@ -252,48 +250,6 @@ export const activateUser = async (req, res) => {
     console.error("Error activating user:", error);
     res.status(500).json({
       message: "Internal server error while activating user",
-    });
-  }
-};
-
-export const deleteUser = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    // Find user first
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, userId));
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Prevent deleting ADMIN users
-    if (user.role === "ADMIN") {
-      return res.status(403).json({
-        message: "Cannot delete admin accounts",
-      });
-    }
-
-    // Prevent deleting yourself
-    if (user.id === req.user.id) {
-      return res.status(400).json({
-        message: "Cannot delete your own account",
-      });
-    }
-
-    // Delete user
-    await db.delete(usersTable).where(eq(usersTable.id, userId));
-
-    res.status(200).json({
-      message: "User deleted successfully",
-    });
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({
-      message: "Internal server error while deleting user",
     });
   }
 };
