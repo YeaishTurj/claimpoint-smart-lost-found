@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Routes } from "react-router";
+import React, { useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router";
 import Navbar from "./components/Navbar";
 import {
   AboutPage,
@@ -10,10 +10,20 @@ import {
   VerificationPage,
   BrowseFoundItems,
   HowItWorks,
+  MyProfilePage,
+  UpdateProfilePage,
+  ChangePasswordPage,
 } from "./pages/index.js";
 import Footer from "./components/Footer";
 
 const App = () => {
+  const location = useLocation();
+
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
@@ -29,6 +39,9 @@ const App = () => {
           <Route path="/verify-email" element={<VerificationPage />} />
           <Route path="/found-items" element={<BrowseFoundItems />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/my-profile" element={<MyProfilePage />} />
+          <Route path="/update-profile" element={<UpdateProfilePage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
         </Routes>
       </main>
 

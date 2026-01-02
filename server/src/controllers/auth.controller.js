@@ -7,6 +7,14 @@ import otpGenerator from "otp-generator";
 import { sendVerificationEmail } from "../../services/email.js";
 import generateEmailTemplate from "../utils/emailTemplates.js";
 
+const isProd = process.env.NODE_ENV === "production";
+const baseCookieOptions = {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "strict" : "Lax",
+  path: "/",
+};
+
 export const register = async (req, res) => {
   const { email, password, full_name, phone } = req.body;
 
@@ -135,10 +143,8 @@ export const verifyEmail = async (req, res) => {
 
     // 5. Set the Cookie
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      ...baseCookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     });
 
     // 6. Final Success Response
@@ -148,6 +154,7 @@ export const verifyEmail = async (req, res) => {
         id: newUser.id,
         full_name: newUser.full_name,
         role: newUser.role,
+        is_active: true,
       },
     });
   } catch (error) {
@@ -238,9 +245,7 @@ export const login = async (req, res) => {
     // 5. SET HTTP-ONLY COOKIE
     // This hides the token from JavaScript (XSS Protection)
     res.cookie("token", token, {
-      httpOnly: true, // Cannot be accessed by frontend JS
-      secure: process.env.NODE_ENV === "production", // Only sent over HTTPS in production
-      sameSite: "strict", // Protecs against CSRF attacks
+      ...baseCookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     });
 
@@ -251,6 +256,7 @@ export const login = async (req, res) => {
         id: user.id,
         full_name: user.full_name,
         role: user.role,
+        is_active: user.is_active,
       },
     });
   } catch (error) {
@@ -263,9 +269,7 @@ export const logout = async (req, res) => {
   try {
     // 1. Clear the cookie named 'token'
     res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      ...baseCookieOptions,
     });
 
     // 2. Return success message
@@ -289,6 +293,7 @@ export const getProfile = async (req, res) => {
         role: usersTable.role,
         email_verified: usersTable.email_verified,
         created_at: usersTable.created_at,
+        is_active: usersTable.is_active,
       })
       .from(usersTable)
       .where(eq(usersTable.id, userId));
@@ -386,9 +391,7 @@ export const changePassword = async (req, res) => {
     // 6. LOGOUT (Optional but Recommended for Security)
     // This forces the user to log in again with the new password
     res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      ...baseCookieOptions,
     });
 
     return res.status(200).json({

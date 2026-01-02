@@ -6,6 +6,9 @@ import RegisterPage from "./RegisterPage";
 import VerificationPage from "./VerificationPage";
 import BrowseFoundItems from "./BrowseFoundItems";
 import HowItWorks from "./HowItWorks";
+import MyProfilePage from "./MyProfilePage";
+import UpdateProfilePage from "./UpdateProfilePage";
+import ChangePasswordPage from "./ChangePasswordPage";
 
 export {
   AboutPage,
@@ -16,4 +19,7 @@ export {
   VerificationPage,
   BrowseFoundItems,
   HowItWorks,
+  MyProfilePage,
+  UpdateProfilePage,
+  ChangePasswordPage,
 };

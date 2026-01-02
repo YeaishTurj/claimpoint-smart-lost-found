@@ -4,23 +4,26 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router";
 import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./context/auth.context";
 import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-    <App />
-    <ToastContainer
-      position="top-right"
-      autoClose={4000}
-      hideProgressBar={false}
-      newestOnTop={true}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="light"
-      toastClassName="!rounded-lg !shadow-lg"
-    />
+    <AuthProvider>
+      <App />
+      <ToastContainer
+        position="top-center"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastClassName="!rounded-lg !shadow-lg"
+      />
+    </AuthProvider>
   </BrowserRouter>
 );
