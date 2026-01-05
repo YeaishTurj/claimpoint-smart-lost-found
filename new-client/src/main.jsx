@@ -13,16 +13,20 @@ createRoot(document.getElementById("root")).render(
       <App />
       <ToastContainer
         position="top-center"
-        autoClose={4000}
+        autoClose={5000}
         hideProgressBar={false}
         newestOnTop={true}
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
+        pauseOnFocusLoss={false}
         draggable
-        pauseOnHover
-        theme="light"
-        toastClassName="!rounded-lg !shadow-lg"
+        pauseOnHover={true}
+        theme="dark"
+        toastClassName={() =>
+          "!rounded-lg !shadow-xl !backdrop-blur-md !bg-slate-900/95 !border !border-slate-700/50 !p-4"
+        }
+        bodyClassName={() => "!text-sm !font-medium !text-white"}
+        limit={3}
       />
     </AuthProvider>
   </BrowserRouter>

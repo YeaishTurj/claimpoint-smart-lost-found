@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       try {
         setIsLoading(true);
         const storedUser = localStorage.getItem("user");
-        console.log("Stored user from localStorage:", storedUser);
+        // console.log("Stored user from localStorage:", storedUser);
 
         // Optimistic hydration from storage to prevent UI flash
         if (storedUser) {

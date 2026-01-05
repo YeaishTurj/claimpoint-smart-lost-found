@@ -9,77 +9,81 @@ import {
   Loader,
   UserCheck,
   UserX,
+  Edit,
   AlertTriangle,
   Filter,
   X,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
-const ManageUsersPage = () => {
-  const [users, setUsers] = useState([]);
+const ManageStaffsPage = () => {
+  const navigate = useNavigate();
+  const [staff, setStaff] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedStaff, setSelectedStaff] = useState(null);
 
   useEffect(() => {
-    fetchUsers();
+    fetchStaff();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchStaff = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/admin/users");
-      setUsers(response.data.users || []);
+      const response = await api.get("/admin/staffs");
+      setStaff(response.data.staff || []);
     } catch (error) {
-      console.error("Failed to fetch users:", error);
-      toast.error("Failed to load users", {
+      console.error("Failed to fetch staff:", error);
+      toast.error("Failed to load staff members", {
         position: "top-center",
         autoClose: 2000,
       });
-      setUsers([]);
+      setStaff([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleToggleStatus = async (userId, currentStatus) => {
+  const handleToggleStatus = async (staffId, currentStatus) => {
     if (currentStatus) {
-      const user = users.find((u) => u.id === userId);
-      setSelectedUser({
-        id: userId,
-        name: user?.full_name || "this user",
+      const staffMember = staff.find((s) => s.id === staffId);
+      setSelectedStaff({
+        id: staffId,
+        name: staffMember?.full_name || "this staff member",
       });
       setShowConfirmModal(true);
       return;
     }
 
-    await performStatusToggle(userId, currentStatus);
+    await performStatusToggle(staffId, currentStatus);
   };
 
-  const performStatusToggle = async (userId, currentStatus) => {
+  const performStatusToggle = async (staffId, currentStatus) => {
     try {
       const endpoint = currentStatus
-        ? `/admin/users/${userId}/deactivate`
-        : `/admin/users/${userId}/activate`;
+        ? `/admin/users/${staffId}/deactivate`
+        : `/admin/users/${staffId}/activate`;
 
       await api.patch(endpoint);
 
       toast.success(
-        `User ${!currentStatus ? "activated" : "deactivated"} successfully`,
+        `Staff member ${
+          !currentStatus ? "activated" : "deactivated"
+        } successfully`,
         {
           position: "top-center",
           autoClose: 2000,
         }
       );
 
-      fetchUsers();
+      fetchStaff();
     } catch (error) {
-      console.error("Failed to update user status:", error);
+      console.error("Failed to update staff status:", error);
       toast.error(
-        error.response?.data?.message || "Failed to update user status",
+        error.response?.data?.message || "Failed to update staff status",
         {
           position: "top-center",
           autoClose: 2000,
@@ -89,28 +93,27 @@ const ManageUsersPage = () => {
   };
 
   const handleConfirmDeactivate = async () => {
-    if (selectedUser) {
-      await performStatusToggle(selectedUser.id, true);
+    if (selectedStaff) {
+      await performStatusToggle(selectedStaff.id, true);
       setShowConfirmModal(false);
-      setSelectedUser(null);
+      setSelectedStaff(null);
     }
   };
 
   const handleCancelDeactivate = () => {
     setShowConfirmModal(false);
-    setSelectedUser(null);
+    setSelectedStaff(null);
   };
 
-  const filteredUsers = users.filter((user) => {
+  const filteredStaff = staff.filter((member) => {
     const matchesSearch =
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+      member.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
   });
 
-  const activeCount = users.filter((u) => u.is_active).length;
+  const activeCount = staff.filter((s) => s.is_active).length;
+  const verifiedCount = staff.filter((s) => s.email_verified).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4 sm:px-6 lg:px-8">
@@ -129,10 +132,10 @@ const ManageUsersPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">
-                User Management
+                Staff Management
               </h1>
               <p className="text-lg text-slate-400 max-w-2xl">
-                Oversee and manage all registered users, their roles, and
+                Oversee and manage all staff members, their access levels, and
                 account statuses
               </p>
             </div>
@@ -140,8 +143,8 @@ const ManageUsersPage = () => {
             {/* Stats Cards */}
             <div className="flex gap-4">
               <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-xl px-4 py-3 min-w-[120px]">
-                <p className="text-xs text-slate-400 mb-1">Total Users</p>
-                <p className="text-2xl font-bold text-white">{users.length}</p>
+                <p className="text-xs text-slate-400 mb-1">Total Staff</p>
+                <p className="text-2xl font-bold text-white">{staff.length}</p>
               </div>
               <div className="bg-slate-900/40 backdrop-blur-xl border border-emerald-500/20 rounded-xl px-4 py-3 min-w-[120px]">
                 <p className="text-xs text-emerald-400 mb-1">Active</p>
@@ -162,7 +165,7 @@ const ManageUsersPage = () => {
             />
             <input
               type="text"
-              placeholder="Search by name, email, or phone..."
+              placeholder="Search by name or email address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-12 py-3.5 border-2 border-slate-700/50 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all bg-slate-950/50 text-white placeholder:text-slate-500"
@@ -183,9 +186,9 @@ const ManageUsersPage = () => {
               <p className="text-slate-400">
                 Showing{" "}
                 <span className="font-semibold text-white">
-                  {filteredUsers.length}
+                  {filteredStaff.length}
                 </span>{" "}
-                of {users.length} users
+                of {staff.length} staff members
               </p>
             </div>
             {searchTerm && (
@@ -207,47 +210,47 @@ const ManageUsersPage = () => {
                 <div className="w-16 h-16 border-4 border-slate-700 border-t-emerald-400 rounded-full animate-spin"></div>
               </div>
               <span className="text-slate-300 text-lg font-medium">
-                Loading users...
+                Loading staff members...
               </span>
             </div>
           </div>
         )}
 
         {/* Empty State */}
-        {!isLoading && filteredUsers.length === 0 && (
+        {!isLoading && filteredStaff.length === 0 && (
           <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl p-16 border border-slate-800/50 shadow-2xl text-center">
             <div className="w-20 h-20 bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Users size={40} className="text-slate-500" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">
-              No Users Found
+              No Staff Members Found
             </h3>
             <p className="text-slate-400 text-lg max-w-md mx-auto">
-              {searchTerm || roleFilter !== "all"
-                ? "No users match your search criteria. Try adjusting your filters."
-                : "No users have been registered in the system yet."}
+              {searchTerm
+                ? "No staff members match your search criteria. Try adjusting your filters."
+                : "No staff members have been added to the system yet."}
             </p>
           </div>
         )}
 
-        {/* Users Table */}
-        {!isLoading && filteredUsers.length > 0 && (
+        {/* Staff Table */}
+        {!isLoading && filteredStaff.length > 0 && (
           <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-800/50 shadow-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-800/40 border-b border-slate-700/50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      User
+                      Staff Member
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
                       Contact
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Role
+                      Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Status
+                      Verification
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
                       Joined Date
@@ -258,85 +261,71 @@ const ManageUsersPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700/30">
-                  {filteredUsers.map((user) => (
+                  {filteredStaff.map((member) => (
                     <tr
-                      key={user.id}
+                      key={member.id}
                       className="hover:bg-slate-800/20 transition-colors"
                     >
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <span className="text-white font-bold text-base">
-                              {user.full_name?.charAt(0).toUpperCase() || "U"}
+                              {member.full_name?.charAt(0).toUpperCase() || "S"}
                             </span>
                           </div>
                           <div>
                             <p className="font-semibold text-white text-base">
-                              {user.full_name || "Unknown"}
+                              {member.full_name || "Unknown"}
                             </p>
                             <p className="text-xs text-slate-500 font-mono">
-                              ID: {user.id}
+                              ID: {member.id}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-slate-300">
-                            <Mail
-                              size={14}
-                              className="text-emerald-400 flex-shrink-0"
-                            />
-                            <span className="truncate max-w-[200px]">
-                              {user.email || "N/A"}
-                            </span>
-                          </div>
-                          {user.phone && (
-                            <div className="flex items-center gap-2 text-sm text-slate-300">
-                              <Phone
-                                size={14}
-                                className="text-emerald-400 flex-shrink-0"
-                              />
-                              {user.phone}
-                            </div>
-                          )}
+                        <div className="flex items-center gap-2 text-sm text-slate-300">
+                          <Mail
+                            size={14}
+                            className="text-emerald-400 flex-shrink-0"
+                          />
+                          <span className="truncate max-w-[200px]">
+                            {member.email || "N/A"}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${
-                            user.role === "ADMIN"
-                              ? "bg-purple-500/15 text-purple-300 border border-purple-500/30"
-                              : user.role === "STAFF"
-                              ? "bg-blue-500/15 text-blue-300 border border-blue-500/30"
-                              : "bg-slate-700/50 text-slate-300 border border-slate-600/50"
+                            member.is_active
+                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                              : "bg-red-500/15 text-red-300 border border-red-500/30"
                           }`}
                         >
-                          <Shield size={13} />
-                          {user.role || "USER"}
+                          {member.is_active ? (
+                            <UserCheck size={13} />
+                          ) : (
+                            <UserX size={13} />
+                          )}
+                          {member.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="px-6 py-5">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${
-                            user.is_active
-                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                              : "bg-red-500/15 text-red-300 border border-red-500/30"
+                            member.email_verified
+                              ? "bg-blue-500/15 text-blue-300 border border-blue-500/30"
+                              : "bg-amber-500/15 text-amber-300 border border-amber-500/30"
                           }`}
                         >
-                          {user.is_active ? (
-                            <UserCheck size={13} />
-                          ) : (
-                            <UserX size={13} />
-                          )}
-                          {user.is_active ? "Active" : "Inactive"}
+                          {member.email_verified ? "Verified" : "Pending"}
                         </span>
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2 text-sm text-slate-300">
                           <Calendar size={14} className="text-emerald-400" />
-                          {user.created_at
-                            ? new Date(user.created_at).toLocaleDateString(
+                          {member.created_at
+                            ? new Date(member.created_at).toLocaleDateString(
                                 "en-US",
                                 {
                                   month: "short",
@@ -348,18 +337,32 @@ const ManageUsersPage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(user.id, user.is_active)
-                          }
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            user.is_active
-                              ? "bg-red-500/15 text-red-300 hover:bg-red-500/25 border border-red-500/30"
-                              : "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30"
-                          }`}
-                        >
-                          {user.is_active ? "Deactivate" : "Activate"}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              navigate(`/update-staff/${member.id}`)
+                            }
+                            className="p-2 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30 rounded-lg transition-all group"
+                            title="Edit Staff"
+                          >
+                            <Edit
+                              size={16}
+                              className="group-hover:scale-110 transition-transform"
+                            />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleToggleStatus(member.id, member.is_active)
+                            }
+                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                              member.is_active
+                                ? "bg-red-500/15 text-red-300 hover:bg-red-500/25 border border-red-500/30"
+                                : "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30"
+                            }`}
+                          >
+                            {member.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -385,7 +388,7 @@ const ManageUsersPage = () => {
                 <p className="text-slate-300 leading-relaxed">
                   Are you sure you want to deactivate{" "}
                   <span className="font-semibold text-white">
-                    {selectedUser?.name}
+                    {selectedStaff?.name}
                   </span>
                   ? This will immediately revoke their access to the system.
                 </p>
@@ -422,4 +425,4 @@ const ManageUsersPage = () => {
   );
 };
 
-export default ManageUsersPage;
+export default ManageStaffsPage;

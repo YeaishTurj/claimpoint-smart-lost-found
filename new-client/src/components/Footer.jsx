@@ -48,9 +48,9 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative bg-linear-to-b from-slate-900 to-slate-950 text-slate-300 mt-24">
+    <footer className="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-300 overflow-hidden">
       {/* Decorative Top linear */}
-      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary-500/30 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 pt-20 pb-12">
@@ -59,12 +59,12 @@ const Footer = () => {
           {/* Brand & Description */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-8 group">
-              <div className="bg-linear-to-br from-primary-500 to-primary-600 p-2 rounded-xl group-hover:shadow-lg group-hover:shadow-primary-500/50 transition-all duration-300">
+              <div className="bg-gradient-to-br from-emerald-600 to-teal-600 p-2 rounded-xl group-hover:shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300">
                 <ShieldCheck size={28} className="text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-2xl font-bold tracking-tight text-white">
-                  Claim<span className="text-primary-400">Point</span>
+                  Claim<span className="text-emerald-400">Point</span>
                 </span>
                 <span className="text-xs text-slate-400 font-medium">
                   Smart Lost & Found
@@ -81,8 +81,8 @@ const Footer = () => {
             {/* Contact Cards */}
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm">
-                <div className="p-2 bg-slate-800/50 rounded-lg">
-                  <Phone size={16} className="text-primary-400" />
+                <div className="p-2 bg-slate-800/60 border border-emerald-500/10 rounded-lg">
+                  <Phone size={16} className="text-emerald-400" />
                 </div>
                 <a
                   href="tel:+8801700000000"
@@ -92,8 +92,8 @@ const Footer = () => {
                 </a>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <div className="p-2 bg-slate-800/50 rounded-lg">
-                  <Mail size={16} className="text-primary-400" />
+                <div className="p-2 bg-slate-800/60 border border-emerald-500/10 rounded-lg">
+                  <Mail size={16} className="text-emerald-400" />
                 </div>
                 <a
                   href="mailto:support@claimpoint.com.bd"
@@ -103,8 +103,8 @@ const Footer = () => {
                 </a>
               </div>
               <div className="flex items-start gap-3 text-sm">
-                <div className="p-2 bg-slate-800/50 rounded-lg mt-0.5">
-                  <MapPin size={16} className="text-primary-400" />
+                <div className="p-2 bg-slate-800/60 border border-emerald-500/10 rounded-lg mt-0.5">
+                  <MapPin size={16} className="text-emerald-400" />
                 </div>
                 <span className="leading-relaxed">
                   Dhaka, Bangladesh
@@ -132,7 +132,7 @@ const Footer = () => {
                       className={({ isActive }) =>
                         `text-sm transition-colors ${
                           isActive
-                            ? "text-primary-400 font-medium"
+                            ? "text-emerald-400 font-medium"
                             : "text-slate-400 hover:text-white"
                         }`
                       }
@@ -157,7 +157,7 @@ const Footer = () => {
                       className={({ isActive }) =>
                         `text-sm transition-colors ${
                           isActive
-                            ? "text-primary-400 font-medium"
+                            ? "text-emerald-400 font-medium"
                             : "text-slate-400 hover:text-white"
                         }`
                       }
@@ -182,7 +182,7 @@ const Footer = () => {
                       className={({ isActive }) =>
                         `text-sm transition-colors ${
                           isActive
-                            ? "text-primary-400 font-medium"
+                            ? "text-emerald-400 font-medium"
                             : "text-slate-400 hover:text-white"
                         }`
                       }
@@ -197,11 +197,11 @@ const Footer = () => {
         </div>
 
         {/* Newsletter Section */}
-        <div className="bg-linear-to-r from-slate-800/40 to-slate-800/20 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-8 md:p-12 mb-16">
+        <div className="bg-gradient-to-r from-slate-900/60 via-slate-900/40 to-slate-900/60 backdrop-blur-xl rounded-2xl border border-emerald-500/10 p-8 md:p-12 mb-16 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <Bell size={20} className="text-primary-400" />
+                <Bell size={20} className="text-emerald-400" />
                 <h5 className="text-lg font-semibold text-white">
                   Stay Updated
                 </h5>
@@ -211,23 +211,23 @@ const Footer = () => {
               </p>
             </div>
 
-            <form onSubmit={handleSubscribe} className="relative flex-shrink-0">
+            <form onSubmit={handleSubscribe} className="relative shrink-0">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email..."
-                className="w-full md:w-80 bg-slate-900/50 border border-slate-600 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/20 transition-all"
+                className="w-full md:w-80 bg-slate-900/60 border-2 border-slate-700 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
               <button
                 type="submit"
-                className="absolute right-2 top-1.5 p-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-all shadow-lg hover:shadow-primary-500/50"
+                className="absolute right-2 top-1.5 p-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
                 aria-label="Subscribe"
               >
                 <ArrowRight size={18} />
               </button>
               {subscribed && (
-                <div className="absolute -bottom-8 left-0 text-xs text-primary-400 font-medium">
+                <div className="absolute -bottom-8 left-0 text-xs text-emerald-400 font-medium">
                   ✓ Thanks for subscribing!
                 </div>
               )}
@@ -259,7 +259,7 @@ const Footer = () => {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/50 hover:bg-primary-600 text-slate-400 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary-600/50"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/60 border border-slate-700/50 hover:border-emerald-500/40 bg-gradient-to-br from-slate-900/80 to-slate-800/70 hover:from-emerald-600 hover:to-teal-600 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/40"
                 >
                   <Icon size={18} />
                 </a>
@@ -276,7 +276,7 @@ const Footer = () => {
               {["bKash", "Nagad", "SSL"].map((method) => (
                 <span
                   key={method}
-                  className="text-[11px] font-bold text-slate-400 tracking-wider"
+                  className="text-[11px] font-bold text-slate-300 tracking-wider"
                 >
                   {method}
                 </span>
@@ -287,7 +287,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Accent */}
-      <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-slate-700/50 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
     </footer>
   );
 };

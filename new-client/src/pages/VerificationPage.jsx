@@ -66,15 +66,15 @@ const VerificationPage = () => {
     const result = await verifyEmail(verificationCode, email);
 
     if (result.success) {
-      toast.success("Email verified successfully!", {
+      toast.success("Registration complete! Welcome to ClaimPoint 🎉", {
         position: "top-center",
-        autoClose: 2000,
+        autoClose: 5000,
       });
 
-      // Navigate to home after short delay
+      // Navigate to home after delay
       setTimeout(() => {
         navigate("/");
-      }, 1500);
+      }, 2500);
     } else {
       setErrors({
         submit: result.error || "Verification failed. Please check your code.",
@@ -94,7 +94,7 @@ const VerificationPage = () => {
     if (result.success) {
       toast.success(result.message || "New code sent to your email!", {
         position: "top-center",
-        autoClose: 3000,
+        autoClose: 5000,
       });
       setResendCooldown(60);
     } else {
@@ -108,20 +108,28 @@ const VerificationPage = () => {
   if (!email) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 flex items-center justify-center px-4 py-12">
-      {/* Decorative Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950/20 to-slate-950 flex items-center justify-center px-4 py-24 relative overflow-hidden">
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl" />
+        <div
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/8 rounded-full blur-3xl animate-pulse"
+          style={{ animationDuration: "6s" }}
+        />
+        <div
+          className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDuration: "8s", animationDelay: "2s" }}
+        />
+        <div
+          className="absolute top-1/2 right-1/3 w-72 h-72 bg-cyan-500/6 rounded-full blur-3xl animate-pulse"
+          style={{ animationDuration: "5s", animationDelay: "4s" }}
+        />
       </div>
 
-      <div className="relative w-full max-w-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-indigo-400/20 rounded-2xl blur-xl" />
-
-        <div className="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+      <div className="w-full max-w-lg relative z-10">
+        <div className="bg-slate-900/60 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-emerald-500/10 p-6 md:p-10 lg:p-12">
           <Link
             to="/register"
-            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-emerald-400 mb-6 transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Registration
@@ -129,26 +137,26 @@ const VerificationPage = () => {
 
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
                 <Mail size={24} className="text-white" />
               </div>
-              <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
                 Verification
               </span>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-2xl font-bold text-white mb-2">
               Verify Your Email
             </h1>
-            <p className="text-slate-400 text-sm mb-2">
+            <p className="text-slate-300 text-sm mb-2">
               We've sent a 6-digit code to:
             </p>
-            <p className="text-blue-400 font-medium text-sm break-all">
+            <p className="text-emerald-400 font-medium text-sm break-all">
               {email}
             </p>
           </div>
 
           {errors.submit && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
               <AlertCircle
                 size={20}
                 className="text-red-400 mt-0.5 flex-shrink-0"
@@ -162,9 +170,9 @@ const VerificationPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 Verification Code
               </label>
               <input
@@ -178,10 +186,10 @@ const VerificationPage = () => {
                   setVerificationCode(value);
                   if (errors.code) setErrors({ ...errors, code: "" });
                 }}
-                className={`w-full rounded-lg border px-4 py-4 text-center text-2xl font-bold tracking-widest text-white transition-all bg-slate-800/50 focus:outline-none ${
+                className={`w-full rounded-xl border-2 px-4 py-3 text-center text-2xl font-bold tracking-widest text-white transition-all bg-slate-900/50 focus:outline-none ${
                   errors.code
-                    ? "border-red-500/50 focus:border-red-500"
-                    : "border-slate-700/50 focus:border-blue-500"
+                    ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                    : "border-slate-700 hover:bg-slate-900/70 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 }`}
               />
               {errors.code && (
@@ -192,7 +200,7 @@ const VerificationPage = () => {
             <button
               type="submit"
               disabled={isLoading || verificationCode.length !== 6}
-              className="w-full rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3 font-semibold text-white transition-all disabled:opacity-60 hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2"
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-4 py-3 font-semibold text-white transition-all disabled:opacity-60 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -206,12 +214,12 @@ const VerificationPage = () => {
             </button>
           </form>
 
-          <div className="mt-8 p-4 bg-slate-800/30 border border-slate-700/50 rounded-lg">
-            <p className="text-sm text-slate-400 mb-4">
+          <div className="mt-8 p-4 bg-slate-800/40 border border-slate-700/50 rounded-lg">
+            <p className="text-sm text-slate-300 mb-4">
               Didn't receive the code?
             </p>
             {resendCooldown > 0 ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-slate-400">
                 <Clock size={16} />
                 <span>Resend available in {resendCooldown}s</span>
               </div>
@@ -220,7 +228,7 @@ const VerificationPage = () => {
                 type="button"
                 onClick={handleResendCode}
                 disabled={resendLoading}
-                className="w-full px-4 py-2.5 rounded-lg border border-blue-500/50 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all font-medium text-sm flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 rounded-lg border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all font-medium text-sm flex items-center justify-center gap-2"
               >
                 {resendLoading ? (
                   <>
@@ -233,11 +241,11 @@ const VerificationPage = () => {
             )}
           </div>
 
-          <div className="mt-6 text-center text-sm text-slate-400">
+          <div className="mt-6 text-center text-sm text-slate-600">
             Wrong email?{" "}
             <Link
               to="/register"
-              className="text-blue-400 hover:text-blue-300 font-semibold transition"
+              className="text-primary-600 hover:text-primary-700 font-semibold transition"
             >
               Go back
             </Link>

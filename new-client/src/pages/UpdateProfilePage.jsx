@@ -92,10 +92,10 @@ const UpdateProfilePage = () => {
 
       toast.success("Profile updated successfully!", {
         position: "top-center",
-        autoClose: 2000,
+        autoClose: 5000,
       });
 
-      // Navigate to my-profile page after 1.5 seconds
+      // Navigate to my-profile page after 2.5 seconds
       setTimeout(() => {
         navigate("/my-profile");
       }, 1500);
@@ -112,10 +112,10 @@ const UpdateProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <div className="flex items-center gap-3">
-          <Loader size={24} className="animate-spin text-primary-600" />
-          <span className="text-slate-600">Loading profile...</span>
+          <Loader size={24} className="animate-spin text-emerald-400" />
+          <span className="text-slate-200">Loading profile...</span>
         </div>
       </div>
     );
@@ -123,14 +123,14 @@ const UpdateProfilePage = () => {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <div className="text-center">
-          <p className="text-slate-600 mb-4">
+          <p className="text-slate-200 mb-4">
             Please login to update your profile
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
+            className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
           >
             Go to Login
           </button>
@@ -140,32 +140,32 @@ const UpdateProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate("/my-profile")}
-            className="p-2 hover:bg-slate-200 rounded-lg transition-all"
+            className="p-2 hover:bg-slate-800 rounded-lg transition-all"
           >
-            <ArrowLeft size={24} className="text-slate-600" />
+            <ArrowLeft size={24} className="text-slate-300" />
           </button>
-          <h1 className="text-3xl font-bold text-slate-900">Update Profile</h1>
+          <h1 className="text-3xl font-bold text-white">Update Profile</h1>
         </div>
 
         {/* Update Form Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-200">
+        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50">
           {/* Profile Info */}
-          <div className="mb-8 pb-8 border-b border-slate-200">
+          <div className="mb-8 pb-8 border-b border-slate-700/50">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-linear-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
                 <User size={32} className="text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+                <h2 className="text-2xl font-bold text-white">
                   {user.full_name}
                 </h2>
-                <p className="text-sm text-slate-600 mt-1">{user.email}</p>
+                <p className="text-sm text-slate-300 mt-1">{user.email}</p>
               </div>
             </div>
           </div>
@@ -180,9 +180,9 @@ const UpdateProfilePage = () => {
           >
             {/* Full Name */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 <div className="flex items-center gap-2">
-                  <User size={16} className="text-primary-600" />
+                  <User size={16} className="text-emerald-400" />
                   Full Name *
                 </div>
               </label>
@@ -192,14 +192,14 @@ const UpdateProfilePage = () => {
                 value={formData.full_name}
                 onChange={handleInputChange}
                 placeholder="Enter your full name"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none transition-all ${
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
                   errors.full_name
                     ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                    : "border-slate-300 hover:border-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                    : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 }`}
               />
               {errors.full_name && (
-                <p className="text-xs text-red-600 mt-1.5">
+                <p className="text-xs text-red-400 mt-1.5">
                   {errors.full_name}
                 </p>
               )}
@@ -207,9 +207,9 @@ const UpdateProfilePage = () => {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 <div className="flex items-center gap-2">
-                  <Phone size={16} className="text-primary-600" />
+                  <Phone size={16} className="text-emerald-400" />
                   Phone Number *
                 </div>
               </label>
@@ -219,23 +219,23 @@ const UpdateProfilePage = () => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="Enter your phone number"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none transition-all ${
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
                   errors.phone
                     ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                    : "border-slate-300 hover:border-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                    : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 }`}
               />
               {errors.phone && (
-                <p className="text-xs text-red-600 mt-1.5">{errors.phone}</p>
+                <p className="text-xs text-red-400 mt-1.5">{errors.phone}</p>
               )}
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-8 pt-8 border-t border-slate-200 flex gap-3 justify-end">
+            <div className="mt-8 pt-8 border-t border-slate-700/50 flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => navigate("/my-profile")}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 rounded-lg transition-all"
               >
                 <X size={16} />
                 Cancel
@@ -243,7 +243,7 @@ const UpdateProfilePage = () => {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
               >
                 {isSaving ? (
                   <>

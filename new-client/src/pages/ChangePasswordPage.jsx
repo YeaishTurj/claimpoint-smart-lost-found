@@ -100,32 +100,32 @@ const ChangePasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate("/my-profile")}
-            className="p-2 hover:bg-slate-200 rounded-lg transition-all"
+            className="p-2 hover:bg-slate-800 rounded-lg transition-all"
           >
-            <ArrowLeft size={24} className="text-slate-600" />
+            <ArrowLeft size={24} className="text-slate-300" />
           </button>
-          <h1 className="text-3xl font-bold text-slate-900">Change Password</h1>
+          <h1 className="text-3xl font-bold text-white">Change Password</h1>
         </div>
 
         {/* Password Change Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-200">
+        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50">
           {/* Info Section */}
-          <div className="mb-8 pb-8 border-b border-slate-200">
+          <div className="mb-8 pb-8 border-b border-slate-700/50">
             <div className="flex items-start gap-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <Lock size={24} className="text-blue-600" />
+              <div className="p-3 bg-emerald-500/10 rounded-lg">
+                <Lock size={24} className="text-emerald-400" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-white">
                   Secure Your Account
                 </h2>
-                <p className="text-sm text-slate-600 mt-1">
+                <p className="text-sm text-slate-200 mt-1">
                   Change your password to keep your account secure. You'll be
                   logged out and need to sign in again with your new password.
                 </p>
@@ -137,7 +137,7 @@ const ChangePasswordPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Current Password */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 Current Password *
               </label>
               <div className="relative">
@@ -147,16 +147,16 @@ const ChangePasswordPage = () => {
                   value={formData.currentPassword}
                   onChange={handleInputChange}
                   placeholder="Enter your current password"
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none transition-all ${
+                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
                     errors.currentPassword
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-slate-300 hover:border-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                      : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-primary-600 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition"
                 >
                   {showCurrentPassword ? (
                     <EyeOff size={20} />
@@ -166,7 +166,7 @@ const ChangePasswordPage = () => {
                 </button>
               </div>
               {errors.currentPassword && (
-                <p className="text-xs text-red-600 mt-1.5">
+                <p className="text-xs text-red-400 mt-1.5">
                   {errors.currentPassword}
                 </p>
               )}
@@ -174,7 +174,7 @@ const ChangePasswordPage = () => {
 
             {/* New Password */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 New Password *
               </label>
               <div className="relative">
@@ -184,22 +184,22 @@ const ChangePasswordPage = () => {
                   value={formData.newPassword}
                   onChange={handleInputChange}
                   placeholder="Enter your new password"
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none transition-all ${
+                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
                     errors.newPassword
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-slate-300 hover:border-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                      : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-primary-600 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition"
                 >
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {errors.newPassword && (
-                <p className="text-xs text-red-600 mt-1.5">
+                <p className="text-xs text-red-400 mt-1.5">
                   {errors.newPassword}
                 </p>
               )}
@@ -207,7 +207,7 @@ const ChangePasswordPage = () => {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 Confirm New Password *
               </label>
               <div className="relative">
@@ -217,16 +217,16 @@ const ChangePasswordPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="Confirm your new password"
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none transition-all ${
+                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
                     errors.confirmPassword
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-slate-300 hover:border-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                      : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-primary-600 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition"
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={20} />
@@ -236,18 +236,18 @@ const ChangePasswordPage = () => {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-xs text-red-600 mt-1.5">
+                <p className="text-xs text-red-400 mt-1.5">
                   {errors.confirmPassword}
                 </p>
               )}
             </div>
 
             {/* Password Requirements */}
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm font-semibold text-amber-900 mb-2">
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <p className="text-sm font-semibold text-amber-200 mb-2">
                 Password Requirements:
               </p>
-              <ul className="text-xs text-amber-800 space-y-1">
+              <ul className="text-xs text-amber-300/90 space-y-1">
                 <li>• At least 6 characters long</li>
                 <li>• Different from your current password</li>
                 <li>• Must be confirmed in the field above</li>
@@ -255,11 +255,11 @@ const ChangePasswordPage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-8 pt-8 border-t border-slate-200 flex gap-3 justify-end">
+            <div className="mt-8 pt-8 border-t border-slate-700/50 flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => navigate("/my-profile")}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 rounded-lg transition-all"
               >
                 <X size={16} />
                 Cancel
@@ -267,7 +267,7 @@ const ChangePasswordPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
               >
                 {isLoading ? (
                   <>

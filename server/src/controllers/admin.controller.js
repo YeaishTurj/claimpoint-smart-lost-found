@@ -74,6 +74,35 @@ export const addStaff = async (req, res) => {
   }
 };
 
+export const getStaffById = async (req, res) => {
+  try {
+    const { staffId } = req.params;
+    const [staff] = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        full_name: usersTable.full_name,
+        phone: usersTable.phone,
+        email_verified: usersTable.email_verified,
+        is_active: usersTable.is_active,
+        created_at: usersTable.created_at,
+      })
+      .from(usersTable)
+      .where(and(eq(usersTable.id, staffId), eq(usersTable.role, "STAFF")));
+
+    if (!staff) {
+      return res.status(404).json({ message: "Staff not found" });
+    }
+
+    res.status(200).json({ staff });
+  } catch (error) {
+    console.error("Error fetching staff by ID:", error);
+    res.status(500).json({
+      message: "Internal server error while fetching staff",
+    });
+  }
+};
+
 export const updateStaff = async (req, res) => {
   try {
     const { staffId } = req.params;
@@ -130,30 +159,6 @@ export const getAllStaffs = async (req, res) => {
     console.error("Error fetching staff:", error);
     res.status(500).json({
       message: "Internal server error while fetching staff",
-    });
-  }
-};
-
-export const getAllUsers = async (req, res) => {
-  try {
-    const users = await db
-      .select({
-        id: usersTable.id,
-        email: usersTable.email,
-        full_name: usersTable.full_name,
-        email_verified: usersTable.email_verified,
-        is_active: usersTable.is_active,
-        created_at: usersTable.created_at,
-      })
-      .from(usersTable)
-      .where(eq(usersTable.role, "USER"))
-      .orderBy(usersTable.created_at);
-
-    res.status(200).json({ users });
-  } catch (error) {
-    console.error("Error fetching general users:", error);
-    res.status(500).json({
-      message: "Internal server error while fetching users",
     });
   }
 };
@@ -250,6 +255,30 @@ export const activateUser = async (req, res) => {
     console.error("Error activating user:", error);
     res.status(500).json({
       message: "Internal server error while activating user",
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        full_name: usersTable.full_name,
+        email_verified: usersTable.email_verified,
+        is_active: usersTable.is_active,
+        created_at: usersTable.created_at,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.role, "USER"))
+      .orderBy(usersTable.created_at);
+
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error("Error fetching general users:", error);
+    res.status(500).json({
+      message: "Internal server error while fetching users",
     });
   }
 };

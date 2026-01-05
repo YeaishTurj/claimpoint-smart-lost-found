@@ -6,6 +6,7 @@ import {
   getAllStaffs,
   deactivateUser,
   activateUser,
+  getStaffById,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 router.post("/staffs", addStaff);
 router.patch("/staffs/:staffId", updateStaff);
 router.get("/staffs", getAllStaffs);
+router.get("/staffs/:staffId", getStaffById);
 
 // User Management
 router.get("/users", getAllUsers);

@@ -17,6 +17,9 @@ import {
   AddStaffPage,
   ManageUsersPage,
   UpdateStaffPage,
+  ManageStaffsPage,
+  ManageItemsPage,
+  UpdateItemPage,
 } from "./pages/index.js";
 import Footer from "./components/Footer";
 
@@ -49,7 +52,10 @@ const App = () => {
           <Route path="/add-found-item" element={<AddFoundItem />} />
           <Route path="/add-staff" element={<AddStaffPage />} />
           <Route path="/manage-users" element={<ManageUsersPage />} />
+          <Route path="/manage-staffs" element={<ManageStaffsPage />} />
           <Route path="/update-staff/:staffId" element={<UpdateStaffPage />} />
+          <Route path="/manage-items" element={<ManageItemsPage />} />
+          <Route path="/update-item/:itemId" element={<UpdateItemPage />} />
         </Routes>
       </main>
 

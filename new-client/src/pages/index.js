@@ -12,7 +12,10 @@ import ChangePasswordPage from "./ChangePasswordPage";
 import AddFoundItem from "./AddFoundItemPage";
 import AddStaffPage from "./AddStaffPage";
 import ManageUsersPage from "./ManageUsersPage";
+import ManageStaffsPage from "./ManageStaffsPage";
 import UpdateStaffPage from "./UpdateStaffPage";
+import ManageItemsPage from "./ManageItemsPage";
+import UpdateItemPage from "./UpdateItemPage";
 
 export {
   AboutPage,
@@ -29,5 +32,8 @@ export {
   AddFoundItem,
   AddStaffPage,
   ManageUsersPage,
+  ManageStaffsPage,
   UpdateStaffPage,
+  ManageItemsPage,
+  UpdateItemPage,
 };
