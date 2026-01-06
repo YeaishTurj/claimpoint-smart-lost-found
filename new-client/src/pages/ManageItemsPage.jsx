@@ -12,10 +12,13 @@ import {
   X,
   Eye,
   Plus,
+  User,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import { useAuth } from "../context/auth.context";
+import ItemDetailsModal from "../components/itemDetailsModal";
 
 const ManageItemsPage = () => {
   const navigate = useNavigate();
@@ -25,6 +28,11 @@ const ManageItemsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+
+  // console.log("Auth Status:", isAuthenticated);
 
   useEffect(() => {
     fetchItems();
@@ -73,6 +81,16 @@ const ManageItemsPage = () => {
     setShowConfirmModal(true);
   };
 
+  const handleOpenDetails = (itemId) => {
+    setSelectedItemId(itemId);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedItemId(null);
+  };
+
   const filteredItems = items.filter((item) => {
     const matchesSearch =
       item.item_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,6 +112,30 @@ const ManageItemsPage = () => {
   const claimedCount = items.filter(
     (item) => item.status?.toLowerCase() === "claimed"
   ).length;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
+        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50 max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <User size={40} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Access Required
+          </h2>
+          <p className="text-slate-300 mb-6">
+            Please log in to access the staff dashboard and manage found items
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4 sm:px-6 lg:px-8">
@@ -336,11 +378,7 @@ const ManageItemsPage = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() =>
-                              navigate(`/items/${item.id}`, {
-                                state: { item },
-                              })
-                            }
+                            onClick={() => handleOpenDetails(item.id)}
                             className="p-2 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 border border-blue-500/30 rounded-lg transition-all group"
                             title="View Details"
                           >
@@ -449,6 +487,13 @@ const ManageItemsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Item Details Modal */}
+      <ItemDetailsModal
+        itemId={selectedItemId}
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseDetails}
+      />
     </div>
   );
 };

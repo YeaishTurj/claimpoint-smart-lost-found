@@ -13,7 +13,7 @@ const ItemCard = ({ item, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col h-full bg-gradient-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-lg rounded-2xl border border-slate-700/80 hover:border-emerald-500/60 transition-all duration-300 cursor-pointer hover:-translate-y-2 shadow-xl hover:shadow-2xl hover:shadow-emerald-500/20"
+      className="group relative flex flex-col h-full bg-linear-to-br from-slate-800/60 to-slate-900/40 backdrop-blur-lg rounded-2xl border border-slate-700/80 hover:border-emerald-500/60 transition-all duration-300 cursor-pointer hover:-translate-y-2 shadow-xl hover:shadow-2xl hover:shadow-emerald-500/20"
     >
       {/* Image Container */}
       <div className="relative aspect-[16/10] overflow-hidden rounded-t-2xl bg-slate-700/50">
@@ -24,7 +24,7 @@ const ItemCard = ({ item, onClick }) => {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800 gap-3">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-slate-700 to-slate-800 gap-3">
             <Package
               size={40}
               className="text-slate-500 group-hover:text-emerald-400 transition-colors"
@@ -45,7 +45,7 @@ const ItemCard = ({ item, onClick }) => {
         </div>
 
         {/* Glossy Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
       </div>
 
       {/* Content Body */}
@@ -87,7 +87,7 @@ const ItemCard = ({ item, onClick }) => {
 
       {/* Modern Button - Only shows full hover effect on group hover */}
       <div className="px-5 pb-5">
-        <button className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/50 group/btn">
+        <button className="w-full flex items-center justify-between px-4 py-3 bg-linear-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/50 group/btn">
           <span className="text-sm font-bold">View Details</span>
           <ArrowRight
             size={18}

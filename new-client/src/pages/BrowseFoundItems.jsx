@@ -3,11 +3,14 @@ import { Search, Filter, Package, X } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 import ItemCard from "../components/ItemCard";
+import ItemDetailsModal from "../components/itemDetailsModal";
 
 const BrowseFoundItems = () => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -58,6 +61,16 @@ const BrowseFoundItems = () => {
       items.filter((item) => item.status?.toLowerCase() === "claimed").length,
     [items]
   );
+
+  const handleItemClick = (itemId) => {
+    setSelectedItemId(itemId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedItemId(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4 sm:px-6 lg:px-8">
@@ -175,25 +188,30 @@ const BrowseFoundItems = () => {
             </h3>
             <p className="text-slate-400 text-lg max-w-md mx-auto">
               {searchTerm
-                ? "No items match your search. Try a different keyword."
-                : "No found items have been added yet. Please check back soon."}
+                ? "No items match your search criteria. Try using different keywords."
+                : "There are currently no found items listed in the system."}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          /* Success State - Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredItems.map((item) => (
               <ItemCard
                 key={item.id || item._id}
                 item={item}
-                onClick={() => {
-                  // Example: navigate(`/items/${item.id}`)
-                  console.log("Viewing item:", item.id);
-                }}
+                onClick={() => handleItemClick(item.id || item._id)}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Item Details Modal */}
+      <ItemDetailsModal
+        itemId={selectedItemId}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

@@ -123,14 +123,20 @@ const UpdateProfilePage = () => {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <div className="text-center">
-          <p className="text-slate-200 mb-4">
-            Please login to update your profile
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
+        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50 max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <User size={40} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Access Required
+          </h2>
+          <p className="text-slate-300 mb-6">
+            Please log in to view your profile and manage your account
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
+            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
           >
             Go to Login
           </button>
