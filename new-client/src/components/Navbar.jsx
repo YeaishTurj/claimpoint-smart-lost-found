@@ -16,10 +16,11 @@ import {
   User,
   X,
   LayoutDashboard,
+  AlertCircle,
 } from "lucide-react";
 import logo from "../assets/logo3.png";
 
-const Navbar = () => {
+const Navbar = ({ onLoginClick = () => {}, onRegisterClick = () => {} }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const location = useLocation();
@@ -46,10 +47,21 @@ const Navbar = () => {
           { to: "/", label: "Home", icon: Home },
           { to: "/manage-items", label: "Manage Items", icon: LayoutDashboard },
           { to: "/add-found-item", label: "Add Found Item", icon: Search },
+          { to: "/manage-claims", label: "Manage Claims", icon: AlertCircle },
+          {
+            to: "/manage-lost-reports",
+            label: "Manage Lost Reports",
+            icon: AlertCircle,
+          },
         ]
       : [
           { to: "/", label: "Home", icon: Home },
           { to: "/found-items", label: "Browse Found Items", icon: Search },
+          {
+            to: "/report-lost-item",
+            label: "Report Lost Item",
+            icon: AlertCircle,
+          },
           { to: "/how-it-works", label: "How It Works", icon: HelpCircle },
           { to: "/about", label: "About", icon: Info },
           { to: "/contact", label: "Contact", icon: Mail },
@@ -71,40 +83,39 @@ const Navbar = () => {
     <>
       {/* Floating Navbar Container */}
       <div className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
-        <nav className="w-full max-w-7xl bg-slate-900/70 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl pointer-events-auto overflow-visible">
+        <nav className="w-full max-w-7xl bg-slate-900/80 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-slate-900/50 rounded-2xl pointer-events-auto overflow-visible">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo Area */}
               <Link
                 to="/"
-                className="flex items-center group transition-transform active:scale-95"
+                className="flex items-center group transition-transform active:scale-95 hover:scale-105 duration-300"
               >
-                <img
+                <motion.img
+                  whileHover={{ rotate: [0, -5, 5, 0] }}
+                  transition={{ duration: 0.5 }}
                   src={logo}
                   alt="Logo"
-                  className="h-9 w-auto brightness-110"
+                  className="h-9 w-auto brightness-110 drop-shadow-lg"
                 />
-                {/* <span className="ml-2 font-bold text-transparent bg-clip-text bg-linear-to-r from-white to-slate-400 hidden sm:block">
-                  ClaimPoint
-                </span> */}
               </Link>
 
               {/* Desktop Nav Links */}
-              <ul className="hidden lg:flex items-center bg-slate-800/40 p-1 rounded-xl border border-white/5">
+              <ul className="hidden lg:flex items-center bg-slate-800/50 backdrop-blur-sm p-1.5 rounded-xl border border-white/5 shadow-inner">
                 {navLinks.map(({ to, label, icon: Icon }) => (
                   <li key={to}>
                     <Link
                       to={to}
-                      className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                         isActive(to)
                           ? "text-white"
-                          : "text-slate-400 hover:text-white"
+                          : "text-slate-400 hover:text-white hover:bg-white/5"
                       }`}
                     >
                       {isActive(to) && (
                         <motion.div
                           layoutId="nav-bg"
-                          className="absolute inset-0 bg-emerald-500/20 border border-emerald-500/30 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                          className="absolute inset-0 bg-gradient-to-r from-emerald-500/25 to-teal-500/25 border border-emerald-500/40 rounded-lg shadow-lg shadow-emerald-500/20"
                         />
                       )}
                       <Icon
@@ -165,6 +176,12 @@ const Navbar = () => {
                           >
                             <User size={16} /> My Profile
                           </Link>
+                          <Link
+                            to="/my-dashboard"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                          >
+                            <LayoutDashboard size={16} /> My Dashboard
+                          </Link>
                           <button
                             onClick={() => setShowLogoutConfirm(true)}
                             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
@@ -177,20 +194,20 @@ const Navbar = () => {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <Link
-                      to="/login"
+                    <button
+                      onClick={onLoginClick}
                       className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
                     >
                       <LogIn size={16} />
                       Login
-                    </Link>
-                    <Link
-                      to="/register"
+                    </button>
+                    <button
+                      onClick={onRegisterClick}
                       className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
                     >
                       Join now
                       <ArrowRight size={16} />
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
@@ -263,22 +280,26 @@ const Navbar = () => {
                   </button>
                 ) : (
                   <>
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        onLoginClick();
+                      }}
                       className="flex items-center justify-center gap-2 w-full p-3 text-slate-300 border border-white/10 rounded-xl"
                     >
                       <LogIn size={18} />
                       Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        onRegisterClick();
+                      }}
                       className="flex items-center justify-center gap-2 w-full p-3 bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-600/20"
                     >
                       Get Started
                       <ArrowRight size={18} />
-                    </Link>
+                    </button>
                   </>
                 )}
               </div>

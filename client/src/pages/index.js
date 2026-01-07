@@ -1,9 +1,0 @@
-export { HomePage } from "./HomePage";
-export { HowItWorksPage } from "./HowItWorksPage";
-export { AboutPage } from "./AboutPage";
-export { ContactPage } from "./ContactPage";
-export { BrowseFoundItemsPage } from "./BrowseFoundItemsPage";
-export { AddStaffPage } from "./AddStaffPage";
-export { UserManagementPage } from "./UserManagementPage";
-export { AllClaimsPage } from "./AllClaimsPage";
-export { ReportLostItemPage } from "./ReportLostItemPage";

@@ -1,5 +1,5 @@
 import { db } from "../index.js";
-import { foundItemsTable } from "../models/index.js";
+import { foundItemsTable, lostReportsTable } from "../models/index.js";
 import { desc } from "drizzle-orm";
 import { eq } from "drizzle-orm";
 

@@ -255,6 +255,44 @@ export const getAllClaims = async (req, res) => {
   }
 };
 
+export const getClaimDetails = async (req, res) => {
+  try {
+    const { claimId } = req.params;
+
+    // 1. Fetch Claim joined with User and Found Item details
+    const [claimDetails] = await db
+      .select({
+        claim: claimsTable,
+        user: {
+          name: usersTable.full_name,
+          email: usersTable.email,
+          phone: usersTable.phone,
+        },
+        found_item: foundItemsTable,
+      })
+      .from(claimsTable)
+      .innerJoin(usersTable, eq(claimsTable.user_id, usersTable.id))
+      .innerJoin(
+        foundItemsTable,
+        eq(claimsTable.found_item_id, foundItemsTable.id)
+      )
+      .where(eq(claimsTable.id, claimId));
+
+    if (!claimDetails) {
+      return res.status(404).json({ message: "Claim not found" });
+    }
+
+    // 2. Structured response for Staff UI
+    return res.status(200).json({
+      success: true,
+      data: claimDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching claim details for staff:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const updateClaimStatus = async (req, res) => {
   const { claimId } = req.params;
   const { status } = req.body; // e.g., "APPROVED", "REJECTED", "COLLECTED"

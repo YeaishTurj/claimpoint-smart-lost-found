@@ -332,7 +332,7 @@ export const getMyClaims = async (req, res) => {
       .orderBy(desc(claimsTable.created_at));
 
     // 2. Format the data for a clean Frontend experience
-    const defaultImage = "https://via.placeholder.com/150?text=No+Image";
+    const defaultImage = "https://placehold.co/150x150?text=No+Image";
 
     const formattedClaims = claims.map((row) => ({
       id: row.claim_id,

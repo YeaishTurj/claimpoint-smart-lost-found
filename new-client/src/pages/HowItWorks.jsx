@@ -7,6 +7,7 @@ import {
   UserCheck,
   Bell,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const HowItWorks = () => {
   return (
@@ -24,40 +25,75 @@ const HowItWorks = () => {
       </div>
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+          >
             <Package size={16} className="text-emerald-400" />
             <span className="text-sm font-semibold text-emerald-400">
               Simple Process
             </span>
-          </div>
+          </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+          >
             How ClaimPoint
             <br />
             <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
               Works For You
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-lg text-slate-300 max-w-3xl mx-auto"
+          >
             Whether you've lost something valuable or found an item, our
             platform makes it easy to connect and reunite items with their
             rightful owners.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* For Those Who Lost Items */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">
+          <motion.h2
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="text-3xl font-bold text-white mb-8 text-center"
+          >
             Lost Something?
-          </h2>
+          </motion.h2>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative">
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative hover:border-emerald-500/30 hover:shadow-emerald-500/20 transition-all"
+            >
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+                className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+              >
                 1
-              </div>
+              </motion.div>
               <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
                 <Search size={28} className="text-emerald-400" />
               </div>
@@ -68,12 +104,22 @@ const HowItWorks = () => {
                 Browse through reported found items using filters like category,
                 location, date, and description to find your lost item.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative">
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative hover:border-teal-500/30 hover:shadow-teal-500/20 transition-all"
+            >
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+                className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+              >
                 2
-              </div>
+              </motion.div>
               <div className="w-14 h-14 bg-teal-500/10 border border-teal-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
                 <UserCheck size={28} className="text-teal-400" />
               </div>
@@ -84,12 +130,22 @@ const HowItWorks = () => {
                 Found your item? Submit a claim with proof of ownership and wait
                 for verification from our staff members.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative">
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative hover:border-cyan-500/30 hover:shadow-cyan-500/20 transition-all"
+            >
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+                className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+              >
                 3
-              </div>
+              </motion.div>
               <div className="w-14 h-14 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
                 <CheckCircle size={28} className="text-cyan-400" />
               </div>
@@ -100,7 +156,7 @@ const HowItWorks = () => {
                 Once verified, you'll receive pickup instructions. Bring valid
                 ID and collect your item from the designated location.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
 

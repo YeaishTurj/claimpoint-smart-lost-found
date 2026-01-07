@@ -3,13 +3,13 @@ import express from "express";
 import {
   reportLostItem,
   getMyReports,
-  getMyReportDetails,
   updateMyReport,
   deleteMyReport,
   myClaimSubmit,
   getMyClaims,
   getMyClaimDetails,
   deleteMyClaim,
+  getMyReportDetails,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router";
+import { motion } from "framer-motion";
 import {
   Mail,
   Phone,
@@ -11,6 +12,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Bell,
+  Sparkles,
 } from "lucide-react";
 
 const Footer = () => {
@@ -49,24 +51,53 @@ const Footer = () => {
 
   return (
     <footer className="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-300 overflow-hidden">
-      {/* Decorative Top linear */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{ y: [0, -20, 0], opacity: [0.05, 0.15, 0.05] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ y: [0, 20, 0], opacity: [0.05, 0.1, 0.05] }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"
+        />
+      </div>
+
+      {/* Decorative Top gradient */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 pt-20 pb-12">
+      <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-12">
         {/* Top Section - Brand & Newsletter */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 mb-20">
           {/* Brand & Description */}
-          <div className="lg:col-span-1">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-1"
+          >
             <Link to="/" className="flex items-center gap-3 mb-8 group">
-              <div className="bg-gradient-to-br from-emerald-600 to-teal-600 p-2 rounded-xl group-hover:shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="bg-gradient-to-br from-emerald-600 to-teal-600 p-2.5 rounded-xl group-hover:shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300"
+              >
                 <ShieldCheck size={28} className="text-white" />
-              </div>
+              </motion.div>
               <div className="flex flex-col">
                 <span className="text-2xl font-bold tracking-tight text-white">
                   Claim<span className="text-emerald-400">Point</span>
                 </span>
-                <span className="text-xs text-slate-400 font-medium">
+                <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                  <Sparkles size={10} className="text-emerald-400" />
                   Smart Lost & Found
                 </span>
               </div>
@@ -80,30 +111,39 @@ const Footer = () => {
 
             {/* Contact Cards */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <div className="p-2 bg-slate-800/60 border border-emerald-500/10 rounded-lg">
+              <motion.div
+                whileHover={{ x: 5 }}
+                className="flex items-center gap-3 text-sm"
+              >
+                <div className="p-2 bg-slate-800/60 border border-emerald-500/20 rounded-lg backdrop-blur-sm">
                   <Phone size={16} className="text-emerald-400" />
                 </div>
                 <a
                   href="tel:+8801700000000"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-emerald-400 transition-colors"
                 >
                   +880 1700-000000
                 </a>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="p-2 bg-slate-800/60 border border-emerald-500/10 rounded-lg">
+              </motion.div>
+              <motion.div
+                whileHover={{ x: 5 }}
+                className="flex items-center gap-3 text-sm"
+              >
+                <div className="p-2 bg-slate-800/60 border border-emerald-500/20 rounded-lg backdrop-blur-sm">
                   <Mail size={16} className="text-emerald-400" />
                 </div>
                 <a
                   href="mailto:support@claimpoint.com.bd"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-emerald-400 transition-colors"
                 >
                   support@claimpoint.com.bd
                 </a>
-              </div>
-              <div className="flex items-start gap-3 text-sm">
-                <div className="p-2 bg-slate-800/60 border border-emerald-500/10 rounded-lg mt-0.5">
+              </motion.div>
+              <motion.div
+                whileHover={{ x: 5 }}
+                className="flex items-start gap-3 text-sm"
+              >
+                <div className="p-2 bg-slate-800/60 border border-emerald-500/20 rounded-lg backdrop-blur-sm mt-0.5">
                   <MapPin size={16} className="text-emerald-400" />
                 </div>
                 <span className="leading-relaxed">
@@ -113,9 +153,9 @@ const Footer = () => {
                     Serving Nationwide
                   </span>
                 </span>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Links */}
           <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-10">

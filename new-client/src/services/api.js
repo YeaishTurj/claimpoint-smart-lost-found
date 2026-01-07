@@ -232,7 +232,7 @@ const api = {
       headers.Authorization = `Bearer ${token}`;
     }
     const response = await fetch(
-      `${API_BASE_URL}/api/items/lost-reports/${id}`,
+      `${API_BASE_URL}/api/user/lost-reports/${id}`,
       {
         method: "GET",
         headers,

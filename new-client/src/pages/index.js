@@ -16,6 +16,13 @@ import ManageStaffsPage from "./ManageStaffsPage";
 import UpdateStaffPage from "./UpdateStaffPage";
 import ManageItemsPage from "./ManageItemsPage";
 import UpdateItemPage from "./UpdateItemPage";
+import ClaimItemPage from "./ClaimItemPage";
+import AddLostItemReportPage from "./AddLostItemReportPage";
+import MyDashboardPage from "./MyDashboardPage";
+import ClaimDetailsPage from "./ClaimDetailsPage";
+import UpdateReportPage from "./UpdateReportPage";
+import ManageClaimsPage from "./ManageClaimsPage";
+import ManageLostReportsPage from "./ManageLostReportsPage";
 
 export {
   AboutPage,
@@ -36,4 +43,11 @@ export {
   UpdateStaffPage,
   ManageItemsPage,
   UpdateItemPage,
+  ClaimItemPage,
+  AddLostItemReportPage,
+  MyDashboardPage,
+  ClaimDetailsPage,
+  UpdateReportPage,
+  ManageClaimsPage,
+  ManageLostReportsPage,
 };

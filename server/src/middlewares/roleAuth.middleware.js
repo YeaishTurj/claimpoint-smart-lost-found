@@ -14,6 +14,8 @@ const roleHierarchy = {
 export const roleAuthorization = (...allowedRoles) => {
   return (req, res, next) => {
     const userRole = req.user.role;
+    console.log("User Role:", userRole);
+    console.log("Allowed Roles:", allowedRoles);
 
     // ADMIN has access to everything
     if (userRole === "ADMIN") {
@@ -22,9 +24,10 @@ export const roleAuthorization = (...allowedRoles) => {
 
     // Check if user's role is in the allowed roles list
     if (allowedRoles.includes(userRole)) {
+      // console.log("Access granted");
       return next();
     }
-
+    // console.log("Access denied");
     return res.status(403).json({
       message: "Forbidden: You do not have permission to access this resource",
     });

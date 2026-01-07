@@ -8,6 +8,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -75,34 +76,64 @@ const ContactPage = () => {
       </div>
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+          >
             <Mail size={16} className="text-emerald-400" />
             <span className="text-sm font-semibold text-emerald-400">
               Get In Touch
             </span>
-          </div>
+          </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+          >
             Contact
             <br />
             <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
               ClaimPoint Team
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-lg text-slate-300 max-w-3xl mx-auto"
+          >
             Have questions or need assistance? We're here to help! Reach out to
             us and we'll get back to you as soon as possible.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {/* Contact Info Cards */}
-          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg text-center">
-            <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg text-center hover:border-emerald-500/30 hover:shadow-emerald-500/20 transition-all"
+          >
+            <motion.div
+              whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+              className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+            >
               <Mail size={28} className="text-white" />
-            </div>
+            </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">Email Us</h3>
             <p className="text-slate-300 text-sm mb-2">
               Send us an email anytime
@@ -113,12 +144,22 @@ const ContactPage = () => {
             >
               support@claimpoint.com
             </a>
-          </div>
+          </motion.div>
 
-          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg text-center">
-            <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg text-center hover:border-teal-500/30 hover:shadow-teal-500/20 transition-all"
+          >
+            <motion.div
+              whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+              className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+            >
               <Phone size={28} className="text-white" />
-            </div>
+            </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">Call Us</h3>
             <p className="text-slate-300 text-sm mb-2">
               Mon-Fri from 9am to 5pm
@@ -129,12 +170,22 @@ const ContactPage = () => {
             >
               > +1 (234) 567-890
             </a>
-          </div>
+          </motion.div>
 
-          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg text-center">
-            <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg text-center hover:border-cyan-500/30 hover:shadow-cyan-500/20 transition-all"
+          >
+            <motion.div
+              whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+              className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+            >
               <MapPin size={28} className="text-white" />
-            </div>
+            </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">Visit Us</h3>
             <p className="text-slate-300 text-sm mb-2">Come say hello</p>
             <p className="text-cyan-400 font-medium">
@@ -142,11 +193,16 @@ const ContactPage = () => {
               <br />
               City, State 12345
             </p>
-          </div>
+          </motion.div>
         </div>
 
         {/* Contact Form */}
-        <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg"
+        >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-3">
               Send Us a Message
@@ -243,9 +299,11 @@ const ContactPage = () => {
               )}
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={isSubmitting}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-60"
             >
               {isSubmitting ? (
@@ -259,9 +317,9 @@ const ContactPage = () => {
                   Send Message
                 </>
               )}
-            </button>
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

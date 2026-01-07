@@ -14,12 +14,15 @@ import {
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/auth.context";
+import { useNavigate } from "react-router";
 
 const ItemDetailsModal = ({ itemId, isOpen, onClose }) => {
   const [item, setItem] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isPrivileged = user?.role === "STAFF" || user?.role === "ADMIN";
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     if (isOpen && itemId) {
@@ -262,23 +265,38 @@ const ItemDetailsModal = ({ itemId, isOpen, onClose }) => {
                 </div>
               )}
 
-              {/* Claim Notice */}
+              {/* Claim CTA Notice */}
               {!isPrivileged && item.status === "FOUND" && (
                 <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-l-4 border-emerald-500 px-8 py-5 rounded-r-xl">
                   <div className="flex items-start gap-4">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg flex-shrink-0">
+                    <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
                       <AlertCircle size={22} className="text-emerald-400" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h4 className="font-bold text-emerald-100 text-base mb-2">
                         Is this your item?
                       </h4>
-                      <p className="text-sm text-slate-300 leading-relaxed">
-                        If you believe this item belongs to you, please contact
-                        our support team or visit the lost and found desk to
-                        start the claim process. Be prepared to answer security
-                        questions to verify ownership.
+                      <p className="text-sm text-slate-300 leading-relaxed mb-4">
+                        If you believe this item belongs to you, you can start a
+                        claim. Be prepared to answer security questions and
+                        provide evidence to verify ownership.
                       </p>
+                      <button
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            toast.error("Please login to claim this item", {
+                              position: "top-center",
+                              autoClose: 2500,
+                            });
+                            navigate("/login");
+                          } else {
+                            navigate(`/claim/${itemId}`);
+                          }
+                        }}
+                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+                      >
+                        Start Claim
+                      </button>
                     </div>
                   </div>
                 </div>

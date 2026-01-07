@@ -1,13 +1,14 @@
 import React from "react";
 import { Users, Target, Award, Heart } from "lucide-react";
+import { motion } from "framer-motion";
 
 const AboutPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
-      {/* Animaound elements */}
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/8 rounded-full blur-3xl animate-pulse"
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"
           style={{ animationDuration: "6s" }}
         />
         <div
@@ -18,36 +19,67 @@ const AboutPage = () => {
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+          >
             <Users size={16} className="text-emerald-400" />
             <span className="text-sm font-semibold text-emerald-400">
               About ClaimPoint
             </span>
-          </div>
+          </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+          >
             Reuniting People With
             <br />
             <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
               Their Lost Belongings
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-lg text-slate-300 max-w-3xl mx-auto"
+          >
             ClaimPoint is a smart lost and found management system designed to
             help people recover their lost items and enable finders to return
             found items to their rightful owners through a secure and efficient
             platform.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Mission & Vision Cards */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg">
-            <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-4">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            whileHover={{ scale: 1.02, y: -5 }}
+            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg hover:shadow-emerald-500/20 hover:border-emerald-500/30 transition-all cursor-default"
+          >
+            <motion.div
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.6 }}
+              className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20"
+            >
               <Target size={28} className="text-white" />
-            </div>
+            </motion.div>
             <h2 className="text-2xl font-bold text-white mb-4">Our Mission</h2>
             <p className="text-slate-300 leading-relaxed">
               To create a trustworthy platform that connects people with their
@@ -55,12 +87,23 @@ const AboutPage = () => {
               items simple, secure, and efficient. We believe every lost item
               deserves a chance to find its way home.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg">
-            <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mb-4">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            whileHover={{ scale: 1.02, y: -5 }}
+            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg hover:shadow-teal-500/20 hover:border-teal-500/30 transition-all cursor-default"
+          >
+            <motion.div
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.6 }}
+              className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-teal-500/20"
+            >
               <Award size={28} className="text-white" />
-            </div>
+            </motion.div>
             <h2 className="text-2xl font-bold text-white mb-4">Our Vision</h2>
             <p className="text-slate-300 leading-relaxed">
               To become the leading lost and found platform that empowers
@@ -68,11 +111,17 @@ const AboutPage = () => {
               something doesn't mean it's gone forever, and finding something
               means making someone's day better.
             </p>
-          </div>
+          </motion.div>
         </div>
 
         {/* Core Values */}
-        <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg mb-16"
+        >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-3">Core Values</h2>
             <p className="text-slate-300">
@@ -81,71 +130,77 @@ const AboutPage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center p-6">
-              <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Heart size={24} className="text-emerald-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Community First
-              </h3>
-              <p className="text-sm text-slate-300">
-                We build tools that strengthen community bonds and encourage
-                people to help each other.
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-12 h-12 bg-teal-500/10 border border-teal-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Target size={24} className="text-teal-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Transparency
-              </h3>
-              <p className="text-sm text-slate-300">
-                Every action is tracked and verified, ensuring accountability
-                and trust in the system.
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Award size={24} className="text-cyan-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Excellence</h3>
-              <p className="text-sm text-slate-300">
-                We strive for the highest quality in our service, technology,
-                and user experience.
-              </p>
-            </div>
+            <ValueCard
+              icon={<Heart size={24} className="text-emerald-400" />}
+              title="Community First"
+              desc="We build tools that strengthen community bonds and encourage people to help each other."
+              color="emerald"
+            />
+            <ValueCard
+              icon={<Target size={24} className="text-teal-400" />}
+              title="Transparency"
+              desc="Every action is tracked and verified, ensuring accountability and trust in the system."
+              color="teal"
+            />
+            <ValueCard
+              icon={<Award size={24} className="text-cyan-400" />}
+              title="Excellence"
+              desc="We strive for the highest quality in our service, technology, and user experience."
+              color="cyan"
+            />
           </div>
-        </div>
+        </motion.div>
 
         {/* How We Help Section */}
-        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-xl">
-          <h2 className="text-3xl font-bold mb-4">How We Help</h2>
-          <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
-            ClaimPoint bridges the gap between those who have lost something
-            precious and those who have found it. We provide the tools,
-            security, and platform to make returns happen efficiently.
-          </p>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="text-4xl font-bold mb-2">24/7</div>
-              <p className="text-emerald-100">Platform Availability</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">100%</div>
-              <p className="text-emerald-100">Secure & Private</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">Fast</div>
-              <p className="text-emerald-100">Item Matching</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-2xl relative overflow-hidden"
+        >
+          <div className="relative z-10">
+            <h2 className="text-3xl font-bold mb-4">How We Help</h2>
+            <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
+              ClaimPoint bridges the gap between those who have lost something
+              precious and those who have found it. We provide the tools,
+              security, and platform to make returns happen efficiently.
+            </p>
+            <div className="grid md:grid-cols-3 gap-8">
+              <StatItem value="24/7" label="Platform Availability" />
+              <StatItem value="100%" label="Secure & Private" />
+              <StatItem value="Fast" label="Item Matching" />
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 };
+
+// Sub-components to keep code clean
+const ValueCard = ({ icon, title, desc, color }) => (
+  <motion.div
+    whileHover={{ y: -5, scale: 1.02 }}
+    className="text-center p-6 rounded-xl hover:bg-slate-800/30 transition-all group"
+  >
+    <motion.div
+      whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+      transition={{ duration: 0.5 }}
+      className={`w-12 h-12 bg-${color}-500/10 border border-${color}-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-${color}-500/20 group-hover:border-${color}-500/40 transition-colors`}
+    >
+      {icon}
+    </motion.div>
+    <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+    <p className="text-sm text-slate-300 leading-relaxed">{desc}</p>
+  </motion.div>
+);
+
+const StatItem = ({ value, label }) => (
+  <motion.div whileHover={{ scale: 1.1 }} className="cursor-default">
+    <div className="text-4xl font-bold mb-2">{value}</div>
+    <p className="text-emerald-100 font-medium">{label}</p>
+  </motion.div>
+);
 
 export default AboutPage;
