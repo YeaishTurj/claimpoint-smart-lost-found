@@ -5,6 +5,8 @@ import {
   usersTable,
   lostReportsTable,
 } from "../models/index.js";
+import { sendClaimStatusEmail } from "../../services/email.js";
+import { generateClaimStatusTemplate } from "../utils/emailTemplates.js";
 import { desc, eq } from "drizzle-orm";
 
 const pickPublicFields = (item) => {
@@ -332,6 +334,28 @@ export const updateClaimStatus = async (req, res) => {
           .where(eq(foundItemsTable.id, claim.found_item_id));
       }
     });
+
+    // 3. Send Email Notification to the User about Claim Status Update
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, claim.user_id));
+
+    if (user) {
+      const emailBody = generateClaimStatusTemplate(
+        user.full_name,
+        status,
+        claimId
+      );
+
+      await sendClaimStatusEmail(
+        user.email,
+        `Your Claim #${claimId} Status Update`,
+        emailBody
+      );
+    }
+
+    // 4. Respond to Staff Client
 
     return res.status(200).json({
       success: true,

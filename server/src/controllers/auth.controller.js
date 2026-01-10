@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import otpGenerator from "otp-generator";
 import { sendVerificationEmail } from "../../services/email.js";
-import generateEmailTemplate from "../utils/emailTemplates.js";
+import { generateEmailTemplate } from "../utils/emailTemplates.js";
 
 const isProd = process.env.NODE_ENV === "production";
 const baseCookieOptions = {

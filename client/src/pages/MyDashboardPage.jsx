@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import {
   ArrowLeft,
   AlertCircle,
@@ -22,6 +22,7 @@ import LostReportDetailsModal from "../components/LostReportDetailsModal";
 
 const MyDashboardPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState("reports");
   const [lostReports, setLostReports] = useState([]);
@@ -35,6 +36,14 @@ const MyDashboardPage = () => {
   const [showDeleteReportModal, setShowDeleteReportModal] = useState(false);
   const [showDeleteClaimModal, setShowDeleteClaimModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+
+  useEffect(() => {
+    // Check if tab parameter is in URL
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "claims") {
+      setActiveTab("claims");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === "USER") {

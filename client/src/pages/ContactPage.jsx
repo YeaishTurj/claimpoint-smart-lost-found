@@ -62,7 +62,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -102,7 +102,7 @@ const ContactPage = () => {
           >
             Contact
             <br />
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
               ClaimPoint Team
             </span>
           </motion.h1>
@@ -130,7 +130,7 @@ const ContactPage = () => {
             <motion.div
               whileHover={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+              className="w-14 h-14 bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4"
             >
               <Mail size={28} className="text-white" />
             </motion.div>
@@ -156,7 +156,7 @@ const ContactPage = () => {
             <motion.div
               whileHover={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+              className="w-14 h-14 bg-linear-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
             >
               <Phone size={28} className="text-white" />
             </motion.div>
@@ -168,7 +168,7 @@ const ContactPage = () => {
               href="tel:+1234567890"
               className="text-teal-400 hover:text-teal-300 font-medium"
             >
-              > +1 (234) 567-890
+              +1 (234) 567-890
             </a>
           </motion.div>
 
@@ -182,7 +182,7 @@ const ContactPage = () => {
             <motion.div
               whileHover={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+              className="w-14 h-14 bg-linear-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
             >
               <MapPin size={28} className="text-white" />
             </motion.div>
@@ -304,7 +304,7 @@ const ContactPage = () => {
               disabled={isSubmitting}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-linear-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>

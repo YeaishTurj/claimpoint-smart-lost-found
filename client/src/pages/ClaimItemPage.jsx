@@ -163,7 +163,7 @@ const ClaimItemPage = () => {
           position: "top-center",
           autoClose: 2000,
         });
-        setTimeout(() => navigate("/found-items"), 1000);
+        setTimeout(() => navigate("/my-dashboard?tab=claims"), 1000);
       }
     } catch (error) {
       console.error(error);

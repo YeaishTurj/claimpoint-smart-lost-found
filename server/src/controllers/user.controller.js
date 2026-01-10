@@ -6,6 +6,8 @@ import {
   foundItemsTable,
 } from "../models/index.js";
 
+import { getLocalMatchScore } from "../../services/localMatcher.js";
+
 const coerceToObject = (value) => {
   if (value && typeof value === "string") {
     try {
@@ -250,58 +252,48 @@ export const deleteMyReport = async (req, res) => {
 export const myClaimSubmit = async (req, res) => {
   try {
     const user_id = req.user?.id;
-    if (!user_id) return res.status(401).json({ message: "Unauthorized" });
     const claimedItemId = req.params.id;
-    const { user_provided_proof, image_urls } = req.body; // user_provided_proof is their explanation
+    const { user_provided_proof, image_urls } = req.body;
 
-    // 1. Fetch the item to get its public details
+    console.log("Claim Submission:", req.body);
+
+    // 1. Fetch item from DB
     const [item] = await db
       .select()
       .from(foundItemsTable)
       .where(eq(foundItemsTable.id, claimedItemId));
-
     if (!item) return res.status(404).json({ message: "Item not found" });
-    if (item.status !== "FOUND")
-      return res.status(400).json({ message: "Item is unavailable" });
 
-    // 2. Prevent Duplicate Claims
-    const [existingClaim] = await db
-      .select()
-      .from(claimsTable)
-      .where(
-        and(
-          eq(claimsTable.found_item_id, claimedItemId),
-          eq(claimsTable.user_id, user_id)
-        )
-      );
+    // 2. RUN LOCAL AI MATCHING
+    // This runs on your Arch Linux server—no API calls!
+    const aiResult = await getLocalMatchScore(
+      user_provided_proof,
+      item.hidden_details
+    );
 
-    if (existingClaim)
-      return res.status(400).json({ message: "Already claimed" });
-
-    // 3. Construct the claim_details object
-    // We combine what the user said with a snapshot of the public info
-    const claimDetailsObj = {
-      user_proof: user_provided_proof,
-      item_snapshot: item.public_details, // Captures the public details at time of claim
-    };
-
-    // 4. Insert
+    // 3. Save Claim with the Match Score
     const [newClaim] = await db
       .insert(claimsTable)
       .values({
         user_id,
         found_item_id: claimedItemId,
-        claim_details: claimDetailsObj, // Now contains both sets of info
-        image_urls: Array.isArray(image_urls) ? image_urls : [],
+        claim_details: {
+          user_proof: user_provided_proof,
+          item_snapshot: item.public_details,
+        },
+        image_urls: image_urls || [],
+        match_percentage: aiResult.percentage, // <--- Local AI score
         status: "PENDING",
       })
       .returning();
 
-    return res
-      .status(201)
-      .json({ message: "Claim submitted", claim: newClaim });
+    return res.status(201).json({
+      success: true,
+      match_confidence: aiResult.percentage,
+      claim: newClaim,
+    });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Claim Submission Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

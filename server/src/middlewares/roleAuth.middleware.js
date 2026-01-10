@@ -14,8 +14,8 @@ const roleHierarchy = {
 export const roleAuthorization = (...allowedRoles) => {
   return (req, res, next) => {
     const userRole = req.user.role;
-    console.log("User Role:", userRole);
-    console.log("Allowed Roles:", allowedRoles);
+    // console.log("User Role:", userRole);
+    // console.log("Allowed Roles:", allowedRoles);
 
     // ADMIN has access to everything
     if (userRole === "ADMIN") {

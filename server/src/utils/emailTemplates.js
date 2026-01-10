@@ -1,4 +1,4 @@
-const generateEmailTemplate = (full_name, verificationCode) => {
+export const generateEmailTemplate = (full_name, verificationCode) => {
   return `
     <html>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; padding: 0 4px;">
@@ -15,4 +15,18 @@ const generateEmailTemplate = (full_name, verificationCode) => {
   `;
 };
 
-export default generateEmailTemplate;
+export const generateClaimStatusTemplate = (full_name, claimStatus) => {
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; padding: 0 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #111827;">Claim Status Update</h2>
+        <p style="margin: 0 0 10px 0;">Hi ${full_name || "there"},</p>
+        <p style="margin: 0 0 12px 0;">We wanted to inform you that the status of your claim has been updated to:</p>
+        <div style="background: #f1f5f9; padding: 20px; text-align: center; border-radius: 8px;">
+          <p style="font-size: 24px; font-weight: 600; margin: 0; color: #2563eb;">${claimStatus}</p>
+        </div>
+        <p style="margin: 16px 0 0 0; font-size: 12px; color: #6b7280;">If you have any questions regarding your claim, please contact our support team.</p>
+      </body>
+    </html>
+  `;
+};

@@ -27,3 +27,21 @@ export const sendVerificationEmail = async (to, subject, body) => {
     });
   });
 };
+
+export const sendClaimStatusEmail = async (to, subject, body) => {
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to,
+    subject,
+    html: body,
+  };
+
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return reject(error);
+      }
+      resolve(info);
+    });
+  });
+};

@@ -130,13 +130,39 @@ const ClaimDetailsModal = ({ claimId, isOpen, onClose }) => {
     );
   };
 
+  const renderUserProof = (proof) => {
+    if (!proof) return null;
+
+    if (typeof proof === "object" && !Array.isArray(proof)) {
+      const entries = Object.entries(proof);
+      if (entries.length === 0) return null;
+      return (
+        <div className="mt-3 space-y-2">
+          {entries.map(([key, value]) => (
+            <div
+              key={key}
+              className="flex items-start justify-between gap-4 border border-white/5 rounded-lg px-3 py-2 bg-slate-950/50"
+            >
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {key}
+              </span>
+              <span className="text-sm text-slate-200 break-words text-right">
+                {String(value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return <p className="text-slate-300 mt-3 text-sm">{String(proof)}</p>;
+  };
+
   if (!isOpen) return null;
 
   if (!isAuthenticated || user?.role !== "USER") {
     return null;
   }
-
-  const itemInfo = claim?.item_info || {};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -181,49 +207,81 @@ const ClaimDetailsModal = ({ claimId, isOpen, onClose }) => {
             </div>
           ) : claim ? (
             <div className="p-8 space-y-6">
-              {/* Top badges */}
+              {/* Match Score Badge */}
               {claim.match_percentage !== undefined && (
-                <div className="px-4 py-2 bg-emerald-500/10 text-emerald-300 rounded-xl border border-emerald-500/20 font-semibold inline-flex">
-                  Match Score: {claim.match_percentage}%
+                <div className="px-4 py-3 bg-emerald-500/10 text-emerald-300 rounded-xl border border-emerald-500/20 font-semibold inline-flex items-center gap-2">
+                  <CheckCircle2 size={16} />
+                  AI Match Score: {claim.match_percentage}%
                 </div>
               )}
 
-              <div className="grid gap-6 md:grid-cols-2">
+              {/* Main Content Grid */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Left Column: Item Info & Proof Images */}
                 <div className="space-y-4">
-                  <div className="bg-slate-950/40 border border-white/5 rounded-xl p-4">
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      Item Info
+                  {/* Found Item Information */}
+                  <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <ImageIcon size={18} className="text-emerald-400" />
+                      Found Item Info
                     </h3>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <ImageIcon size={16} />
-                      <span>{itemInfo.type || "Unknown item"}</span>
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/5">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Item Type
+                        </span>
+                        <span className="text-sm font-semibold text-white text-right">
+                          {claim.item_info?.type || "Unknown"}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/5">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          <MapPin size={14} className="inline mr-1" />
+                          Location
+                        </span>
+                        <span className="text-sm font-semibold text-white text-right">
+                          {claim.item_info?.location || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/5">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          <Clock size={14} className="inline mr-1" />
+                          Date Found
+                        </span>
+                        <span className="text-sm font-semibold text-white text-right">
+                          {claim.item_info?.date
+                            ? formatDate(claim.item_info.date)
+                            : "N/A"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-slate-300 mt-2">
-                      <MapPin size={16} />
-                      <span>{itemInfo.location || "N/A"}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300 mt-2">
-                      <Clock size={16} />
-                      <span>
-                        {itemInfo.date ? formatDate(itemInfo.date) : "N/A"}
-                      </span>
-                    </div>
-                    {renderPublicDetails(itemInfo.public_details)}
+
+                    {/* Public Details of Found Item */}
+                    {claim.item_info?.public_details && (
+                      <div className="mt-4 pt-4 border-t border-white/5">
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                          Public Details
+                        </p>
+                        {renderPublicDetails(claim.item_info.public_details)}
+                      </div>
+                    )}
                   </div>
 
+                  {/* User's Proof Images */}
                   {Array.isArray(claim.image_urls) &&
                     claim.image_urls.length > 0 && (
-                      <div className="bg-slate-950/40 border border-white/5 rounded-xl p-4">
-                        <h3 className="text-lg font-semibold text-white mb-3">
-                          Proof Images
+                      <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                          <ImageIcon size={18} className="text-amber-400" />
+                          Your Proof Images
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {claim.image_urls.map((url) => (
+                          {claim.image_urls.map((url, idx) => (
                             <img
-                              key={url}
+                              key={idx}
                               src={url}
                               alt="Proof"
-                              className="w-full h-28 object-cover rounded-lg border border-white/10"
+                              className="w-full h-32 object-cover rounded-lg border border-white/10 hover:border-amber-500/50 transition-all cursor-pointer"
                             />
                           ))}
                         </div>
@@ -231,24 +289,39 @@ const ClaimDetailsModal = ({ claimId, isOpen, onClose }) => {
                     )}
                 </div>
 
-                {Array.isArray(itemInfo.images) &&
-                  itemInfo.images.length > 0 && (
-                    <div className="bg-slate-950/40 border border-white/5 rounded-xl p-4">
-                      <h3 className="text-lg font-semibold text-white mb-3">
-                        Found Item Photos
+                {/* Right Column: User Proof & Item Photos */}
+                <div className="space-y-4">
+                  {/* User's Proof Details */}
+                  {claim.claim_details?.user_proof && (
+                    <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+                      <h3 className="text-lg font-semibold text-white mb-4">
+                        Your Proof Details
                       </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {itemInfo.images.map((url) => (
-                          <img
-                            key={url}
-                            src={url}
-                            alt="Found item"
-                            className="w-full h-32 object-cover rounded-lg border border-white/10"
-                          />
-                        ))}
-                      </div>
+                      {renderUserProof(claim.claim_details.user_proof)}
                     </div>
                   )}
+
+                  {/* Found Item Photos */}
+                  {Array.isArray(claim.item_info?.images) &&
+                    claim.item_info.images.length > 0 && (
+                      <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                          <ImageIcon size={18} className="text-teal-400" />
+                          Found Item Photos
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {claim.item_info.images.map((url, idx) => (
+                            <img
+                              key={idx}
+                              src={url}
+                              alt="Found item"
+                              className="w-full h-32 object-cover rounded-lg border border-white/10 hover:border-teal-500/50 transition-all cursor-pointer"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
               </div>
             </div>
           ) : (
