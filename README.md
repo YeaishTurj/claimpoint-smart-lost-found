@@ -245,7 +245,6 @@ claimpoint-smart-lost-found/
 ├── package.json              # Root package (setup scripts)
 ├── README.md                 # This file
 ├── LICENSE                   # MIT License
-├── CONTRIBUTING.md           # Contribution guidelines
 └── .gitignore               # Git ignore rules
 ```
 
@@ -403,18 +402,6 @@ NODE_ENV=production npm start
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push to branch: `git push origin feature/your-feature`
-5. Submit a Pull Request
-
----
-
 ## 📄 License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
@@ -426,7 +413,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 - 📧 **Email:** support@claimpoint.com
 - 🐛 **Report Bugs:** [GitHub Issues](../../issues)
 - 💡 **Feature Requests:** [GitHub Discussions](../../discussions)
-- 📖 **Documentation:** See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
@@ -440,7 +426,7 @@ Thanks to:
 - HuggingFace for Transformers
 - PostgreSQL for reliable data storage
 - Cloudinary for image hosting
-- All contributors and supporters
+- All supporters
 
 ---
 
