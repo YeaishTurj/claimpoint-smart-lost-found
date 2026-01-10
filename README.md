@@ -129,7 +129,8 @@ claimpoint-smart-lost-found/
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL 14+ (15 recommended)
+- Docker + Docker Compose (recommended)
+- PostgreSQL 14+ (15 recommended) if you don’t use Docker
 
 ### 1) Install dependencies
 
@@ -215,6 +216,35 @@ npm run bootstrap:docker
 ```
 
 This will install dependencies, start Postgres via Docker Compose, run `db:push`, run the seed script, and then start the dev servers.
+
+### Running on a fresh PC (Docker) — step by step
+
+1. Install (one time): Git + Node.js 18+ + Docker + Docker Compose
+
+2. Clone:
+
+```bash
+git clone https://github.com/YeaishTurj/claimpoint-smart-lost-found
+cd claimpoint-smart-lost-found
+```
+
+3. Put your original env files in place:
+
+- Place your client env as `client/.env` (if you have `client.env`, rename it to `.env`)
+- Place your server env as `server/.env` (if you have `server.env`, rename it to `.env`)
+
+4. Run the project:
+
+```bash
+npm run bootstrap:docker
+```
+
+5. Open:
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+
+If Docker fails with a permissions error, fix Docker permissions (recommended) instead of running npm with sudo.
 
 ### 4) Start the app
 
