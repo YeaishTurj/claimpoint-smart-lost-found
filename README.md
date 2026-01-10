@@ -1,8 +1,8 @@
-# 🔍 ClaimPoint - Smart Lost & Found Platform
+# ClaimPoint - Smart Lost & Found Platform
 
 > An AI-powered Lost & Found Management System that automatically connects lost items with found items, helping organizations and users recover belongings 10x faster.
 
-**[→ Read Full Technical & Conceptual Documentation](./README_COMPREHENSIVE.md)**
+**[📖 Full Documentation](./docs/README_COMPREHENSIVE.md)** | **[🚀 Quick Start](#quick-start)** | **[💡 How It Works](#how-it-works)** | **[📞 Support](#support)**
 
 ---
 
