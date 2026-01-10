@@ -1,446 +1,338 @@
-# ClaimPoint - Smart Lost & Found Management System
+# ClaimPoint — Smart Lost & Found Management System
 
-ClaimPoint is a **full-stack web application** for managing lost and found items with **AI-powered smart matching**. It's designed for organizations like airports, hotels, hospitals, and universities to efficiently reunite people with their lost items.
+ClaimPoint is a full-stack lost & found system with **role-based dashboards** (Admin / Staff / User) and **local AI-powered claim verification**. Staff can post found items (with hidden verification details), users can submit claims, and the backend assigns a **match percentage** using a local embedding model.
 
-## 🎯 Quick Overview
+## Tech Stack
 
-- **Frontend:** React 19 with Vite, Tailwind CSS, Framer Motion
-- **Backend:** Node.js with Express 5, PostgreSQL, Drizzle ORM
-- **Authentication:** JWT + bcryptjs
-- **AI Matching:** Semantic similarity algorithm (HuggingFace Transformers)
-- **Notifications:** Email alerts for matches
-- **Image Handling:** Cloudinary integration
-- **Role-Based:** Admin, Staff, and User roles
+- **Frontend:** React 19, Vite, Tailwind CSS, Framer Motion
+- **Backend:** Node.js (ESM) + Express 5
+- **DB:** PostgreSQL + Drizzle ORM
+- **Auth:** JWT stored in **HTTP-only cookie** (`token`)
+- **AI Matching:** `@huggingface/transformers` (local embeddings + cosine similarity)
+- **Email:** Nodemailer (OTP verification + claim status updates)
+- **Images:** Cloudinary
 
-## ✨ Key Features
+## What This Repo Contains
 
-✅ **Two-Way Reporting** - Report lost OR found items
-✅ **Smart Matching** - AI-powered semantic similarity matching (85%+ accuracy)
-✅ **Multi-Role System** - Admin, Staff, and User interfaces
-✅ **Real-Time Notifications** - Email alerts when matches found
-✅ **Secure Authentication** - JWT tokens with role-based access control
-✅ **Item Search & Filter** - Search across all items with multiple filters
-✅ **Cloudinary Integration** - Upload and manage item photos
-✅ **OTP Verification** - Two-factor authentication for email
-✅ **Mobile Responsive** - Works on all devices
-✅ **Audit Trail** - Track all item status changes
+- Users can register and verify email via OTP
+- Users can create lost reports
+- Staff can create and manage found items (public + hidden details)
+- Users can claim found items; backend computes and stores a local AI match score
+- Staff can approve/reject/collect claims; users get email status updates
+- Admin can manage staff accounts and activate/deactivate users
 
-## 🚀 Quick Start
+## Project Structure (Matches Repo)
+
+```
+claimpoint-smart-lost-found/
+├── CONTRIBUTING.md
+├── LICENSE
+├── package.json
+├── README.md
+├── client/
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── README.md
+│   ├── vite.config.js
+│   └── src/
+│       ├── App.jsx
+│       ├── index.css
+│       ├── main.jsx
+│       ├── assets/
+│       ├── components/
+│       │   ├── ClaimDetailsModal.jsx
+│       │   ├── Footer.jsx
+│       │   ├── ItemCard.jsx
+│       │   ├── itemDetailsModal.jsx
+│       │   ├── LostReportDetailsModal.jsx
+│       │   ├── Navbar.jsx
+│       │   ├── StaffClaimDetailsModal.jsx
+│       │   ├── StaffLostReportDetailsModal.jsx
+│       │   └── modal/
+│       │       ├── LoginModal.jsx
+│       │       └── RegisterModal.jsx
+│       ├── context/
+│       │   └── auth.context.jsx
+│       ├── lib/
+│       │   └── api.js
+│       ├── pages/
+│       │   ├── AboutPage.jsx
+│       │   ├── AddFoundItemPage.jsx
+│       │   ├── AddLostItemReportPage.jsx
+│       │   ├── AddStaffPage.jsx
+│       │   ├── BrowseFoundItems.jsx
+│       │   ├── ChangePasswordPage.jsx
+│       │   ├── ClaimDetailsPage.jsx
+│       │   ├── ClaimItemPage.jsx
+│       │   ├── ContactPage.jsx
+│       │   ├── HomePage.jsx
+│       │   ├── HowItWorks.jsx
+│       │   ├── index.js
+│       │   ├── LoginPage.jsx
+│       │   ├── ManageClaimsPage.jsx
+│       │   ├── ManageItemsPage.jsx
+│       │   ├── ManageLostReportsPage.jsx
+│       │   ├── ManageStaffsPage.jsx
+│       │   ├── ManageUsersPage.jsx
+│       │   ├── MyDashboardPage.jsx
+│       │   ├── MyProfilePage.jsx
+│       │   ├── RegisterPage.jsx
+│       │   ├── UpdateItemPage.jsx
+│       │   ├── UpdateProfilePage.jsx
+│       │   ├── UpdateReportPage.jsx
+│       │   ├── UpdateStaffPage.jsx
+│       │   └── VerificationPage.jsx
+│       └── services/
+│           └── api.js
+└── server/
+    ├── docker-compose.yml
+    ├── drizzle.config.js
+    ├── index.js
+    ├── package.json
+    ├── config/
+    │   └── cloudinary.js
+    ├── scripts/
+    │   └── seed-admin.js
+    ├── services/
+    │   ├── email.js
+    │   └── localMatcher.js
+    └── src/
+        ├── index.js
+        ├── controllers/
+        │   ├── admin.controller.js
+        │   ├── auth.controller.js
+        │   ├── item.controller.js
+        │   ├── staff.controller.js
+        │   └── user.controller.js
+        ├── middlewares/
+        │   ├── auth.middleware.js
+        │   ├── optionalAuth.middleware.js
+        │   └── roleAuth.middleware.js
+        ├── models/
+        │   ├── index.js
+        │   ├── item.model.js
+        │   └── user.model.js
+        ├── routes/
+        │   ├── admin.routes.js
+        │   ├── auth.routes.js
+        │   ├── item.routes.js
+        │   ├── staff.routes.js
+        │   └── user.routes.js
+        └── utils/
+            ├── cron.js
+            └── emailTemplates.js
+```
+
+## Quick Start (Dev)
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- PostgreSQL 14+ (or Docker)
-- Git
+- Node.js 18+
+- PostgreSQL 14+ (15 recommended)
 
-### Installation (One Command)
+### 1) Install dependencies
 
 ```bash
-git clone https://github.com/yourusername/claimpoint-smart-lost-found.git
+git clone https://github.com/YeaishTurj/claimpoint-smart-lost-found
 cd claimpoint-smart-lost-found
 npm run setup
 ```
 
-This will:
+If you want a single command that also starts Postgres (Docker), creates tables, seeds admin, and starts dev servers, jump to **One Command (Docker)** below.
 
-- Install root dependencies
-- Install server dependencies
-- Install client dependencies
+### 2) Environment variables
 
-### Configuration
+#### Server env
 
-**1. Setup Database (PostgreSQL)**
+```bash
+cp server/.env.example server/.env
+```
 
-Option A: Using Docker (recommended)
+Server uses these env vars (see `server/.env.example`):
+
+- `NODE_ENV` (development/production)
+- `PORT` (default 5000)
+- `DATABASE_URL` (PostgreSQL connection string)
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` (used by `server/docker-compose.yml` if you run Postgres via Docker)
+- `JWT_SECRET` (signing secret)
+- `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM`
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FULLNAME`, `ADMIN_PHONE` (used by seed)
+- `STAFF_DEFAULT_PASSWORD` (default password for newly created staff)
+
+#### Client env
+
+```bash
+cp client/.env.example client/.env
+```
+
+Client env vars (see `client/.env.example`):
+
+- `VITE_API_BASE_URL` (default `http://localhost:5000`)
+- `VITE_CLOUDINARY_CLOUD_NAME`
+- `VITE_CLOUDINARY_UPLOAD_PRESET`
+
+### 3) Database setup
+
+Run PostgreSQL locally or via Docker.
+
+Option A — quick Docker container:
 
 ```bash
 docker run --name claimpoint-postgres \
   -e POSTGRES_DB=claimpoint_db \
   -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_PASSWORD=something_secure \
   -p 5432:5432 \
   -d postgres:15
 ```
 
-Option B: Using existing PostgreSQL installation
+Option B — using the included Compose file:
 
-```bash
-createdb claimpoint_db
-```
-
-**2. Configure Environment Variables**
-
-```bash
-# Copy server example config
-cp server/.env.example server/.env
-
-# Copy client example config
-cp client/.env.example client/.env
-```
-
-Edit `server/.env` with your actual values:
-
-```env
-NODE_ENV=development
-PORT=5000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/claimpoint_db
-JWT_SECRET=your_secret_key_here
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-ADMIN_EMAIL=admin@claimpoint.com
-ADMIN_PASSWORD=admin@123
-```
-
-**3. Initialize Database**
+- `server/docker-compose.yml` expects `DB_NAME`, `DB_USER`, `DB_PASSWORD` (and optional `DB_PORT`).
+- Put them in `server/.env` (recommended) or export them in your shell.
 
 ```bash
 cd server
-npx drizzle-kit push
+docker compose up -d
+```
+
+Then apply schema + seed admin:
+
+```bash
+cd server
+npm run db:push
 npm run seed
 ```
 
-This will create tables and seed an admin user.
+### One Command (Docker)
 
-**4. Start Development Servers**
+After you create `server/.env` and `client/.env`, you can run:
 
 ```bash
-# From root directory
+npm run bootstrap:docker
+```
+
+This will install dependencies, start Postgres via Docker Compose, run `db:push`, run the seed script, and then start the dev servers.
+
+### 4) Start the app
+
+From repo root:
+
+```bash
 npm run dev
 ```
 
-Or run separately:
+URLs:
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+
+## Default Admin + Staff Password
+
+- Admin is created by the seed script using `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `server/.env`.
+- New staff accounts created by Admin use `STAFF_DEFAULT_PASSWORD` from `server/.env`.
+
+## Authentication Notes (Important)
+
+- Backend stores the JWT in an **HTTP-only cookie** named `token`.
+- Frontend API calls must send cookies (`withCredentials: true`).
+- CORS is configured in the server for `http://localhost:5173` (update `server/index.js` for production).
+
+## API Routes (Actual)
+
+Base URL: `http://localhost:5000/api`
+
+### Auth — `/auth`
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout` (requires cookie auth)
+- `GET /api/auth/verify-email?code=XXXXXX&email=user@example.com`
+- `GET /api/auth/resend-verification-code?email=user@example.com`
+- `GET /api/auth/profile` (requires cookie auth)
+- `PATCH /api/auth/profile` (requires cookie auth)
+- `PUT /api/auth/change-password` (requires cookie auth)
+
+### Public/Optional Auth — `/items`
+
+- `GET /api/items/found-items` (public; staff/admin see full rows, public sees only safe columns)
+- `GET /api/items/found-items/:id`
+
+### User (USER role) — `/user`
+
+- `POST /api/user/lost-reports`
+- `GET /api/user/lost-reports`
+- `GET /api/user/lost-reports/:id`
+- `PATCH /api/user/lost-reports/:id`
+- `DELETE /api/user/lost-reports/:id`
+- `POST /api/user/claims/:id` (submit a claim for found item `:id`)
+- `GET /api/user/claims`
+- `GET /api/user/claims/:id`
+- `DELETE /api/user/claims/:id`
+
+### Staff (STAFF role) — `/staff`
+
+- `POST /api/staff/found-items`
+- `PATCH /api/staff/found-items/:itemId`
+- `DELETE /api/staff/found-items/:itemId`
+- `GET /api/staff/claims`
+- `GET /api/staff/claims/:claimId`
+- `PATCH /api/staff/claims/:claimId` (update claim status; sends email)
+- `GET /api/staff/lost-reports`
+- `GET /api/staff/lost-reports/:reportId`
+
+### Admin (ADMIN role) — `/admin`
+
+- `POST /api/admin/staffs`
+- `PATCH /api/admin/staffs/:staffId`
+- `GET /api/admin/staffs`
+- `GET /api/admin/staffs/:staffId`
+- `GET /api/admin/users`
+- `PATCH /api/admin/users/:userId/deactivate`
+- `PATCH /api/admin/users/:userId/activate`
+
+## Local AI Matching (How It Works)
+
+Claim verification is done locally during claim submission:
+
+- When a user calls `POST /api/user/claims/:id`, the backend loads the found item’s `hidden_details` from DB.
+- The matcher (`server/services/localMatcher.js`) embeds both texts using:
+  - task: `feature-extraction`
+  - model: `Xenova/all-MiniLM-L6-v2`
+- It computes cosine similarity and stores the result as `match_percentage` on the claim.
+
+This is **local inference** (no external API calls).
+
+## Background Jobs
+
+- A cron job runs hourly to remove expired pending registrations from `usersPendingTable` (older than 24 hours).
+
+## Development Commands (Actual)
 
 ```bash
-# Terminal 1 - Backend
-cd server && npm run dev
-
-# Terminal 2 - Frontend
-cd client && npm run dev
-```
-
-**Access the application:**
-
-- 🖥️ **Frontend:** http://localhost:5173
-- 🔗 **API:** http://localhost:5000
-- 📊 **Database:** Use `npm run db:studio` in server for visual DB management
-
----
-
-## 🔑 Default Login Credentials
-
-After seeding:
-
-| Role  | Email                        | Password         |
-| ----- | ---------------------------- | ---------------- |
-| Admin | admin@claimpoint.com         | admin@123        |
-| Staff | (Create via Admin Dashboard) | (Staff-specific) |
-| User  | (Self-signup)                | (User-specific)  |
-
----
-
-## 📊 User Roles & Permissions
-
-### Admin (Superadmin)
-
-- Manage staff accounts (create, edit, delete)
-- Manage user accounts
-- View all items and claims
-- Generate reports
-- System configuration
-
-### Staff
-
-- Add and manage found items
-- View and process claims
-- Update item status
-- Handle item returns
-- View assigned items
-
-### Users (Public)
-
-- Report lost items
-- Browse found items
-- Submit claims
-- Receive email notifications
-- Track claim status
-- Update their profile
-
----
-
-## 🔌 API Endpoints
-
-### Authentication
-
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/verify-otp` - Verify OTP
-- `POST /api/auth/logout` - User logout
-
-### Items
-
-- `GET /api/items` - List all items (with filters)
-- `GET /api/items/:id` - Get item details
-- `POST /api/items` - Add new item (Lost or Found)
-- `PUT /api/items/:id` - Update item
-- `DELETE /api/items/:id` - Delete item
-
-### Matching
-
-- `GET /api/items/:id/matches` - Get AI matches for an item
-- `POST /api/matches/auto` - Trigger auto-matching
-
-### Admin
-
-- `GET /api/admin/users` - List all users
-- `GET /api/admin/staff` - List all staff
-- `POST /api/admin/staff` - Create new staff
-- `PUT /api/admin/staff/:id` - Update staff
-- `DELETE /api/admin/staff/:id` - Delete staff
-
-### User Profile
-
-- `GET /api/users/profile` - Get current user profile
-- `PUT /api/users/profile` - Update profile
-- `PUT /api/users/password` - Change password
-
----
-
-## 📁 Project Structure
-
-```
-claimpoint-smart-lost-found/
-├── client/                    # React frontend
-│   ├── src/
-│   │   ├── pages/            # Page components (HomePage, LoginPage, etc.)
-│   │   ├── components/       # Reusable UI components
-│   │   ├── services/         # API client services
-│   │   ├── context/          # React Context (auth context)
-│   │   ├── lib/              # Utility libraries
-│   │   ├── assets/           # Images, icons, fonts
-│   │   └── App.jsx           # Main app component
-│   ├── package.json
-│   ├── vite.config.js
-│   └── .env.example
-│
-├── server/                    # Node.js/Express backend
-│   ├── src/
-│   │   ├── controllers/      # Request handlers (auth, items, admin, etc.)
-│   │   ├── routes/           # API route definitions
-│   │   ├── models/           # Database models/schema
-│   │   ├── middlewares/      # Auth, role-check, error handling
-│   │   └── utils/            # Helper functions (cron, email, etc.)
-│   ├── services/             # Email service
-│   ├── config/               # Cloudinary configuration
-│   ├── scripts/              # Database seed script
-│   ├── package.json
-│   ├── index.js              # Server entry point
-│   ├── drizzle.config.js     # ORM configuration
-│   └── .env.example
-│
-├── package.json              # Root package (setup scripts)
-├── README.md                 # This file
-├── LICENSE                   # MIT License
-└── .gitignore               # Git ignore rules
-```
-
----
-
-## 🤖 Smart Matching Algorithm
-
-The system uses a 3-factor matching algorithm:
-
-```
-Match Score = (Details × 0.6) + (Location × 0.3) + (Date × 0.1)
-
-Details (60%):
-  - Device IMEI, color, model, condition
-  - Semantic similarity using HuggingFace Transformers
-
-Location (30%):
-  - Geographic proximity
-  - Same area or building tokens
-
-Date (10%):
-  - Days between lost and found
-  - Recent matches prioritized
-```
-
-Only matches with **≥50% score** are auto-suggested to staff.
-
----
-
-## 🔐 Security Features
-
-- ✅ **Password Security:** bcryptjs hashing (salt rounds: 10)
-- ✅ **Authentication:** JWT tokens with 7-day expiry
-- ✅ **Email Verification:** OTP-based verification
-- ✅ **Role-Based Access Control (RBAC):** Endpoint-level permission checks
-- ✅ **Data Privacy:** Sensitive fields hidden based on user role
-- ✅ **SQL Injection Prevention:** Drizzle ORM with parameterized queries
-- ✅ **CORS Configuration:** Restricted to trusted origins
-- ✅ **Input Validation:** Server-side validation on all inputs
-- ✅ **Audit Trail:** All changes logged with user info and timestamp
-
----
-
-## 📧 Email Notifications
-
-The system sends emails for:
-
-- Account verification (OTP)
-- Item match alerts
-- Claim status updates
-- Password recovery
-
-Configure SMTP in `.env`:
-
-```env
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password (not your regular password)
-```
-
-**For Gmail:** [Create an App Password](https://support.google.com/accounts/answer/185833)
-
----
-
-## 🛠️ Development Commands
-
-```bash
-# Root level
-npm run setup          # Install all dependencies
-npm run dev           # Start both server & client
-npm run build         # Build for production
-npm run build:server  # Build server only
-npm run build:client  # Build client only
+# Root
+npm run setup          # install root + server + client deps
+npm run dev            # start server + client (concurrently)
+npm run dev:server     # start only backend
+npm run dev:client     # start only frontend
 
 # Server
 cd server
-npm run dev           # Start with nodemon
-npm run db:push      # Push schema to database
-npm run db:studio    # Open visual database editor
-npm run seed         # Seed admin user
+npm run dev            # nodemon index.js
+npm run db:push        # drizzle-kit push
+npm run db:studio      # drizzle-kit studio
+npm run seed           # seed admin user
 
 # Client
 cd client
-npm run dev          # Start Vite dev server
-npm run build        # Build for production
-npm run lint         # Run ESLint
-npm run preview      # Preview production build
-```
-
----
-
-## 📱 Frontend Technologies
-
-| Library         | Purpose                 |
-| --------------- | ----------------------- |
-| React 19        | UI framework            |
-| Vite            | Build tool & dev server |
-| Tailwind CSS 4  | Utility-first styling   |
-| Framer Motion   | Animations              |
-| React Router v7 | Client-side routing     |
-| Axios           | HTTP client             |
-| Lucide React    | Icons                   |
-| React Toastify  | Toast notifications     |
-| ESLint          | Code linting            |
-
----
-
-## 🖥️ Backend Technologies
-
-| Library     | Purpose              |
-| ----------- | -------------------- |
-| Express 5   | Web framework        |
-| PostgreSQL  | Database             |
-| Drizzle ORM | Type-safe ORM        |
-| JWT         | Token authentication |
-| bcryptjs    | Password hashing     |
-| Nodemailer  | Email service        |
-| Cloudinary  | Image CDN            |
-| HuggingFace | AI/ML transformers   |
-| Node Cron   | Scheduled tasks      |
-| Dotenv      | Environment config   |
-
----
-
-## 🚢 Deployment
-
-### Environment Setup
-
-Before deploying, ensure:
-
-1. All `.env` variables are set correctly
-2. PostgreSQL database is accessible
-3. Cloudinary account is created
-4. Email SMTP credentials are valid
-5. JWT_SECRET is a strong, unique string
-
-### Production Build
-
-```bash
+npm run dev
 npm run build
+npm run lint
+npm run preview
 ```
 
-This generates:
+## License
 
-- `client/dist/` - Frontend build
-- `server/` - Ready for Node.js production
-
-### Running in Production
-
-```bash
-cd server
-NODE_ENV=production npm start
-```
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 📞 Support & Contact
-
-- 📧 **Email:** support@claimpoint.com
-- 🐛 **Report Bugs:** [GitHub Issues](../../issues)
-- 💡 **Feature Requests:** [GitHub Discussions](../../discussions)
-
----
-
-## 🙏 Acknowledgments
-
-Built with ❤️ using modern web technologies for efficient lost & found management.
-
-Thanks to:
-
-- React and Node.js communities
-- HuggingFace for Transformers
-- PostgreSQL for reliable data storage
-- Cloudinary for image hosting
-- All supporters
-
----
-
-## 📈 Project Stats
-
-- **Lines of Code:** 5,000+
-- **Components:** 20+
-- **API Endpoints:** 25+
-- **Database Tables:** 6
-- **Tech Stack:** React + Node.js + PostgreSQL
-- **Status:** ✅ Production Ready
-
----
-
-**Version:** 1.0.0 | **Last Updated:** January 2026 | **Status:** Production Ready
-
-Made with ❤️ for lost & found management
+MIT — see [LICENSE](LICENSE).

@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "setup": "npm install && cd server && npm install && cd ../client && npm install",
+    "bootstrap:docker": "npm run setup && cd server && docker compose up -d && npm run db:push && npm run seed && cd .. && npm run dev",
+    "db:docker": "cd server && docker compose up -d && npm run db:push && npm run seed",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
