@@ -43,10 +43,10 @@ const AboutPage = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-4xl md:text-5xl font-bold text-white mb-6"
           >
-            Reuniting People With
+            AI-Powered Lost & Found
             <br />
             <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
-              Their Lost Belongings
+              Built for Busy Venues
             </span>
           </motion.h1>
 
@@ -56,10 +56,10 @@ const AboutPage = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-lg text-slate-300 max-w-3xl mx-auto"
           >
-            ClaimPoint is a smart lost and found management system designed to
-            help people recover their lost items and enable finders to return
-            found items to their rightful owners through a secure and efficient
-            platform.
+            ClaimPoint connects admins, staff, and guests with a secure, AI-
+            assisted flow that turns chaos at stations, airports, and campuses
+            into a predictable handover: dynamic item fields, dual public vs
+            hidden details, email notifications, and role-based dashboards.
           </motion.p>
         </motion.div>
 
@@ -82,10 +82,9 @@ const AboutPage = () => {
             </motion.div>
             <h2 className="text-2xl font-bold text-white mb-4">Our Mission</h2>
             <p className="text-slate-300 leading-relaxed">
-              To create a trustworthy platform that connects people with their
-              lost belongings, making the process of reporting and claiming
-              items simple, secure, and efficient. We believe every lost item
-              deserves a chance to find its way home.
+              Help frontline teams close the loop faster by pairing structured
+              data with human review. Every lost item gets tracked, matched, and
+              reunited with evidence-based verification.
             </p>
           </motion.div>
 
@@ -106,10 +105,9 @@ const AboutPage = () => {
             </motion.div>
             <h2 className="text-2xl font-bold text-white mb-4">Our Vision</h2>
             <p className="text-slate-300 leading-relaxed">
-              To become the leading lost and found platform that empowers
-              communities to help each other. We envision a world where losing
-              something doesn't mean it's gone forever, and finding something
-              means making someone's day better.
+              A world where reporting, matching, and pickup are transparent—AI
+              suggests, staff approves, owners get notified, and handovers are
+              logged end-to-end.
             </p>
           </motion.div>
         </div>
@@ -132,20 +130,20 @@ const AboutPage = () => {
           <div className="grid md:grid-cols-3 gap-6">
             <ValueCard
               icon={<Heart size={24} className="text-emerald-400" />}
-              title="Community First"
-              desc="We build tools that strengthen community bonds and encourage people to help each other."
+              title="Role Clarity"
+              desc="Admins govern, staff verify, and users self-serve with the right access at every step."
               color="emerald"
             />
             <ValueCard
               icon={<Target size={24} className="text-teal-400" />}
-              title="Transparency"
-              desc="Every action is tracked and verified, ensuring accountability and trust in the system."
+              title="Traceability"
+              desc="Public vs hidden details, approvals, and pickups are recorded for auditability."
               color="teal"
             />
             <ValueCard
               icon={<Award size={24} className="text-cyan-400" />}
-              title="Excellence"
-              desc="We strive for the highest quality in our service, technology, and user experience."
+              title="Reliability"
+              desc="AI scoring (details + location), email alerts, and resilient workflows reduce misses."
               color="cyan"
             />
           </div>
@@ -162,14 +160,14 @@ const AboutPage = () => {
           <div className="relative z-10">
             <h2 className="text-3xl font-bold mb-4">How We Help</h2>
             <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
-              ClaimPoint bridges the gap between those who have lost something
-              precious and those who have found it. We provide the tools,
-              security, and platform to make returns happen efficiently.
+              AI suggests matches (70% details, 30% location). Staff confirm,
+              owners get notified, and handovers are logged—no more spreadsheets
+              or guesswork.
             </p>
             <div className="grid md:grid-cols-3 gap-8">
-              <StatItem value="24/7" label="Platform Availability" />
-              <StatItem value="100%" label="Secure & Private" />
-              <StatItem value="Fast" label="Item Matching" />
+              <StatItem value="70/30" label="Details + Location scoring" />
+              <StatItem value="Dual" label="Public & hidden proofs" />
+              <StatItem value="End-to-end" label="From report to pickup" />
             </div>
           </div>
         </motion.div>

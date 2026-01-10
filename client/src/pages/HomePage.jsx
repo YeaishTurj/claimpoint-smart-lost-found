@@ -11,8 +11,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import heroImage from "../assets/hero.jpg";
+import { useAuth } from "../context/auth.context";
 
 const HomePage = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Hero Section */}
@@ -87,32 +90,36 @@ const HomePage = () => {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  to="/found-items"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/50 transition-all"
+              {user && (user.role === "ADMIN" || user.role === "USER") && (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Search size={20} />
-                  Browse Found Items
-                  <ArrowRight size={20} />
-                </Link>
-              </motion.div>
+                  <Link
+                    to="/found-items"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/50 transition-all"
+                  >
+                    <Search size={20} />
+                    Browse Found Items
+                    <ArrowRight size={20} />
+                  </Link>
+                </motion.div>
+              )}
 
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  to="/add-found-item"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-slate-800/80 backdrop-blur-sm text-white font-semibold rounded-xl border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-slate-700/80 transition-all shadow-lg"
+              {user && user.role === "USER" && (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Package size={20} />
-                  Report Found Item
-                </Link>
-              </motion.div>
+                  <Link
+                    to="/report-lost-item"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-slate-800/80 backdrop-blur-sm text-white font-semibold rounded-xl border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-slate-700/80 transition-all shadow-lg"
+                  >
+                    <Package size={20} />
+                    Report Lost Item
+                  </Link>
+                </motion.div>
+              )}
             </motion.div>
           </div>
 

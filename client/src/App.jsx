@@ -29,6 +29,7 @@ import {
   UpdateReportPage,
   ManageClaimsPage,
   ManageLostReportsPage,
+  ManageMatchesPage,
 } from "./pages/index.js";
 import Footer from "./components/Footer";
 
@@ -110,6 +111,7 @@ const App = () => {
             path="/manage-lost-reports"
             element={<ManageLostReportsPage />}
           />
+          <Route path="/manage-matches" element={<ManageMatchesPage />} />
         </Routes>
       </main>
 

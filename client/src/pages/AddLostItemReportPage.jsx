@@ -205,7 +205,7 @@ const AddLostItemReportPage = () => {
       const response = await api.post("/user/lost-reports", payload);
       if (response.status === 201 || response.status === 200) {
         toast.success("Lost item reported successfully");
-        setTimeout(() => navigate("/found-items"), 1500);
+        setTimeout(() => navigate("/my-dashboard"), 1500);
       }
     } catch (error) {
       console.error(error);

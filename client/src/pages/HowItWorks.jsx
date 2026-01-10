@@ -62,9 +62,9 @@ const HowItWorks = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-lg text-slate-300 max-w-3xl mx-auto"
           >
-            Whether you've lost something valuable or found an item, our
-            platform makes it easy to connect and reunite items with their
-            rightful owners.
+            Two clear paths: AI auto-matching for lost reports and a verified
+            claims path for found items. Staff stay in control, owners stay
+            informed.
           </motion.p>
         </motion.div>
 
@@ -76,7 +76,7 @@ const HowItWorks = () => {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="text-3xl font-bold text-white mb-8 text-center"
           >
-            Lost Something?
+            Lost Something? (Auto-Match Path)
           </motion.h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -98,11 +98,11 @@ const HowItWorks = () => {
                 <Search size={28} className="text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                Search Found Items
+                Report Your Loss
               </h3>
               <p className="text-slate-300">
-                Browse through reported found items using filters like category,
-                location, date, and description to find your lost item.
+                Log item type, where and when it went missing, and the details
+                only you know. Public vs hidden fields keep verification tight.
               </p>
             </motion.div>
 
@@ -124,11 +124,12 @@ const HowItWorks = () => {
                 <UserCheck size={28} className="text-teal-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                Claim Your Item
+                Let AI Suggest Matches
               </h3>
               <p className="text-slate-300">
-                Found your item? Submit a claim with proof of ownership and wait
-                for verification from our staff members.
+                When staff add a matching found item, our 70/30 scoring (details
+                vs location) proposes the best candidates so staff can review
+                faster.
               </p>
             </motion.div>
 
@@ -150,11 +151,11 @@ const HowItWorks = () => {
                 <CheckCircle size={28} className="text-cyan-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                Collect Your Item
+                Get Approved & Collect
               </h3>
               <p className="text-slate-300">
-                Once verified, you'll receive pickup instructions. Bring valid
-                ID and collect your item from the designated location.
+                Staff approve matches, you receive an email, and pickup is
+                recorded with proper ID verification.
               </p>
             </motion.div>
           </div>
@@ -163,7 +164,7 @@ const HowItWorks = () => {
         {/* For Those Who Found Items */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
-            Found Something?
+            Found Something? (Claims Path)
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -175,11 +176,12 @@ const HowItWorks = () => {
                 <FileText size={28} className="text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                Report the Item
+                Register the Item
               </h3>
               <p className="text-slate-300">
-                Submit details about the found item including photos, location,
-                category, and description. The more details, the better.
+                Capture public details (safe to show) and hidden details
+                (verification only), plus photos and location. AI compares these
+                against open reports automatically.
               </p>
             </div>
 
@@ -191,11 +193,12 @@ const HowItWorks = () => {
                 <Bell size={28} className="text-teal-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                Wait for Claims
+                Review AI Suggestions or Claims
               </h3>
               <p className="text-slate-300">
-                Owners can view and claim their items. You'll be notified when
-                someone claims the item you found.
+                Staff see AI matches and user-submitted claims. They approve or
+                reject with full context—public details, hidden proofs, and
+                score.
               </p>
             </div>
 
@@ -207,11 +210,11 @@ const HowItWorks = () => {
                 <Package size={28} className="text-cyan-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                Return the Item
+                Hand Over Confidently
               </h3>
               <p className="text-slate-300">
-                After verification, staff will coordinate the return process.
-                Hand over the item and make someone's day!
+                Approved matches move to pickup. Collection is logged, statuses
+                update to RESOLVED/RETURNED, and everyone gets a clear record.
               </p>
             </div>
           </div>
@@ -229,10 +232,10 @@ const HowItWorks = () => {
                 <CheckCircle size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="font-bold mb-2">Verified Claims</h3>
+                <h3 className="font-bold mb-2">AI + Human Review</h3>
                 <p className="text-emerald-100">
-                  All claims are verified by staff to ensure items are returned
-                  to the rightful owners.
+                  70/30 scoring plus staff approval keeps speed without giving
+                  up accuracy.
                 </p>
               </div>
             </div>
@@ -242,10 +245,10 @@ const HowItWorks = () => {
                 <CheckCircle size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="font-bold mb-2">Secure Platform</h3>
+                <h3 className="font-bold mb-2">Dual Detail System</h3>
                 <p className="text-emerald-100">
-                  Your personal information is protected with industry-standard
-                  security measures.
+                  Public details help identify; hidden details verify ownership
+                  without exposing sensitive info.
                 </p>
               </div>
             </div>
@@ -255,10 +258,10 @@ const HowItWorks = () => {
                 <CheckCircle size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="font-bold mb-2">Real-time Updates</h3>
+                <h3 className="font-bold mb-2">Clear Statuses</h3>
                 <p className="text-emerald-100">
-                  Get notified instantly when someone claims your found item or
-                  finds your lost item.
+                  OPEN → MATCHED → RESOLVED for reports, FOUND → RETURNED for
+                  items, with email updates along the way.
                 </p>
               </div>
             </div>
@@ -268,10 +271,10 @@ const HowItWorks = () => {
                 <CheckCircle size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="font-bold mb-2">Easy to Use</h3>
+                <h3 className="font-bold mb-2">Auditable Handoffs</h3>
                 <p className="text-emerald-100">
-                  Simple, intuitive interface designed for quick reporting and
-                  efficient searching.
+                  Every approval, rejection, and collection is tracked for
+                  accountability and reporting.
                 </p>
               </div>
             </div>

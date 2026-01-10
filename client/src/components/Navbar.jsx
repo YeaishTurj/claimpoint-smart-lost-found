@@ -17,6 +17,7 @@ import {
   X,
   LayoutDashboard,
   AlertCircle,
+  Link2,
 } from "lucide-react";
 import logo from "../assets/logo3.png";
 
@@ -48,9 +49,10 @@ const Navbar = ({ onLoginClick = () => {}, onRegisterClick = () => {} }) => {
           { to: "/manage-items", label: "Manage Items", icon: LayoutDashboard },
           { to: "/add-found-item", label: "Add Found Item", icon: Search },
           { to: "/manage-claims", label: "Manage Claims", icon: AlertCircle },
+          { to: "/manage-matches", label: "Manage Matches", icon: Link2 },
           {
             to: "/manage-lost-reports",
-            label: "Manage Lost Reports",
+            label: "View Lost Reports",
             icon: AlertCircle,
           },
         ]
@@ -196,14 +198,14 @@ const Navbar = ({ onLoginClick = () => {}, onRegisterClick = () => {} }) => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={onLoginClick}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white  cursor-pointer transition-colors"
                     >
                       <LogIn size={16} />
                       Login
                     </button>
                     <button
                       onClick={onRegisterClick}
-                      className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+                      className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer"
                     >
                       Join now
                       <ArrowRight size={16} />

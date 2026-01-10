@@ -1,6 +1,8 @@
-# ClaimPoint - Smart Lost & Found Management System
+# 🔍 ClaimPoint - Smart Lost & Found Platform
 
-ClaimPoint is a **web-based Lost & Found Management System** built with **PostgreSQL, Express, React, and Node.js**. It helps organizations efficiently manage lost and found items with AI-powered smart matching, making the process faster, secure, and user-friendly.
+> An AI-powered Lost & Found Management System that automatically connects lost items with found items, helping organizations and users recover belongings 10x faster.
+
+**[→ Read Full Technical & Conceptual Documentation](./README_COMPREHENSIVE.md)**
 
 ---
 
@@ -22,13 +24,13 @@ ClaimPoint is a **web-based Lost & Found Management System** built with **Postgr
 
 ## **Features**
 
-✅ Two-Way Reporting System (Lost & Found)  
-✅ Admin Dashboard (Superadmin & Staff)  
-✅ User-Friendly Interface for the public  
-✅ Smart AI Matching Algorithm  
-✅ Notification System (Email/SMS/in-app)  
-✅ Secure Authentication & Role-Based Access  
-✅ Search & Filter for items  
+✅ Two-Way Reporting System (Lost & Found)
+✅ Admin Dashboard (Superadmin & Staff)
+✅ User-Friendly Interface for the public
+✅ Smart AI Matching Algorithm
+✅ Notification System (Email/SMS/in-app)
+✅ Secure Authentication & Role-Based Access
+✅ Search & Filter for items
 ✅ Scalable & Modular Architecture
 
 ---

@@ -10,6 +10,7 @@ import {
   foundItemsRelations,
   claimsRelations,
   lostReportsRelations,
+  itemMatchesTable,
 } from "./item.model.js";
 
 export {
@@ -25,4 +26,5 @@ export {
   foundItemsRelations,
   claimsRelations,
   lostReportsRelations,
+  itemMatchesTable,
 };

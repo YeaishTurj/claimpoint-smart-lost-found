@@ -113,6 +113,25 @@ export const lostReportsTable = pgTable("lost_reports", {
     .defaultNow(),
 });
 
+export const itemMatchesTable = pgTable("item_matches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  lost_report_id: uuid("lost_report_id")
+    .notNull()
+    .references(() => lostReportsTable.id, { onDelete: "cascade" }),
+
+  found_item_id: uuid("found_item_id")
+    .notNull()
+    .references(() => foundItemsTable.id, { onDelete: "cascade" }),
+
+  match_score: integer("match_score").notNull(),
+
+  // 'PENDING' = AI suggested, 'APPROVED' = Staff confirmed, 'REJECTED' = Not a match
+  status: text("status").notNull().default("PENDING"),
+
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 export const foundItemsRelations = relations(
   foundItemsTable,
   ({ one, many }) => ({
