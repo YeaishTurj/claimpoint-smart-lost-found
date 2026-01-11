@@ -378,7 +378,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2.5 disabled:opacity-70 mt-4 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+                  className="w-full h-12 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2.5 disabled:opacity-70 mt-4 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 cursor-pointer"
                 >
                   {isLoading ? (
                     <>
@@ -387,7 +387,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                     </>
                   ) : (
                     <>
-                      <span>Sign in to Dashboard</span>
+                      <span>Sign in</span>
                       <LogIn size={18} />
                     </>
                   )}

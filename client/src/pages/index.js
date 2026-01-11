@@ -23,6 +23,7 @@ import ClaimDetailsPage from "./ClaimDetailsPage";
 import UpdateReportPage from "./UpdateReportPage";
 import ManageClaimsPage from "./ManageClaimsPage";
 import ManageLostReportsPage from "./ManageLostReportsPage";
+import ManageMatchesPage from "./ManageMatchesPage";
 
 export {
   AboutPage,
@@ -50,4 +51,5 @@ export {
   UpdateReportPage,
   ManageClaimsPage,
   ManageLostReportsPage,
+  ManageMatchesPage,
 };

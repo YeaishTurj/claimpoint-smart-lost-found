@@ -52,12 +52,61 @@ export const getLocalMatchScore = async (userProof, hiddenDetails) => {
 
     const cleanText = (text) => {
       const raw = flattenAnyInput(text);
-      return raw
+
+      // Remove common filler words but preserve key identifiers
+      const stopWords = [
+        "i have a",
+        "it is a",
+        "the",
+        "is",
+        "on",
+        "at",
+        "from my",
+        "there is a",
+        "a",
+        "an",
+        "my",
+        "i",
+        "and",
+        "or",
+        "that",
+        "with",
+        "in",
+        "to",
+        "for",
+      ];
+
+      let cleaned = raw
         .toLowerCase()
-        .replace(/(i have a|it is a|the|is|on|at|from my|there is a)/g, "")
-        .replace(/[^\w\s]/g, "") // Remove punctuation like { } or :
+        .replace(new RegExp(`\\b(${stopWords.join("|")})\\b`, "g"), "")
+        .replace(/[^\w\s]/g, "") // Remove punctuation
         .replace(/\s+/g, " ")
         .trim();
+
+      // Boost weight for specific keywords (IMEI, serial, model numbers, colors)
+      const keywordBoosts = [
+        "imei",
+        "serial",
+        "model",
+        "black",
+        "white",
+        "red",
+        "blue",
+        "gold",
+        "silver",
+        "space gray",
+        "pro",
+        "max",
+        "plus",
+      ];
+      const foundKeywords = keywordBoosts.filter((kw) => cleaned.includes(kw));
+
+      // If important keywords match, duplicate them to increase similarity score
+      if (foundKeywords.length > 0) {
+        cleaned += " " + foundKeywords.join(" ");
+      }
+
+      return cleaned;
     };
 
     const processedTruth = cleanText(hiddenDetails);

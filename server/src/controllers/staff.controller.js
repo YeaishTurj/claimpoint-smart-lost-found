@@ -4,9 +4,11 @@ import {
   claimsTable,
   usersTable,
   lostReportsTable,
+  itemMatchesTable,
 } from "../models/index.js";
 import { sendClaimStatusEmail } from "../../services/email.js";
 import { generateClaimStatusTemplate } from "../utils/emailTemplates.js";
+import { runAutoMatch } from "../../services/autoMatchService.js";
 import { desc, eq } from "drizzle-orm";
 
 const pickPublicFields = (item) => {
@@ -67,7 +69,7 @@ export const addFoundItem = async (req, res) => {
       image_urls,
     } = req.body;
 
-    // --- Validation ---
+    // 1. Validation
     if (
       !item_type ||
       !date_found ||
@@ -92,7 +94,7 @@ export const addFoundItem = async (req, res) => {
       return res.status(400).json({ message: "Invalid date_found" });
     }
 
-    // --- Insert into DB ---
+    // 2. Insert into DB
     const [newFoundItem] = await db
       .insert(foundItemsTable)
       .values({
@@ -106,11 +108,105 @@ export const addFoundItem = async (req, res) => {
       })
       .returning();
 
-    // --- Send only public fields in response ---
-    res.status(201).json({ foundItem: pickPublicFields(newFoundItem) });
+    // 3. TRIGGER AUTO-MATCHING
+    // We run this after the item is saved.
+    // The AI will scan lostReportsTable for similar items.
+    const potentialMatches = await runAutoMatch(newFoundItem);
+
+    console.log(
+      `✅ Item added. AI found ${potentialMatches.length} suggested matches.`
+    );
+
+    // 4. Response
+    res.status(201).json({
+      message: "Found item added and cross-checked with lost reports",
+      foundItem: pickPublicFields(newFoundItem),
+      match_count: potentialMatches.length,
+      suggested_matches: potentialMatches, // Returns array of { reportId, score }
+    });
   } catch (error) {
     console.error("Error adding found item:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const approveAiMatch = async (req, res) => {
+  const { matchId } = req.params; // ID from item_matches table
+
+  try {
+    // 1. Get the match details + User email
+    const [matchData] = await db
+      .select({
+        match: itemMatchesTable,
+        user: usersTable,
+        reportId: lostReportsTable.id,
+      })
+      .from(itemMatchesTable)
+      .innerJoin(
+        lostReportsTable,
+        eq(itemMatchesTable.lost_report_id, lostReportsTable.id)
+      )
+      .innerJoin(usersTable, eq(lostReportsTable.user_id, usersTable.id))
+      .where(eq(itemMatchesTable.id, matchId));
+
+    if (!matchData)
+      return res.status(404).json({ message: "Match suggestion not found" });
+
+    await db.transaction(async (tx) => {
+      // 2. Update Match Status
+      await tx
+        .update(itemMatchesTable)
+        .set({ status: "APPROVED" })
+        .where(eq(itemMatchesTable.id, matchId));
+
+      // 3. Update Lost Report Status to 'MATCHED'
+      await tx
+        .update(lostReportsTable)
+        .set({ status: "MATCHED" })
+        .where(eq(lostReportsTable.id, matchData.reportId));
+    });
+
+    // 4. Send Email to User
+    await sendClaimStatusEmail(
+      matchData.user.email,
+      "Great News: We found a match for your lost item!",
+      `Hi ${matchData.user.full_name}, our staff has verified a match for your report. Please visit the office to collect it.`
+    );
+
+    res
+      .status(200)
+      .json({ success: true, message: "Match approved and user notified." });
+  } catch (error) {
+    res.status(500).json({ message: "Approval failed" });
+  }
+};
+
+export const markAsCollected = async (req, res) => {
+  const { matchId } = req.params;
+
+  try {
+    const [matchData] = await db
+      .select()
+      .from(itemMatchesTable)
+      .where(eq(itemMatchesTable.id, matchId));
+
+    await db.transaction(async (tx) => {
+      // Update Report to RESOLVED
+      await tx
+        .update(lostReportsTable)
+        .set({ status: "RESOLVED" })
+        .where(eq(lostReportsTable.id, matchData.lost_report_id));
+
+      // Update Found Item to RETURNED
+      await tx
+        .update(foundItemsTable)
+        .set({ status: "RETURNED" })
+        .where(eq(foundItemsTable.id, matchData.found_item_id));
+    });
+
+    res.status(200).json({ message: "Item successfully returned to owner." });
+  } catch (error) {
+    res.status(500).json({ message: "Error resolving match" });
   }
 };
 
@@ -178,10 +274,19 @@ export const updateFoundItem = async (req, res) => {
       .where(eq(foundItemsTable.id, itemId))
       .returning();
 
-    // 5. Respond with masked data
+    // 5. TRIGGER AUTO-MATCHING (similar to addFoundItem)
+    const potentialMatches = await runAutoMatch(updatedItem);
+
+    console.log(
+      `✅ Item updated. AI found ${potentialMatches.length} suggested matches.`
+    );
+
+    // 6. Respond with masked data
     return res.status(200).json({
       message: "Item updated successfully",
       foundItem: pickPublicFields(updatedItem),
+      match_count: potentialMatches.length,
+      suggested_matches: potentialMatches, // Returns array of { reportId, score }
     });
   } catch (error) {
     console.error("Error updating found item:", error);
@@ -432,6 +537,277 @@ export const getReportDetails = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching lost report details for staff:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get all matches (for staff dashboard)
+export const getAllMatches = async (req, res) => {
+  try {
+    const staff_id = req.user?.id;
+    if (!staff_id) return res.status(401).json({ message: "Unauthorized" });
+
+    // Get all matches where the found_item was created by this staff member
+    const matches = await db
+      .select({
+        match_id: itemMatchesTable.id,
+        match_score: itemMatchesTable.match_score,
+        match_status: itemMatchesTable.status,
+        match_created_at: itemMatchesTable.created_at,
+        // Lost report info
+        report_id: lostReportsTable.id,
+        report_item_type: lostReportsTable.item_type,
+        report_location: lostReportsTable.location_lost,
+        report_date: lostReportsTable.date_lost,
+        report_user_id: lostReportsTable.user_id,
+        report_status: lostReportsTable.status,
+        report_details: lostReportsTable.report_details,
+        // Found item info
+        found_item_id: foundItemsTable.id,
+        found_item_type: foundItemsTable.item_type,
+        found_item_location: foundItemsTable.location_found,
+        found_item_date: foundItemsTable.date_found,
+        found_public_details: foundItemsTable.public_details,
+        found_hidden_details: foundItemsTable.hidden_details,
+      })
+      .from(itemMatchesTable)
+      .innerJoin(
+        lostReportsTable,
+        eq(itemMatchesTable.lost_report_id, lostReportsTable.id)
+      )
+      .innerJoin(
+        foundItemsTable,
+        eq(itemMatchesTable.found_item_id, foundItemsTable.id)
+      )
+      .where(eq(foundItemsTable.staff_id, staff_id))
+      .orderBy(desc(itemMatchesTable.created_at));
+
+    return res.status(200).json({
+      success: true,
+      count: matches.length,
+      matches,
+    });
+  } catch (error) {
+    console.error("Error fetching matches:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Approve a match
+export const approveMatch = async (req, res) => {
+  try {
+    const staff_id = req.user?.id;
+    const { matchId } = req.params;
+
+    if (!staff_id) return res.status(401).json({ message: "Unauthorized" });
+
+    // 1. Get the match
+    const [match] = await db
+      .select()
+      .from(itemMatchesTable)
+      .where(eq(itemMatchesTable.id, matchId));
+
+    if (!match) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    // 2. Verify staff owns the found item
+    const [foundItem] = await db
+      .select()
+      .from(foundItemsTable)
+      .where(eq(foundItemsTable.id, match.found_item_id));
+
+    if (foundItem.staff_id !== staff_id) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    // 3. Get the lost report and user
+    const [lostReport] = await db
+      .select()
+      .from(lostReportsTable)
+      .where(eq(lostReportsTable.id, match.lost_report_id));
+
+    const [reportUser] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, lostReport.user_id));
+
+    // 4. Update match status to APPROVED
+    await db
+      .update(itemMatchesTable)
+      .set({ status: "APPROVED" })
+      .where(eq(itemMatchesTable.id, matchId));
+
+    // 5. Update report status to MATCHED
+    await db
+      .update(lostReportsTable)
+      .set({ status: "MATCHED" })
+      .where(eq(lostReportsTable.id, match.lost_report_id));
+
+    // 6. Send email to user
+    if (reportUser?.email) {
+      try {
+        await sendClaimStatusEmail(
+          reportUser.email,
+          reportUser.full_name,
+          "MATCHED",
+          {
+            itemType: foundItem.item_type,
+            matchPercentage: match.match_score,
+            location: foundItem.location_found,
+          }
+        );
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+        // Don't fail the request if email fails
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Match approved successfully. User notified.",
+      match: {
+        id: match.id,
+        status: "APPROVED",
+      },
+    });
+  } catch (error) {
+    console.error("Error approving match:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Reject a match
+export const rejectMatch = async (req, res) => {
+  try {
+    const staff_id = req.user?.id;
+    const { matchId } = req.params;
+
+    if (!staff_id) return res.status(401).json({ message: "Unauthorized" });
+
+    // 1. Get the match
+    const [match] = await db
+      .select()
+      .from(itemMatchesTable)
+      .where(eq(itemMatchesTable.id, matchId));
+
+    if (!match) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    // 2. Verify staff owns the found item
+    const [foundItem] = await db
+      .select()
+      .from(foundItemsTable)
+      .where(eq(foundItemsTable.id, match.found_item_id));
+
+    if (foundItem.staff_id !== staff_id) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    // 3. Update match status to REJECTED
+    await db
+      .update(itemMatchesTable)
+      .set({ status: "REJECTED" })
+      .where(eq(itemMatchesTable.id, matchId));
+
+    return res.status(200).json({
+      success: true,
+      message: "Match rejected successfully.",
+      match: {
+        id: match.id,
+        status: "REJECTED",
+      },
+    });
+  } catch (error) {
+    console.error("Error rejecting match:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Mark a matched item as collected (for resolved status)
+export const markItemCollected = async (req, res) => {
+  try {
+    const staff_id = req.user?.id;
+    const { matchId } = req.params;
+
+    if (!staff_id) return res.status(401).json({ message: "Unauthorized" });
+
+    // 1. Get the match
+    const [match] = await db
+      .select()
+      .from(itemMatchesTable)
+      .where(eq(itemMatchesTable.id, matchId));
+
+    if (!match) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    // 2. Verify staff owns the found item and match is approved
+    const [foundItem] = await db
+      .select()
+      .from(foundItemsTable)
+      .where(eq(foundItemsTable.id, match.found_item_id));
+
+    if (foundItem.staff_id !== staff_id) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    if (match.status !== "APPROVED") {
+      return res
+        .status(400)
+        .json({ message: "Only approved matches can be marked as collected" });
+    }
+
+    // 3. Update report status to RESOLVED
+    await db
+      .update(lostReportsTable)
+      .set({ status: "RESOLVED" })
+      .where(eq(lostReportsTable.id, match.lost_report_id));
+
+    // 4. Update found item status to RETURNED
+    await db
+      .update(foundItemsTable)
+      .set({ status: "RETURNED" })
+      .where(eq(foundItemsTable.id, match.found_item_id));
+
+    // 5. Get user to send confirmation email
+    const [lostReport] = await db
+      .select()
+      .from(lostReportsTable)
+      .where(eq(lostReportsTable.id, match.lost_report_id));
+
+    const [reportUser] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, lostReport.user_id));
+
+    if (reportUser?.email) {
+      try {
+        await sendClaimStatusEmail(
+          reportUser.email,
+          reportUser.full_name,
+          "RESOLVED",
+          {
+            itemType: foundItem.item_type,
+            message: "Your item has been marked as collected.",
+          }
+        );
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Item marked as collected. Report resolved.",
+      report: {
+        id: lostReport.id,
+        status: "RESOLVED",
+      },
+    });
+  } catch (error) {
+    console.error("Error marking item collected:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

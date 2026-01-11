@@ -101,16 +101,19 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         "Email sent! Please check your inbox for verification code.",
         {
           position: "top-center",
-          autoClose: 4000,
+          autoClose: 3000,
         }
       );
 
+      // Close modal first, then navigate
+      onClose?.();
+
+      // Navigate after a brief delay to ensure modal is closed
       setTimeout(() => {
         navigate("/verify-email", {
           state: { email },
         });
-        onClose?.();
-      }, 800);
+      }, 500);
     } else {
       setErrors({
         submit: result.error || "Registration failed. Please try again.",

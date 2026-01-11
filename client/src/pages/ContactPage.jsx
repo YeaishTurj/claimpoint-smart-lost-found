@@ -62,7 +62,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -102,7 +102,7 @@ const ContactPage = () => {
           >
             Contact
             <br />
-            <span className="bg-linear-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
               ClaimPoint Team
             </span>
           </motion.h1>
@@ -113,8 +113,8 @@ const ContactPage = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-lg text-slate-300 max-w-3xl mx-auto"
           >
-            Have questions or need assistance? We're here to help! Reach out to
-            us and we'll get back to you as soon as possible.
+            Lost an item, need to verify a pickup, or have a staff request?
+            Reach the operations desk and we will respond quickly.
           </motion.p>
         </motion.div>
 
@@ -130,19 +130,19 @@ const ContactPage = () => {
             <motion.div
               whileHover={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className="w-14 h-14 bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+              className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4"
             >
               <Mail size={28} className="text-white" />
             </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">Email Us</h3>
             <p className="text-slate-300 text-sm mb-2">
-              Send us an email anytime
+              Priority response within 4 business hours
             </p>
             <a
-              href="mailto:support@claimpoint.com"
+              href="mailto:support@claimpoint.app"
               className="text-emerald-400 hover:text-emerald-300 font-medium"
             >
-              support@claimpoint.com
+              support@claimpoint.app
             </a>
           </motion.div>
 
@@ -156,19 +156,19 @@ const ContactPage = () => {
             <motion.div
               whileHover={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className="w-14 h-14 bg-linear-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+              className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
             >
               <Phone size={28} className="text-white" />
             </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">Call Us</h3>
             <p className="text-slate-300 text-sm mb-2">
-              Mon-Fri from 9am to 5pm
+              Hotline (lost & found desk): 08:00–22:00, 7 days
             </p>
             <a
-              href="tel:+1234567890"
+              href="tel:+8809611222333"
               className="text-teal-400 hover:text-teal-300 font-medium"
             >
-              +1 (234) 567-890
+              +880 9611-222333
             </a>
           </motion.div>
 
@@ -182,19 +182,51 @@ const ContactPage = () => {
             <motion.div
               whileHover={{ rotate: [0, -10, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className="w-14 h-14 bg-linear-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
+              className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4"
             >
               <MapPin size={28} className="text-white" />
             </motion.div>
             <h3 className="text-lg font-bold text-white mb-2">Visit Us</h3>
-            <p className="text-slate-300 text-sm mb-2">Come say hello</p>
+            <p className="text-slate-300 text-sm mb-2">On-site handovers</p>
             <p className="text-cyan-400 font-medium">
-              123 Main St, Suite 100
+              Kamalapur Railway Station — Lost & Found Desk
               <br />
-              City, State 12345
+              Station Road, Dhaka 1205, Bangladesh
             </p>
           </motion.div>
         </div>
+
+        {/* Service expectations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+          className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-lg mb-12"
+        >
+          <div className="grid md:grid-cols-3 gap-6 text-sm text-slate-200">
+            <div className="flex flex-col gap-1">
+              <div className="font-semibold text-white">Response times</div>
+              <div className="text-slate-300">
+                Email: under 4 business hours. Hotline: immediate during desk
+                hours.
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="font-semibold text-white">What to include</div>
+              <div className="text-slate-300">
+                Item type, date/time, location, and any hidden identifiers
+                (IMEI, engravings, card initials).
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="font-semibold text-white">Urgent cases</div>
+              <div className="text-slate-300">
+                For ID documents or medical devices, call the hotline and mark
+                “Urgent” in the subject.
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Contact Form */}
         <motion.div
@@ -208,7 +240,8 @@ const ContactPage = () => {
               Send Us a Message
             </h2>
             <p className="text-slate-300">
-              Fill out the form below and we'll respond within 24 hours
+              We typically reply within the same business day. For urgent
+              handovers, call the hotline after submitting.
             </p>
           </div>
 
@@ -223,7 +256,7 @@ const ContactPage = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="John Doe"
+                  placeholder="Your full name"
                   className={`w-full px-4 py-3 bg-slate-900/50 border-2 rounded-xl text-white placeholder:text-slate-400 focus:outline-none transition-all ${
                     errors.name
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -244,7 +277,7 @@ const ContactPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="john@example.com"
+                  placeholder="your.email@example.com"
                   className={`w-full px-4 py-3 bg-slate-900/50 border-2 rounded-xl text-white placeholder:text-slate-400 focus:outline-none transition-all ${
                     errors.email
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -304,7 +337,7 @@ const ContactPage = () => {
               disabled={isSubmitting}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-linear-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>
