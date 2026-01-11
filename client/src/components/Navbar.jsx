@@ -30,6 +30,8 @@ const Navbar = ({ onLoginClick = () => {}, onRegisterClick = () => {} }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
+  // console.log(user);
+
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
   }, [isMobileMenuOpen]);
@@ -178,12 +180,14 @@ const Navbar = ({ onLoginClick = () => {}, onRegisterClick = () => {} }) => {
                           >
                             <User size={16} /> My Profile
                           </Link>
-                          <Link
-                            to="/my-dashboard"
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                          >
-                            <LayoutDashboard size={16} /> My Dashboard
-                          </Link>
+                          {user?.role === "USER" && (
+                            <Link
+                              to="/my-dashboard"
+                              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                            >
+                              <LayoutDashboard size={16} /> My Dashboard
+                            </Link>
+                          )}
                           <button
                             onClick={() => setShowLogoutConfirm(true)}
                             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
