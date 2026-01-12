@@ -5,314 +5,289 @@ import {
   MapPin,
   Calendar,
   User,
-  Mail,
-  Phone,
   FileText,
   CheckCircle2,
   Package,
-  ExternalLink,
+  Camera,
+  ClipboardList,
+  Fingerprint,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 
 const StaffLostReportDetailsModal = ({ reportId, isOpen, onClose }) => {
-  const [report, setReport] = useState(null);
+  const [reportData, setReportData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && reportId) fetchReportDetails();
+  }, [isOpen, reportId]);
 
   const fetchReportDetails = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await api.get(`/staff/lost-reports/${reportId}`);
-      setReport(response.data.data);
+      setReportData(response.data.data);
     } catch (err) {
-      console.error("Failed to fetch report details:", err);
       setError(err.response?.data?.message || "Failed to load report details");
-      toast.error("Failed to load report details");
+      toast.error("Registry Link Failure", { theme: "dark" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!isOpen || !reportId) return;
-    fetchReportDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, reportId]);
-
   if (!isOpen) return null;
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      OPEN: { bg: "bg-amber-500/10", text: "text-amber-400", label: "Open" },
-      MATCHED: {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        label: "Matched",
-      },
-      RESOLVED: {
-        bg: "bg-blue-500/10",
-        text: "text-blue-400",
-        label: "Resolved",
-      },
-    };
-    const config = statusConfig[status] || statusConfig.OPEN;
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-3 py-1 ${config.bg} ${config.text} rounded-full text-xs font-semibold border border-current/20`}
-      >
-        <CheckCircle2 size={12} />
-        {config.label}
-      </span>
-    );
-  };
-
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const renderDetails = (details) => {
-    if (!details) return null;
-    if (typeof details === "string")
-      return (
-        <p className="text-slate-300 mt-3 text-sm leading-relaxed">{details}</p>
-      );
-    if (Array.isArray(details)) {
-      if (details.length === 0) return null;
-      return (
-        <ul className="text-slate-300 mt-3 text-sm leading-relaxed list-disc list-inside space-y-1">
-          {details.map((item, idx) => (
-            <li key={idx}>{String(item)}</li>
-          ))}
-        </ul>
-      );
-    }
-    if (typeof details === "object") {
-      const entries = Object.entries(details);
-      if (entries.length === 0) return null;
-      return (
-        <div className="mt-3 space-y-2">
-          {entries.map(([key, value]) => (
-            <div
-              key={key}
-              className="flex items-start justify-between gap-4 border border-white/5 rounded-lg px-3 py-2 bg-slate-950/50"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {key}
-              </span>
-              <span className="text-sm text-slate-200 break-words text-right">
-                {String(value)}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return (
-      <p className="text-slate-300 mt-3 text-sm leading-relaxed">
-        {String(details)}
-      </p>
-    );
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-150 flex items-center justify-center pt-15">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-8 py-5 flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-white">
-                Lost Report Details
+      <div className="relative w-full max-w-5xl max-h-[80vh] bg-[#0b1120] border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+        {/* Modal Header */}
+        <div className="px-10 py-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-2xl font-black text-white tracking-tight">
+                Report <span className="text-emerald-400">Analysis.</span>
               </h2>
-              {report?.report?.status && getStatusBadge(report.report.status)}
+              {reportData?.report?.status && (
+                <StatusBadge status={reportData.report.status} />
+              )}
             </div>
-            <p className="text-sm text-slate-400 mt-1">
-              {report?.report?.created_at
-                ? `Reported ${formatDate(report.report.created_at)}`
-                : "Loading report details"}
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Report ID:{" "}
+              <span className="text-slate-300 font-mono">
+                #{reportId?.slice(0, 12)}
+              </span>
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 hover:bg-slate-800/50 rounded-xl transition-all text-slate-400 hover:text-white active:scale-95"
-            aria-label="Close"
+            className="p-3 bg-slate-800 text-slate-400 hover:text-white rounded-2xl transition-all"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto max-h-[calc(90vh-160px)] bg-gradient-to-br from-slate-950/50 via-slate-900/30 to-slate-950/50">
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
           {isLoading ? (
-            <div className="flex items-center justify-center py-28">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-400 rounded-full animate-spin" />
-                <span className="text-slate-300 text-lg font-semibold">
-                  Loading...
-                </span>
-              </div>
+            <div className="py-20 flex flex-col items-center justify-center">
+              <div className="w-12 h-12 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                Retrieving Loss Data...
+              </p>
             </div>
-          ) : report?.report ? (
-            <div className="p-8 space-y-6">
-              {/* Main Info Card */}
-              <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl space-y-6">
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                    <Package size={18} className="text-emerald-400" />
-                    Item Type
-                  </label>
-                  <p className="text-3xl font-bold text-white">
-                    {report.report.item_type}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-700/50">
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      <MapPin size={18} className="text-emerald-400" />
-                      Location Lost
-                    </label>
-                    <p className="text-lg font-semibold text-white">
-                      {report.report.location_lost}
-                    </p>
+          ) : reportData ? (
+            <div className="space-y-8">
+              {/* Primary Incident Asset Card */}
+              <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-8">
+                <div className="flex flex-col md:flex-row justify-between gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">
+                        Reported Asset
+                      </p>
+                      <h3 className="text-4xl font-black text-white leading-tight">
+                        {reportData.report.item_type}
+                      </h3>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <DataRow
+                        icon={<MapPin size={14} />}
+                        label="Loss Site"
+                        value={reportData.report.location_lost}
+                      />
+                      <DataRow
+                        icon={<Calendar size={14} />}
+                        label="Event Time"
+                        value={new Date(
+                          reportData.report.date_lost
+                        ).toLocaleDateString()}
+                      />
+                    </div>
                   </div>
-
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      <Calendar size={18} className="text-emerald-400" />
-                      Date Lost
-                    </label>
-                    <p className="text-lg font-semibold text-white">
-                      {formatDate(report.report.date_lost)}
+                  <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-5 min-w-[200px] self-start">
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                      Internal Meta
                     </p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[11px] font-bold uppercase">
+                        <span className="text-slate-600">Created</span>
+                        <span className="text-slate-300">
+                          {new Date(
+                            reportData.report.created_at
+                          ).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[11px] font-bold uppercase">
+                        <span className="text-slate-600">Sync Status</span>
+                        <span className="text-emerald-500">Active</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Reporter Info */}
-              {report.user && (
-                <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg">
-                      <User size={20} className="text-emerald-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white uppercase tracking-wider">
-                      Reported By
-                    </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Reporter Dossier */}
+                <div className="space-y-4">
+                  <SectionHeader icon={User} title="Claimant Identity" />
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 space-y-4">
+                    <DossierRow
+                      label="Full Name"
+                      value={reportData.user.name || "N/A"}
+                    />
+                    <DossierRow
+                      label="Email Access"
+                      value={reportData.user.email}
+                      isMono
+                    />
+                    <DossierRow
+                      label="Contact Phone"
+                      value={reportData.user.phone || "Not provided"}
+                    />
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1 min-w-fit">
-                        Name:
+                </div>
+
+                {/* Technical Specifications */}
+                <div className="space-y-4">
+                  <SectionHeader
+                    icon={ClipboardList}
+                    title="Loss Specifications"
+                  />
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6">
+                    {reportData.report.report_details ? (
+                      renderMetadata(reportData.report.report_details)
+                    ) : (
+                      <p className="text-xs text-slate-600 italic uppercase font-black">
+                        No supplemental specs provided.
                       </p>
-                      <p className="text-white font-medium">
-                        {report.user.name || "Not provided"}
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1 min-w-fit">
-                        Email:
-                      </p>
-                      <p className="text-white font-medium break-all">
-                        {report.user.email || "Not provided"}
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1 min-w-fit">
-                        Phone:
-                      </p>
-                      <p className="text-white font-medium">
-                        {report.user.phone || "Not provided"}
-                      </p>
-                    </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Evidence Photos */}
+              {reportData.report.image_urls?.length > 0 && (
+                <div className="space-y-4">
+                  <SectionHeader icon={Camera} title="Evidence Documentation" />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {reportData.report.image_urls.map((url, i) => (
+                      <div
+                        key={i}
+                        className="aspect-square rounded-[1.5rem] bg-slate-900 border border-slate-800 overflow-hidden group"
+                      >
+                        <img
+                          src={url}
+                          alt=""
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?q=80&w=400&auto=format&fit=crop";
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
-
-              {/* Additional Details */}
-              {report.report.report_details &&
-                Object.keys(report.report.report_details).length > 0 && (
-                  <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-emerald-500/10 rounded-lg">
-                        <FileText size={20} className="text-emerald-400" />
-                      </div>
-                      <h3 className="text-lg font-bold text-white uppercase tracking-wider">
-                        Additional Details
-                      </h3>
-                    </div>
-                    {renderDetails(report.report.report_details)}
-                  </div>
-                )}
-
-              {/* Images */}
-              {Array.isArray(report.report.image_urls) &&
-                report.report.image_urls.length > 0 && (
-                  <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                    <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-6">
-                      Evidence Photos
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {report.report.image_urls.map((url, index) => (
-                        <div
-                          key={index}
-                          className="aspect-square rounded-xl overflow-hidden border-2 border-slate-700/50 hover:border-emerald-500/50 transition-all shadow-lg group"
-                        >
-                          <img
-                            src={url}
-                            alt={`Evidence ${index + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            onError={(e) => {
-                              e.target.src =
-                                "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop";
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center py-28">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <AlertCircle size={48} className="text-red-400" />
-                </div>
-                <p className="text-slate-300 text-xl font-bold mb-2">
-                  Failed to load report
-                </p>
-                <p className="text-slate-500 text-sm">{error}</p>
-              </div>
+            <div className="py-20 text-center">
+              <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
+              <p className="text-white font-black uppercase tracking-widest text-xs">
+                Analysis Link Failed.
+              </p>
             </div>
           ) : null}
         </div>
 
-        {/* Footer */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-t border-slate-800/50 px-8 py-2 flex justify-end">
+        {/* Modal Footer */}
+        <div className="px-10 py-6 border-t border-slate-800 bg-slate-900/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-8 py-2 border-2 border-slate-700/50 text-slate-300 font-bold rounded-xl hover:bg-slate-800/50 hover:border-slate-600 transition-all active:scale-95"
+            className="px-8 py-3 bg-slate-800 text-slate-300 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-700 transition-all"
           >
-            Close
+            Close Analysis
           </button>
         </div>
       </div>
     </div>
   );
+};
+
+// --- Helpers ---
+
+const StatusBadge = ({ status }) => {
+  const colors = {
+    OPEN: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    MATCHED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    RESOLVED: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  };
+  return (
+    <span
+      className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${colors[status]}`}
+    >
+      {status}
+    </span>
+  );
+};
+
+const SectionHeader = ({ icon: Icon, title }) => (
+  <div className="flex items-center gap-3 px-2">
+    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+      <Icon size={16} />
+    </div>
+    <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">
+      {title}
+    </h3>
+  </div>
+);
+
+const DataRow = ({ icon, label, value }) => (
+  <div className="flex items-center gap-2 text-sm font-bold text-slate-400">
+    <span className="text-emerald-500">{icon}</span>
+    <span className="uppercase text-[10px] text-slate-600 min-w-[60px]">
+      {label}:
+    </span>
+    <span className="text-slate-200">{value}</span>
+  </div>
+);
+
+const DossierRow = ({ label, value, isMono }) => (
+  <div className="flex flex-col py-1">
+    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+      {label}
+    </span>
+    <span
+      className={`text-sm font-bold text-white ${
+        isMono ? "font-mono tracking-tight" : ""
+      }`}
+    >
+      {value}
+    </span>
+  </div>
+);
+
+const renderMetadata = (data) => {
+  if (typeof data === "string")
+    return (
+      <p className="text-sm font-bold text-slate-300 leading-relaxed">{data}</p>
+    );
+  return Object.entries(data).map(([key, value]) => (
+    <div key={key} className="flex flex-col mb-4 last:mb-0">
+      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+        {key}
+      </span>
+      <span className="text-sm font-bold text-slate-300">{String(value)}</span>
+    </div>
+  ));
 };
 
 export default StaffLostReportDetailsModal;

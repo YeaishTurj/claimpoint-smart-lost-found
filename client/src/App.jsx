@@ -68,7 +68,7 @@ const App = () => {
   const switchToLogin = () => navigate("/login", { replace: true });
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <Navbar
         onLoginClick={openLoginModal}
         onRegisterClick={openRegisterModal}

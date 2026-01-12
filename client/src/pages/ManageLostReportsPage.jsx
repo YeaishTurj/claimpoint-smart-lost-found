@@ -9,11 +9,17 @@ import {
   MapPin,
   Package,
   User,
+  ChevronRight,
+  ClipboardList,
+  Search,
+  Filter,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/auth.context";
 import StaffLostReportDetailsModal from "../components/StaffLostReportDetailsModal";
+import { PageShell } from "../components/layout";
+import { AccessCard } from "../components/ui";
 
 const ManageLostReportsPage = () => {
   const navigate = useNavigate();
@@ -24,6 +30,7 @@ const ManageLostReportsPage = () => {
   const [error, setError] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== "STAFF") return;
@@ -39,258 +46,224 @@ const ManageLostReportsPage = () => {
     } catch (err) {
       console.error("Failed to fetch lost reports:", err);
       setError(err.response?.data?.message || "Failed to load lost reports");
-      toast.error("Failed to load lost reports");
+      toast.error("Database Error: Failed to retrieve lost property ledger", {
+        theme: "dark",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const filteredReports = reports.filter(
+    (report) =>
+      report.item_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.user_email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (!isAuthenticated || user?.role !== "STAFF") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
-        <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-          <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle size={36} className="text-emerald-400" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-3">
-            Access Required
-          </h2>
-          <p className="text-slate-400 mb-8 text-sm leading-relaxed">
-            You must be logged in as staff to manage lost reports.
-          </p>
-          <button
-            onClick={() => navigate("/login")}
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
-        <div className="flex flex-col items-center gap-4 text-slate-300">
-          <Loader className="w-10 h-10 animate-spin text-emerald-400" />
-          <p className="text-sm">Loading lost reports...</p>
-        </div>
-      </div>
+      <PageShell variant="centered">
+        <AccessCard
+          icon={AlertCircle}
+          title="Identity Verification Required"
+          description="Access to the Lost Property Ledger is restricted to authorized personnel only."
+        />
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="group inline-flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors mb-6"
-          >
-            <ArrowLeft
-              size={20}
-              className="group-hover:-translate-x-1 transition-transform"
-            />
-            <span className="font-medium">Back</span>
-          </button>
+    <PageShell>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+        <button
+          onClick={() => navigate("/admin")}
+          className="hover:text-emerald-400 transition-colors"
+        >
+          Operations
+        </button>
+        <ChevronRight size={12} />
+        <span className="text-slate-300">Lost Property Ledger</span>
+      </div>
 
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <AlertCircle size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Manage Lost Reports
-              </h1>
-              <p className="text-slate-400 mt-1">
-                Review all lost item reports submitted by users
-              </p>
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4">
+            <ClipboardList size={14} className="text-emerald-400" />
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+              Incident Registry
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+            Lost <span className="text-emerald-400">Reports.</span>
+          </h1>
+          <p className="text-slate-400 font-medium max-w-xl">
+            Monitor incoming loss reports. Use the intelligence data below to
+            cross-reference with found items in the inventory.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-4">
+          <StatPill label="Total Logs" value={reports.length} color="slate" />
+          <StatPill
+            label="Unresolved"
+            value={reports.filter((r) => r.status === "OPEN").length}
+            color="amber"
+          />
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="bg-[#0b1120] rounded-[2rem] p-6 border border-slate-800 shadow-2xl mb-10 flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search
+            size={20}
+            className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"
+          />
+          <input
+            type="text"
+            placeholder="Search by asset type, claimant name, or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-14 pr-12 py-4 bg-[#010409] border border-slate-800 rounded-2xl text-white font-medium focus:border-emerald-500 transition-all placeholder:text-slate-600"
+          />
+        </div>
+      </div>
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="py-24 flex flex-col items-center">
+          <Loader className="animate-spin text-emerald-500 mb-4" size={40} />
+          <p className="text-slate-500 font-black text-[10px] uppercase tracking-[0.2em]">
+            Synchronizing Report Data...
+          </p>
+        </div>
+      ) : filteredReports.length === 0 ? (
+        <div className="bg-[#0b1120] rounded-[2.5rem] p-20 border border-slate-800 text-center">
+          <Package size={60} className="mx-auto text-slate-800 mb-6" />
+          <h3 className="text-xl font-black text-white">No Incidents Found</h3>
+          <p className="text-slate-500 text-sm mt-2">
+            The registry is currently clear of matching loss reports.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-[#0b1120] rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-900/50 border-b border-slate-800">
+                  <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Asset Type
+                  </th>
+                  <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Reported By
+                  </th>
+                  <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Event Context
+                  </th>
+                  <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Status
+                  </th>
+                  <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {filteredReports.map((report) => (
+                  <tr
+                    key={report.id}
+                    className="hover:bg-slate-900/30 transition-colors group"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-slate-800 border border-slate-700 rounded-xl flex items-center justify-center text-emerald-400">
+                          <Package size={18} />
+                        </div>
+                        <p className="font-bold text-white text-base">
+                          {report.item_type}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <p className="text-xs font-bold text-slate-300">
+                        {report.user_name}
+                      </p>
+                      <p className="text-[10px] font-mono text-slate-600 uppercase tracking-tighter mt-1">
+                        {report.user_email}
+                      </p>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                          <MapPin size={12} className="text-emerald-500" />{" "}
+                          {report.location_lost}
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                          <Calendar size={12} className="text-emerald-500" />{" "}
+                          {new Date(report.date_lost).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span
+                        className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg border ${
+                          report.status === "MATCHED"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : report.status === "RESOLVED"
+                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                            : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        }`}
+                      >
+                        {report.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <button
+                        onClick={() => {
+                          setSelectedReportId(report.id);
+                          setShowDetailsModal(true);
+                        }}
+                        className="p-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:text-emerald-400 hover:border-emerald-400 transition-all rounded-xl"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Status Breakdown Footer */}
+          <div className="px-8 py-6 bg-slate-900/50 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Database sync complete. Total records:{" "}
+              <span className="text-white">{reports.length}</span>
+            </p>
+            <div className="flex items-center gap-6">
+              <StatusDot
+                label="Open"
+                count={reports.filter((r) => r.status === "OPEN").length}
+                color="bg-amber-500"
+              />
+              <StatusDot
+                label="Matched"
+                count={reports.filter((r) => r.status === "MATCHED").length}
+                color="bg-emerald-500"
+              />
+              <StatusDot
+                label="Resolved"
+                count={reports.filter((r) => r.status === "RESOLVED").length}
+                color="bg-blue-500"
+              />
             </div>
           </div>
         </div>
+      )}
 
-        {/* Content */}
-        {error && (
-          <div className="mb-6 bg-red-500/10 border-l-4 border-red-500 px-6 py-4 rounded-r-xl">
-            <div className="flex items-start gap-3">
-              <AlertCircle size={20} className="text-red-400 mt-0.5 shrink-0" />
-              <p className="text-red-200 text-sm">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {reports.length === 0 ? (
-          <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-12 text-center">
-            <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Package size={32} className="text-slate-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-300 mb-2">
-              No Lost Reports Yet
-            </h3>
-            <p className="text-slate-400 text-sm">
-              All lost item reports will appear here once users submit them.
-            </p>
-          </div>
-        ) : (
-          <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Table Header */}
-            <div className="px-6 py-4 border-b border-white/10 bg-white/5">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                Lost Reports Table
-              </h2>
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10 bg-slate-950/50">
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Item Type
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Location Lost
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Date Lost
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Reported On
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reports.map((report) => (
-                    <tr
-                      key={report.id}
-                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0">
-                            <Package size={18} className="text-emerald-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-white">
-                              {report.item_type}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <User size={14} className="text-slate-500" />
-                          <div>
-                            <p className="text-sm text-white font-medium">
-                              {report.user_name}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              {report.user_email}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-slate-300">
-                          <MapPin
-                            size={14}
-                            className="text-slate-500 shrink-0"
-                          />
-                          <span>{report.location_lost}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-slate-300">
-                          <Calendar
-                            size={14}
-                            className="text-slate-500 shrink-0"
-                          />
-                          <span>
-                            {new Date(report.date_lost).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                            report.status === "MATCHED"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                              : report.status === "RESOLVED"
-                              ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                              : "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                          }`}
-                        >
-                          {report.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-400">
-                        {new Date(report.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() => {
-                            setSelectedReportId(report.id);
-                            setShowDetailsModal(true);
-                          }}
-                          className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all"
-                          title="View report details"
-                        >
-                          <Eye size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Table Footer */}
-            <div className="px-6 py-4 border-t border-white/10 bg-white/5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-slate-400">
-                  Total reports:{" "}
-                  <span className="font-semibold">{reports.length}</span>
-                </p>
-                <div className="flex items-center gap-4 text-xs text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                    <span>
-                      Open ({reports.filter((r) => r.status === "OPEN").length})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    <span>
-                      Matched (
-                      {reports.filter((r) => r.status === "MATCHED").length})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span>
-                      Resolved (
-                      {reports.filter((r) => r.status === "RESOLVED").length})
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Staff Lost Report Details Modal */}
       <StaffLostReportDetailsModal
         reportId={selectedReportId}
         isOpen={showDetailsModal}
@@ -299,8 +272,38 @@ const ManageLostReportsPage = () => {
           setSelectedReportId(null);
         }}
       />
-    </div>
+    </PageShell>
   );
 };
+
+// --- Helpers ---
+
+const StatPill = ({ label, value, color }) => (
+  <div
+    className={`px-6 py-4 bg-slate-900/40 border ${
+      color === "amber" ? "border-amber-500/20" : "border-slate-800"
+    } rounded-2xl min-w-[140px]`}
+  >
+    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+      {label}
+    </p>
+    <p
+      className={`text-3xl font-black ${
+        color === "amber" ? "text-amber-400" : "text-white"
+      }`}
+    >
+      {value}
+    </p>
+  </div>
+);
+
+const StatusDot = ({ label, count, color }) => (
+  <div className="flex items-center gap-2">
+    <div className={`w-1.5 h-1.5 rounded-full ${color}`}></div>
+    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+      {label} ({count})
+    </span>
+  </div>
+);
 
 export default ManageLostReportsPage;

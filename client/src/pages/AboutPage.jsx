@@ -1,204 +1,182 @@
 import React from "react";
-import { Users, Target, Award, Heart } from "lucide-react";
+import {
+  Users,
+  Target,
+  Award,
+  Heart,
+  ShieldCheck,
+  Cpu,
+  BellRing,
+  ArrowRight,
+} from "lucide-react";
 import { motion } from "framer-motion";
+import { PageShell } from "../components/layout";
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
-      {/* Animated background elements */}
+    <PageShell
+      className="relative bg-[#020617] overflow-hidden" // Matching Home Page deep slate
+      containerClassName="max-w-6xl"
+    >
+      {/* Dynamic Background Accents */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: "6s" }}
-        />
-        <div
-          className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: "8s", animationDelay: "2s" }}
-        />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-600/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full" />
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
+      <div className="relative z-10 py-12 lg:py-20">
+        {/* --- Header Section --- */}
+        <div className="text-center max-w-4xl mx-auto mb-20">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-950/50 border border-emerald-500/40 backdrop-blur-md rounded-full mb-8"
           >
-            <Users size={16} className="text-emerald-400" />
-            <span className="text-sm font-semibold text-emerald-400">
-              About ClaimPoint
+            <ShieldCheck size={16} className="text-emerald-400" />
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-50">
+              The Mission Behind ClaimPoint
             </span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-white mb-6"
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight"
           >
-            AI-Powered Lost & Found
-            <br />
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
-              Built for Busy Venues
-            </span>
+            Intelligence meets
+            <span className="text-emerald-400"> Integrity.</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-lg text-slate-300 max-w-3xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed drop-shadow-sm"
           >
-            ClaimPoint connects admins, staff, and guests with a secure, AI-
-            assisted flow that turns chaos at stations, airports, and campuses
-            into a predictable handover: dynamic item fields, dual public vs
-            hidden details, email notifications, and role-based dashboards.
+            We’ve engineered a secure, AI-assisted ecosystem that transforms the
+            complexity of lost and found into a seamless, verifiable recovery
+            process for Bangladesh's busiest hubs.
           </motion.p>
-        </motion.div>
-
-        {/* Mission & Vision Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg hover:shadow-emerald-500/20 hover:border-emerald-500/30 transition-all cursor-default"
-          >
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.6 }}
-              className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20"
-            >
-              <Target size={28} className="text-white" />
-            </motion.div>
-            <h2 className="text-2xl font-bold text-white mb-4">Our Mission</h2>
-            <p className="text-slate-300 leading-relaxed">
-              Help frontline teams close the loop faster by pairing structured
-              data with human review. Every lost item gets tracked, matched, and
-              reunited with evidence-based verification.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg hover:shadow-teal-500/20 hover:border-teal-500/30 transition-all cursor-default"
-          >
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.6 }}
-              className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-teal-500/20"
-            >
-              <Award size={28} className="text-white" />
-            </motion.div>
-            <h2 className="text-2xl font-bold text-white mb-4">Our Vision</h2>
-            <p className="text-slate-300 leading-relaxed">
-              A world where reporting, matching, and pickup are transparent—AI
-              suggests, staff approves, owners get notified, and handovers are
-              logged end-to-end.
-            </p>
-          </motion.div>
         </div>
 
-        {/* Core Values */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg mb-16"
-        >
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-3">Core Values</h2>
-            <p className="text-slate-300">
-              The principles that guide everything we do
-            </p>
+        {/* --- Mission & Vision (High Contrast Cards) --- */}
+        <div className="grid md:grid-cols-2 gap-8 mb-24">
+          <SectionCard
+            icon={<Target size={32} className="text-emerald-400" />}
+            title="Our Mission"
+            text="To empower frontline teams with structured data and AI matching, ensuring every lost item is reunited with its owner through rigorous, evidence-based verification."
+            gradient="from-emerald-500/20 to-transparent"
+          />
+          <SectionCard
+            icon={<Award size={32} className="text-blue-400" />}
+            title="Our Vision"
+            text="To set the national standard for asset recovery, where technology manages the search and humans provide the trust, making lost items a thing of the past."
+            gradient="from-blue-500/20 to-transparent"
+          />
+        </div>
+
+        {/* --- Core Values (Clean Grid) --- */}
+        <div className="mb-24">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Core Principles
+            </h2>
+            <div className="h-1.5 w-20 bg-emerald-500 mx-auto rounded-full" />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-8">
             <ValueCard
-              icon={<Heart size={24} className="text-emerald-400" />}
-              title="Role Clarity"
-              desc="Admins govern, staff verify, and users self-serve with the right access at every step."
-              color="emerald"
+              icon={<Cpu size={28} />}
+              title="AI-Driven Logic"
+              desc="Our 70/30 scoring algorithm weighs visual details against location data for precision matching."
             />
             <ValueCard
-              icon={<Target size={24} className="text-teal-400" />}
-              title="Traceability"
-              desc="Public vs hidden details, approvals, and pickups are recorded for auditability."
-              color="teal"
+              icon={<ShieldCheck size={28} />}
+              title="Audit-Ready"
+              desc="Every handover is logged with dual-layer proof (public vs hidden), creating a foolproof paper trail."
             />
             <ValueCard
-              icon={<Award size={24} className="text-cyan-400" />}
-              title="Reliability"
-              desc="AI scoring (details + location), email alerts, and resilient workflows reduce misses."
-              color="cyan"
+              icon={<BellRing size={28} />}
+              title="Instant Response"
+              desc="Real-time alerts bridge the gap between reporting a loss and confirming a find instantly."
             />
           </div>
-        </motion.div>
+        </div>
 
-        {/* How We Help Section */}
+        {/* --- Call to Action / How it Works --- */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-2xl relative overflow-hidden"
+          className="relative bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[2rem] p-10 md:p-16 text-white overflow-hidden shadow-2xl shadow-emerald-900/20"
         >
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+
           <div className="relative z-10">
-            <h2 className="text-3xl font-bold mb-4">How We Help</h2>
-            <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
-              AI suggests matches (70% details, 30% location). Staff confirm,
-              owners get notified, and handovers are logged—no more spreadsheets
-              or guesswork.
+            <h2 className="text-3xl md:text-4xl font-black mb-6">
+              Built for Scale
+            </h2>
+            <p className="text-emerald-50 text-lg md:text-xl mb-12 max-w-2xl font-medium">
+              Whether it's an international airport or a local university,
+              ClaimPoint adapts to high-volume environments with role-based
+              precision.
             </p>
-            <div className="grid md:grid-cols-3 gap-8">
-              <StatItem value="70/30" label="Details + Location scoring" />
-              <StatItem value="Dual" label="Public & hidden proofs" />
-              <StatItem value="End-to-end" label="From report to pickup" />
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <StatItem value="70%" label="Detail Match" />
+              <div className="hidden md:flex items-center justify-center text-emerald-300">
+                <ArrowRight size={32} />
+              </div>
+              <StatItem value="30%" label="Location Factor" />
+              <StatItem value="100%" label="Verification" />
             </div>
           </div>
         </motion.div>
       </div>
-    </div>
+    </PageShell>
   );
 };
 
-// Sub-components to keep code clean
-const ValueCard = ({ icon, title, desc, color }) => (
+// Reusable Sub-components for better visibility and maintenance
+const SectionCard = ({ icon, title, text, gradient }) => (
   <motion.div
-    whileHover={{ y: -5, scale: 1.02 }}
-    className="text-center p-6 rounded-xl hover:bg-slate-800/30 transition-all group"
+    whileHover={{ y: -5 }}
+    className={`relative p-10 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md overflow-hidden group`}
   >
-    <motion.div
-      whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-      transition={{ duration: 0.5 }}
-      className={`w-12 h-12 bg-${color}-500/10 border border-${color}-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-${color}-500/20 group-hover:border-${color}-500/40 transition-colors`}
-    >
-      {icon}
-    </motion.div>
-    <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
-    <p className="text-sm text-slate-300 leading-relaxed">{desc}</p>
+    <div
+      className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+    />
+    <div className="relative z-10">
+      <div className="mb-6">{icon}</div>
+      <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>
+      <p className="text-slate-300 leading-relaxed text-lg">{text}</p>
+    </div>
   </motion.div>
 );
 
+const ValueCard = ({ icon, title, desc }) => (
+  <div className="text-left p-8 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 transition-all duration-300 group">
+    <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all">
+      {icon}
+    </div>
+    <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+      {title}
+    </h3>
+    <p className="text-slate-400 leading-relaxed">{desc}</p>
+  </div>
+);
+
 const StatItem = ({ value, label }) => (
-  <motion.div whileHover={{ scale: 1.1 }} className="cursor-default">
-    <div className="text-4xl font-bold mb-2">{value}</div>
-    <p className="text-emerald-100 font-medium">{label}</p>
-  </motion.div>
+  <div className="text-center md:text-left">
+    <div className="text-4xl md:text-5xl font-black mb-2 text-white">
+      {value}
+    </div>
+    <p className="text-emerald-100 font-bold uppercase tracking-wider text-xs">
+      {label}
+    </p>
+  </div>
 );
 
 export default AboutPage;

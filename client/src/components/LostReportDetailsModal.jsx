@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import {
   X,
   AlertCircle,
-  CheckCircle2,
-  Clock,
   Package,
   MapPin,
-  Loader,
   Calendar,
+  FileText,
+  CheckCircle2,
+  Camera,
+  Loader2,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
@@ -30,251 +33,221 @@ const LostReportDetailsModal = ({ reportId, isOpen, onClose }) => {
       const res = await api.get(`/user/lost-reports/${reportId}`);
       setReport(res.data.lostReport);
     } catch (error) {
-      console.error("Failed to load report", error);
-      toast.error(error.response?.data?.message || "Failed to load report");
+      toast.error("Telemetry failed to sync", { theme: "dark" });
       onClose?.();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      OPEN: { bg: "bg-blue-500/10", text: "text-blue-400", label: "Open" },
-      MATCHED: {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        label: "Matched",
-      },
-      RESOLVED: {
-        bg: "bg-teal-500/10",
-        text: "text-teal-400",
-        label: "Resolved",
-      },
-    };
-    const config = statusConfig[status] || statusConfig.OPEN;
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-3 py-1 ${config.bg} ${config.text} rounded-full text-xs font-semibold border border-current/20`}
-      >
-        <CheckCircle2 size={12} />
-        {config.label}
-      </span>
-    );
-  };
-
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const renderReportDetails = (details) => {
-    if (!details) return null;
-
-    if (typeof details === "string") {
-      return (
-        <p className="text-slate-300 mt-3 text-sm leading-relaxed">{details}</p>
-      );
-    }
-
-    if (Array.isArray(details)) {
-      if (details.length === 0) return null;
-      return (
-        <ul className="text-slate-300 mt-3 text-sm leading-relaxed list-disc list-inside space-y-1">
-          {details.map((item, idx) => (
-            <li key={idx}>{String(item)}</li>
-          ))}
-        </ul>
-      );
-    }
-
-    if (typeof details === "object") {
-      const entries = Object.entries(details);
-      if (entries.length === 0) return null;
-      return (
-        <div className="mt-3 space-y-2">
-          {entries.map(([key, value]) => (
-            <div
-              key={key}
-              className="flex items-start justify-between gap-4 border border-white/5 rounded-lg px-3 py-2 bg-slate-950/50"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {key}
-              </span>
-              <span className="text-sm text-slate-200 break-words text-right">
-                {String(value)}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    return (
-      <p className="text-slate-300 mt-3 text-sm leading-relaxed">
-        {String(details)}
-      </p>
-    );
-  };
-
-  if (!isOpen) return null;
-
-  if (!isAuthenticated || user?.role !== "USER") {
-    return null;
-  }
+  if (!isOpen || !isAuthenticated || user?.role !== "USER") return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-150 flex items-center justify-center pt-15">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-8 py-5 flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-white">
-                Lost Report Details
+      <div className="relative w-full max-w-5xl max-h-[80vh] bg-[#0b1120] border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+        {/* Modal Header */}
+        <div className="px-10 py-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-2xl font-black text-white tracking-tight">
+                Report <span className="text-emerald-400">Dossier.</span>
               </h2>
-              {report && getStatusBadge(report.status)}
+              {report && <StatusBadge status={report.status} />}
             </div>
-            <p className="text-sm text-slate-400 mt-1">
-              {report
-                ? `Reported ${formatDate(report.created_at)}`
-                : "Loading report details"}
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Reference:{" "}
+              <span className="text-slate-300 font-mono">
+                #{reportId?.slice(0, 12)}
+              </span>
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 hover:bg-slate-800/50 rounded-xl transition-all text-slate-400 hover:text-white active:scale-95"
-            aria-label="Close"
+            className="p-3 bg-slate-800 text-slate-400 hover:text-white rounded-2xl transition-all"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto max-h-[calc(90vh-160px)] bg-gradient-to-br from-slate-950/50 via-slate-900/30 to-slate-950/50">
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
           {isLoading ? (
-            <div className="flex items-center justify-center py-28">
-              <div className="flex flex-col items-center gap-4">
-                <Loader size={48} className="text-emerald-400 animate-spin" />
-                <span className="text-slate-300 text-lg font-semibold">
-                  Loading...
-                </span>
-              </div>
+            <div className="py-24 flex flex-col items-center justify-center">
+              <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest tracking-[0.2em]">
+                Accessing Registry...
+              </p>
             </div>
           ) : report ? (
-            <div className="p-8 space-y-6">
-              {/* Main Info Card */}
-              <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl space-y-6">
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                    <Package size={18} className="text-emerald-400" />
-                    Item Type
-                  </label>
-                  <p className="text-3xl font-bold text-white">
-                    {report.item_type}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-700/50">
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      <MapPin size={18} className="text-emerald-400" />
-                      Location Lost
-                    </label>
-                    <p className="text-lg font-semibold text-white">
-                      {report.location_lost}
-                    </p>
+            <div className="space-y-10">
+              {/* Asset Hero Card */}
+              <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-8">
+                <div className="flex flex-col md:flex-row justify-between gap-6">
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">
+                        Target Asset Type
+                      </p>
+                      <h3 className="text-4xl font-black text-white leading-tight">
+                        {report.item_type}
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <InfoBlock
+                        icon={<MapPin size={14} />}
+                        label="Loss Location"
+                        value={report.location_lost}
+                      />
+                      <InfoBlock
+                        icon={<Calendar size={14} />}
+                        label="Incident Date"
+                        value={new Date(report.date_lost).toLocaleDateString()}
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      <Calendar size={18} className="text-emerald-400" />
-                      Date Lost
-                    </label>
-                    <p className="text-lg font-semibold text-white">
-                      {formatDate(report.date_lost)}
+                  {/* Status Helper Card */}
+                  <div className="bg-emerald-500/[0.03] border border-emerald-500/10 rounded-2xl p-6 min-w-[240px]">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ShieldCheck size={16} className="text-emerald-500" />
+                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                        System Status
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                      {report.status === "OPEN"
+                        ? "Staff are currently cross-referencing this report against new arrivals."
+                        : "This report has been successfully linked to a found asset."}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Report Details */}
-              {report.report_details &&
-                Object.keys(report.report_details).length > 0 && (
-                  <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-emerald-500/10 rounded-lg">
-                        <Package size={20} className="text-emerald-400" />
-                      </div>
-                      <h3 className="text-lg font-bold text-white uppercase tracking-wider">
-                        Item Details
-                      </h3>
-                    </div>
-                    {renderReportDetails(report.report_details)}
+              {/* Data Specifications */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="space-y-6">
+                  <SectionHeader icon={FileText} title="Specifications" />
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6">
+                    {report.report_details ? (
+                      renderMetadata(report.report_details)
+                    ) : (
+                      <p className="text-xs text-slate-600 font-black uppercase tracking-widest italic">
+                        No detailed specs provided
+                      </p>
+                    )}
                   </div>
-                )}
+                </div>
 
-              {/* Images */}
-              {Array.isArray(report.image_urls) &&
-                report.image_urls.length > 0 && (
-                  <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                    <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-6">
-                      Evidence Photos
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {report.image_urls.map((url, index) => (
+                {/* Evidence Photos */}
+                <div className="space-y-6">
+                  <SectionHeader icon={Camera} title="Evidence Documentation" />
+                  {report.image_urls?.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {report.image_urls.map((url, i) => (
                         <div
-                          key={index}
-                          className="aspect-square rounded-xl overflow-hidden border-2 border-slate-700/50 hover:border-emerald-500/50 transition-all shadow-lg group"
+                          key={i}
+                          className="aspect-square rounded-[1.5rem] bg-slate-900 border border-slate-800 overflow-hidden group"
                         >
                           <img
                             src={url}
-                            alt={`Evidence ${index + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            alt=""
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="h-40 rounded-[2rem] border border-dashed border-slate-800 flex items-center justify-center">
+                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                        No Photos Uploaded
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center py-28">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <AlertCircle size={48} className="text-red-400" />
-                </div>
-                <p className="text-slate-300 text-xl font-bold mb-2">
-                  Failed to load report
-                </p>
-                <p className="text-slate-500 text-sm">Please try again later</p>
-              </div>
+            <div className="py-20 text-center">
+              <AlertCircle size={48} className="text-rose-500 mx-auto mb-4" />
+              <p className="text-white font-black uppercase tracking-widest text-xs">
+                Report Registry Unavailable
+              </p>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-t border-slate-800/50 px-8 py-2 flex justify-end">
+        {/* Modal Footer */}
+        <div className="px-10 py-6 border-t border-slate-800 bg-slate-900/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-8 py-2 border-2 border-slate-700/50 text-slate-300 font-bold rounded-xl hover:bg-slate-800/50 hover:border-slate-600 transition-all active:scale-95"
+            className="px-8 py-3 bg-slate-800 text-slate-300 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-700 transition-all"
           >
-            Close
+            Dismiss Dossier
           </button>
         </div>
       </div>
     </div>
   );
+};
+
+// --- Sub-Components ---
+
+const StatusBadge = ({ status }) => {
+  const configs = {
+    OPEN: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    MATCHED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    RESOLVED: "bg-teal-500/10 text-teal-400 border-teal-500/20",
+  };
+  return (
+    <span
+      className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${configs[status]}`}
+    >
+      {status}
+    </span>
+  );
+};
+
+const SectionHeader = ({ icon: Icon, title }) => (
+  <div className="flex items-center gap-3 px-2">
+    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+      <Icon size={16} />
+    </div>
+    <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">
+      {title}
+    </h3>
+  </div>
+);
+
+const InfoBlock = ({ icon, label, value }) => (
+  <div className="flex items-center gap-3">
+    <div className="text-emerald-500">{icon}</div>
+    <div>
+      <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">
+        {label}
+      </p>
+      <p className="text-sm font-bold text-slate-200">{value}</p>
+    </div>
+  </div>
+);
+
+const renderMetadata = (data) => {
+  if (typeof data === "string")
+    return (
+      <p className="text-sm font-bold text-slate-300 leading-relaxed">{data}</p>
+    );
+  return Object.entries(data).map(([key, value]) => (
+    <div key={key} className="flex flex-col mb-4 last:mb-0">
+      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+        {key}
+      </span>
+      <span className="text-sm font-bold text-slate-300">{String(value)}</span>
+    </div>
+  ));
 };
 
 export default LostReportDetailsModal;

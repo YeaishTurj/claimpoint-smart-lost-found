@@ -2,287 +2,192 @@ import React from "react";
 import {
   Search,
   FileText,
-  CheckCircle,
+  CheckCircle2,
   Package,
   UserCheck,
-  Bell,
+  BellRing,
+  Cpu,
+  ShieldCheck,
+  ArrowRightLeft,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { PageShell } from "../components/layout";
 
 const HowItWorks = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/8 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: "6s" }}
-        />
-        <div
-          className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: "8s", animationDelay: "2s" }}
-        />
+    <PageShell
+      className="relative bg-[#020617] overflow-hidden"
+      containerClassName="max-w-6xl"
+    >
+      {/* Background Ambience */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-600/10 blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/5 blur-[120px]" />
       </div>
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
+
+      <div className="relative z-10 py-12 lg:py-20">
+        {/* --- Header Section --- */}
+        <div className="text-center max-w-3xl mx-auto mb-20">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6"
           >
-            <Package size={16} className="text-emerald-400" />
-            <span className="text-sm font-semibold text-emerald-400">
-              Simple Process
-            </span>
+            <ArrowRightLeft size={14} /> Seamless Recovery Flow
           </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-white mb-6"
-          >
-            How ClaimPoint
-            <br />
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
-              Works For You
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-lg text-slate-300 max-w-3xl mx-auto"
-          >
-            Two clear paths: AI auto-matching for lost reports and a verified
-            claims path for found items. Staff stay in control, owners stay
-            informed.
-          </motion.p>
-        </motion.div>
-
-        {/* For Those Who Lost Items */}
-        <div className="mb-16">
-          <motion.h2
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="text-3xl font-bold text-white mb-8 text-center"
-          >
-            Lost Something? (Auto-Match Path)
-          </motion.h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -5 }}
-              className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative hover:border-emerald-500/30 hover:shadow-emerald-500/20 transition-all"
-            >
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
-              >
-                1
-              </motion.div>
-              <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
-                <Search size={28} className="text-emerald-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Report Your Loss
-              </h3>
-              <p className="text-slate-300">
-                Log item type, where and when it went missing, and the details
-                only you know. Public vs hidden fields keep verification tight.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -5 }}
-              className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative hover:border-teal-500/30 hover:shadow-teal-500/20 transition-all"
-            >
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
-              >
-                2
-              </motion.div>
-              <div className="w-14 h-14 bg-teal-500/10 border border-teal-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
-                <UserCheck size={28} className="text-teal-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Let AI Suggest Matches
-              </h3>
-              <p className="text-slate-300">
-                When staff add a matching found item, our 70/30 scoring (details
-                vs location) proposes the best candidates so staff can review
-                faster.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -5 }}
-              className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative hover:border-cyan-500/30 hover:shadow-cyan-500/20 transition-all"
-            >
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
-              >
-                3
-              </motion.div>
-              <div className="w-14 h-14 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
-                <CheckCircle size={28} className="text-cyan-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Get Approved & Collect
-              </h3>
-              <p className="text-slate-300">
-                Staff approve matches, you receive an email, and pickup is
-                recorded with proper ID verification.
-              </p>
-            </motion.div>
-          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-6">
+            Designed for <span className="text-emerald-400">Precision.</span>
+          </h1>
+          <p className="text-slate-400 text-lg font-medium">
+            ClaimPoint utilizes a dual-path system powered by AI scoring to
+            bridge the gap between losing an item and a verified collection.
+          </p>
         </div>
 
-        {/* For Those Who Found Items */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">
-            Found Something? (Claims Path)
-          </h2>
+        {/* --- Path 1: Lost Item Journey --- */}
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="h-px flex-1 bg-slate-800" />
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3 whitespace-nowrap px-4">
+              <Search className="text-emerald-400" /> The Lost Report Path
+            </h2>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 relative">
+            {/* Logic Flow Connectors (Desktop Only) */}
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent -translate-y-1/2 pointer-events-none" />
+
+            <ProcessCard
+              number="01"
+              icon={<FileText size={24} />}
+              title="Detailed Reporting"
+              desc="Submit your report with public identifiers and private 'Hidden Proofs' that only the true owner would know."
+              color="emerald"
+            />
+            <ProcessCard
+              number="02"
+              icon={<Cpu size={24} />}
+              title="AI Score Match"
+              desc="Our engine calculates a 70% detail / 30% location score, instantly notifying staff of potential matches."
+              color="emerald"
+            />
+            <ProcessCard
+              number="03"
+              icon={<CheckCircle2 size={24} />}
+              title="Verified Pickup"
+              desc="Once staff approves the match, receive a secure pickup code and instructions for collection."
+              color="emerald"
+            />
+          </div>
+        </section>
+
+        {/* --- Path 2: Found Item Journey --- */}
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="h-px flex-1 bg-slate-800" />
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3 whitespace-nowrap px-4">
+              <Package className="text-blue-400" /> The Found Asset Path
+            </h2>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative">
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                1
-              </div>
-              <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
-                <FileText size={28} className="text-emerald-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Register the Item
-              </h3>
-              <p className="text-slate-300">
-                Capture public details (safe to show) and hidden details
-                (verification only), plus photos and location. AI compares these
-                against open reports automatically.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative">
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                2
-              </div>
-              <div className="w-14 h-14 bg-teal-500/10 border border-teal-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
-                <Bell size={28} className="text-teal-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Review AI Suggestions or Claims
-              </h3>
-              <p className="text-slate-300">
-                Staff see AI matches and user-submitted claims. They approve or
-                reject with full context—public details, hidden proofs, and
-                score.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-lg relative">
-              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                3
-              </div>
-              <div className="w-14 h-14 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center mb-4 mt-4">
-                <Package size={28} className="text-cyan-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Hand Over Confidently
-              </h3>
-              <p className="text-slate-300">
-                Approved matches move to pickup. Collection is logged, statuses
-                update to RESOLVED/RETURNED, and everyone gets a clear record.
-              </p>
-            </div>
+            <ProcessCard
+              number="01"
+              icon={<ShieldCheck size={24} />}
+              title="Staff Registration"
+              desc="Official desks log found items with secure photo evidence and precise inventory location tracking."
+              color="blue"
+            />
+            <ProcessCard
+              number="02"
+              icon={<BellRing size={24} />}
+              title="Claim Triage"
+              desc="Staff review AI-suggested reports or manual claims submitted by users with full verification context."
+              color="blue"
+            />
+            <ProcessCard
+              number="03"
+              icon={<UserCheck size={24} />}
+              title="Resolution"
+              desc="Items are marked as 'Returned,' updating the global ledger and closing the audit trail."
+              color="blue"
+            />
           </div>
-        </div>
+        </section>
 
-        {/* Key Features */}
-        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 md:p-12 text-white shadow-xl">
-          <h2 className="text-3xl font-bold mb-8 text-center">
-            Why Choose ClaimPoint?
+        {/* --- Bottom Feature Grid (High Contrast) --- */}
+        <div className="p-8 md:p-16 rounded-[3rem] bg-gradient-to-br from-emerald-600 to-teal-800 text-white shadow-2xl">
+          <h2 className="text-3xl font-black mb-12 text-center">
+            System Integrity Features
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold mb-2">AI + Human Review</h3>
-                <p className="text-emerald-100">
-                  70/30 scoring plus staff approval keeps speed without giving
-                  up accuracy.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold mb-2">Dual Detail System</h3>
-                <p className="text-emerald-100">
-                  Public details help identify; hidden details verify ownership
-                  without exposing sensitive info.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold mb-2">Clear Statuses</h3>
-                <p className="text-emerald-100">
-                  OPEN → MATCHED → RESOLVED for reports, FOUND → RETURNED for
-                  items, with email updates along the way.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold mb-2">Auditable Handoffs</h3>
-                <p className="text-emerald-100">
-                  Every approval, rejection, and collection is tracked for
-                  accountability and reporting.
-                </p>
-              </div>
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <FeatureBox
+              title="Privacy First"
+              desc="Hidden details are never visible to the public, only to authorized verification officers."
+            />
+            <FeatureBox
+              title="Audit Trail"
+              desc="Every status change (Open → Matched → Resolved) is timestamped and logged."
+            />
+            <FeatureBox
+              title="Smart Alerts"
+              desc="Automated email triggers keep users updated without manual staff follow-up."
+            />
+            <FeatureBox
+              title="Geo-Scoring"
+              desc="Matches are weighted by precise location proximity to reduce false positives."
+            />
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
+
+// --- Helper Components ---
+
+const ProcessCard = ({ number, icon, title, desc, color }) => {
+  const isEmerald = color === "emerald";
+  return (
+    <motion.div
+      whileHover={{ y: -8 }}
+      className="relative p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md group"
+    >
+      <div
+        className={`text-5xl font-black opacity-10 absolute top-4 right-6 transition-opacity group-hover:opacity-20 ${
+          isEmerald ? "text-emerald-400" : "text-blue-400"
+        }`}
+      >
+        {number}
+      </div>
+      <div
+        className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors ${
+          isEmerald
+            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-slate-950"
+            : "bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-slate-950"
+        }`}
+      >
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+        {title}
+      </h3>
+      <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
+    </motion.div>
+  );
+};
+
+const FeatureBox = ({ title, desc }) => (
+  <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:bg-white/20 transition-all">
+    <div className="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center mb-4">
+      <CheckCircle2 size={18} className="text-emerald-300" />
+    </div>
+    <h4 className="font-bold mb-2 text-white">{title}</h4>
+    <p className="text-emerald-50 text-xs leading-relaxed opacity-80">{desc}</p>
+  </div>
+);
 
 export default HowItWorks;

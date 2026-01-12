@@ -10,11 +10,13 @@ import {
   AlertCircle,
   CheckCircle2,
   Shield,
+  ExternalLink,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/auth.context";
 import { useNavigate } from "react-router";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ItemDetailsModal = ({ itemId, isOpen, onClose }) => {
   const [item, setItem] = useState(null);
@@ -37,13 +39,9 @@ const ItemDetailsModal = ({ itemId, isOpen, onClose }) => {
       setItem(response.data.data);
     } catch (error) {
       console.error("Failed to fetch item details:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to load item details",
-        {
-          position: "top-center",
-          autoClose: 2000,
-        }
-      );
+      toast.error("Security alert: Could not retrieve item data", {
+        theme: "dark",
+      });
       onClose();
     } finally {
       setIsLoading(false);
@@ -52,8 +50,7 @@ const ItemDetailsModal = ({ itemId, isOpen, onClose }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -65,272 +62,212 @@ const ItemDetailsModal = ({ itemId, isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="pt-15 fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
         onClick={onClose}
       />
 
-      {/* Modal Content */}
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-8 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <Package size={24} className="text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">Item Details</h2>
-                <p className="text-sm text-slate-400 mt-0.5">
-                  Complete item information
-                </p>
-              </div>
+      {/* Modal Container */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-5xl max-h-[80vh] bg-[#0b1120] border border-slate-800 rounded-[2.5rem] shadow-[0_0_50px_-12px_rgba(16,185,129,0.2)] overflow-hidden flex flex-col"
+      >
+        {/* Header: Fixed */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-800 bg-[#0b1120]/50 backdrop-blur-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
+              <Package size={20} className="text-emerald-400" />
             </div>
-            <button
-              onClick={onClose}
-              className="p-2.5 hover:bg-slate-800/50 rounded-xl transition-all text-slate-400 hover:text-white active:scale-95"
-            >
-              <X size={22} />
-            </button>
+            <div>
+              <h2 className="text-xl font-black text-white tracking-tight">
+                Technical Specifications
+              </h2>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                Reference ID: {itemId?.slice(-8)}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto max-h-[calc(90vh-160px)] bg-gradient-to-br from-slate-950/50 via-slate-900/30 to-slate-950/50">
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto custom-scrollbar flex-grow p-8">
           {isLoading ? (
-            <div className="flex items-center justify-center py-32">
-              <div className="flex flex-col items-center gap-4">
-                <Loader size={48} className="text-emerald-400 animate-spin" />
-                <span className="text-slate-300 text-lg font-semibold">
-                  Loading details...
-                </span>
-              </div>
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader className="animate-spin text-emerald-500" size={40} />
+              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">
+                Querying Secure Database...
+              </p>
             </div>
           ) : item ? (
-            <div className="p-8 space-y-6">
-              {/* Status and Privilege Badges */}
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg ${
-                    item.status === "FOUND"
-                      ? "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border-2 border-emerald-500/30"
-                      : "bg-slate-500/20 text-slate-300 border-2 border-slate-500/30"
-                  }`}
-                >
-                  {item.status === "FOUND" ? (
-                    <>
-                      <CheckCircle2 size={18} />
-                      Available for Claim
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle size={18} />
-                      {item.status}
-                    </>
-                  )}
-                </div>
-                {isPrivileged && (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-2 border-amber-500/30 rounded-xl text-sm font-bold text-amber-300 shadow-lg">
-                    <Shield size={16} />
-                    {user.role} ACCESS
-                  </div>
-                )}
-              </div>
+            <div className="space-y-10">
+              {/* Primary Info Block */}
+              <div className="grid lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800">
+                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 block">
+                      Found Category
+                    </span>
+                    <h3 className="text-4xl font-black text-white mb-6">
+                      {item.item_type}
+                    </h3>
 
-              {/* Main Info Card */}
-              <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl space-y-6">
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                    <Package size={18} className="text-emerald-400" />
-                    Item Type
-                  </label>
-                  <p className="text-3xl font-bold text-white">
-                    {item.item_type}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-700/50">
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      <MapPin size={18} className="text-emerald-400" />
-                      Location Found
-                    </label>
-                    <p className="text-lg font-semibold text-white">
-                      {item.location_found}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      <Calendar size={18} className="text-emerald-400" />
-                      Date Found
-                    </label>
-                    <p className="text-lg font-semibold text-white">
-                      {formatDate(item.date_found)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Public Details */}
-              {item.public_details &&
-                Object.keys(item.public_details).length > 0 && (
-                  <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-emerald-500/10 rounded-lg">
-                        <Eye size={20} className="text-emerald-400" />
-                      </div>
-                      <h3 className="text-lg font-bold text-white uppercase tracking-wider">
-                        Public Attributes
-                      </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <DetailBox
+                        icon={<MapPin size={14} />}
+                        label="Location"
+                        value={item.location_found}
+                      />
+                      <DetailBox
+                        icon={<Calendar size={14} />}
+                        label="Found Date"
+                        value={formatDate(item.date_found)}
+                      />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(item.public_details).map(
-                        ([key, value]) => (
+                  </div>
+
+                  {/* Public Attributes */}
+                  <div className="space-y-4">
+                    <h4 className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest px-2">
+                      <Eye size={14} className="text-emerald-400" /> Public
+                      Description
+                    </h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      {Object.entries(item.public_details || {}).map(
+                        ([key, val]) => (
                           <div
                             key={key}
-                            className="bg-slate-950/50 border border-slate-700/50 rounded-xl p-4 hover:border-emerald-500/30 transition-all"
+                            className="flex justify-between items-center p-4 bg-slate-900/30 border border-slate-800 rounded-2xl"
                           >
-                            <p className="text-xs font-bold text-emerald-400 mb-2 uppercase tracking-wider">
+                            <span className="text-xs font-bold text-slate-500 uppercase">
                               {key}
-                            </p>
-                            <p className="text-base text-white font-semibold">
-                              {value}
-                            </p>
+                            </span>
+                            <span className="text-sm font-bold text-slate-200">
+                              {val}
+                            </span>
                           </div>
                         )
                       )}
                     </div>
                   </div>
-                )}
+                </div>
 
-              {/* Hidden Details (Only for Staff/Admin) */}
-              {isPrivileged &&
-                item.hidden_details &&
-                Object.keys(item.hidden_details).length > 0 && (
-                  <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl border-2 border-amber-500/30 rounded-2xl p-8 shadow-xl">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-amber-500/20 rounded-lg">
-                        <EyeOff size={20} className="text-amber-300" />
-                      </div>
-                      <h3 className="text-lg font-bold text-amber-200 uppercase tracking-wider">
-                        Hidden Attributes
-                        <span className="ml-2 text-xs font-semibold text-amber-400/80">
-                          (Staff Only)
-                        </span>
-                      </h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(item.hidden_details).map(
-                        ([key, value]) => (
-                          <div
-                            key={key}
-                            className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 hover:border-amber-400/50 transition-all"
-                          >
-                            <p className="text-xs font-bold text-amber-300 mb-2 uppercase tracking-wider">
-                              {key}
-                            </p>
-                            <p className="text-base text-amber-50 font-semibold">
-                              {value}
-                            </p>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-
-              {/* Images */}
-              {item.image_urls && item.image_urls.length > 0 && (
-                <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-xl">
-                  <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-6">
+                {/* Evidence Gallery */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest px-2">
                     Evidence Photos
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {item.image_urls.map((url, index) => (
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {item.image_urls?.map((url, idx) => (
                       <div
-                        key={index}
-                        className="aspect-square rounded-xl overflow-hidden border-2 border-slate-700/50 hover:border-emerald-500/50 transition-all shadow-lg group"
+                        key={idx}
+                        className="aspect-square rounded-2xl overflow-hidden border border-slate-800 group relative"
                       >
                         <img
                           src={url}
-                          alt={`${item.item_type} - Photo ${index + 1}`}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
+                        <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* Claim CTA Notice */}
-              {!isPrivileged && item.status === "FOUND" && (
-                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-l-4 border-emerald-500 px-8 py-5 rounded-r-xl">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
-                      <AlertCircle size={22} className="text-emerald-400" />
+              {/* Staff-Only Vault (Conditional Visibility) */}
+              {isPrivileged && (
+                <div className="p-8 rounded-[2rem] bg-amber-500/5 border border-amber-500/20 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Shield size={120} />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <EyeOff size={20} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black text-amber-500">
+                          Privileged Verification Data
+                        </h4>
+                        <p className="text-xs font-bold text-amber-500/60 uppercase">
+                          Internal use only — Do not disclose
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-emerald-100 text-base mb-2">
-                        Is this your item?
-                      </h4>
-                      <p className="text-sm text-slate-300 leading-relaxed mb-4">
-                        If you believe this item belongs to you, you can start a
-                        claim. Be prepared to answer security questions and
-                        provide evidence to verify ownership.
-                      </p>
-                      <button
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            toast.error("Please login to claim this item", {
-                              position: "top-center",
-                              autoClose: 2500,
-                            });
-                            navigate("/login");
-                          } else {
-                            navigate(`/claim/${itemId}`);
-                          }
-                        }}
-                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
-                      >
-                        Start Claim
-                      </button>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {Object.entries(item.hidden_details || {}).map(
+                        ([key, val]) => (
+                          <div
+                            key={key}
+                            className="p-4 bg-amber-950/20 border border-amber-500/20 rounded-xl"
+                          >
+                            <p className="text-[10px] font-black text-amber-500/70 uppercase mb-1">
+                              {key}
+                            </p>
+                            <p className="text-sm font-bold text-amber-50">
+                              {val}
+                            </p>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="flex items-center justify-center py-32">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <AlertCircle size={48} className="text-red-400" />
-                </div>
-                <p className="text-slate-300 text-xl font-bold mb-2">
-                  Failed to load item details
-                </p>
-                <p className="text-slate-500 text-sm">Please try again later</p>
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
 
-        {/* Footer */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-t border-slate-800/50 px-8 py-2">
-          <div className="flex justify-end gap-3">
+        {/* Footer: Action Bar */}
+        <div className="px-8 py-6 border-t border-slate-800 bg-slate-900/30 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-slate-500">
+            <Shield size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">
+              Verified claim process active
+            </span>
+          </div>
+          <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-8 py-2 border-2 border-slate-700/50 text-slate-300 font-bold rounded-xl hover:bg-slate-800/50 hover:border-slate-600 transition-all active:scale-95"
+              className="px-6 py-2.5 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors"
             >
               Close
             </button>
+            {!isPrivileged && item?.status === "FOUND" && (
+              <button
+                onClick={() =>
+                  navigate(isAuthenticated ? `/claim/${itemId}` : "/login")
+                }
+                className="px-8 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+              >
+                <ExternalLink size={14} /> Start Recovery
+              </button>
+            )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
+
+const DetailBox = ({ icon, label, value }) => (
+  <div className="p-4 bg-slate-950/50 border border-slate-800 rounded-2xl">
+    <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+      {icon} {label}
+    </div>
+    <div className="text-sm font-bold text-white truncate">{value}</div>
+  </div>
+);
 
 export default ItemDetailsModal;

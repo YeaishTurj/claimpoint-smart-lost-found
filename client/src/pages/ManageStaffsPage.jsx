@@ -14,6 +14,8 @@ import {
   Filter,
   User,
   X,
+  ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
@@ -34,20 +36,14 @@ const ManageStaffsPage = () => {
   }, []);
 
   const fetchStaff = async () => {
-    if (!isAuthenticated) {
-      setIsLoading(false);
-      setStaff([]);
-      return;
-    }
     setIsLoading(true);
     try {
       const response = await api.get("/admin/staffs");
       setStaff(response.data.staff || []);
     } catch (error) {
       console.error("Failed to fetch staff:", error);
-      toast.error("Failed to load staff members", {
-        position: "top-center",
-        autoClose: 2000,
+      toast.error("Access Denied: Could not retrieve staff registry", {
+        theme: "dark",
       });
       setStaff([]);
     } finally {
@@ -65,7 +61,6 @@ const ManageStaffsPage = () => {
       setShowConfirmModal(true);
       return;
     }
-
     await performStatusToggle(staffId, currentStatus);
   };
 
@@ -74,29 +69,16 @@ const ManageStaffsPage = () => {
       const endpoint = currentStatus
         ? `/admin/users/${staffId}/deactivate`
         : `/admin/users/${staffId}/activate`;
-
       await api.patch(endpoint);
-
       toast.success(
-        `Staff member ${
-          !currentStatus ? "activated" : "deactivated"
-        } successfully`,
-        {
-          position: "top-center",
-          autoClose: 2000,
-        }
+        `Staff authorization ${!currentStatus ? "activated" : "revoked"}`,
+        { theme: "dark" }
       );
-
       fetchStaff();
     } catch (error) {
-      console.error("Failed to update staff status:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to update staff status",
-        {
-          position: "top-center",
-          autoClose: 2000,
-        }
-      );
+      toast.error(error.response?.data?.message || "Operation failed", {
+        theme: "dark",
+      });
     }
   };
 
@@ -120,278 +102,210 @@ const ManageStaffsPage = () => {
     return matchesSearch;
   });
 
+  const activeCount = staff.filter((s) => s.is_active).length;
+
+  // Check authentication and show restriction message if not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
-        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User size={40} className="text-white" />
+      <div className="min-h-screen flex items-center justify-center bg-[#020617] px-4">
+        <div className="bg-slate-900/40 backdrop-blur-2xl rounded-3xl p-10 border border-slate-800 max-w-md w-full text-center shadow-2xl">
+          <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+            <Shield size={40} className="text-emerald-500" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Access Required
+          <h2 className="text-2xl font-black text-white mb-3">
+            Security Restriction
           </h2>
-          <p className="text-slate-300 mb-6">
-            Please log in to access admin functionalities
+          <p className="text-slate-400 mb-8 font-medium">
+            Administrative privileges are required to manage staff members.
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
+            className="w-full px-6 py-4 bg-emerald-500 text-slate-950 font-black rounded-2xl hover:bg-emerald-400 transition-all uppercase tracking-widest text-xs"
           >
-            Go to Login
+            Authenticate Identity
           </button>
         </div>
       </div>
     );
   }
 
-  const activeCount = staff.filter((s) => s.is_active).length;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#020617] pt-28 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+          <span className="hover:text-emerald-400 transition-colors">
+            Admin
+          </span>
+          <ChevronRight size={12} />
+          <span className="text-slate-300">Personnel Management</span>
+        </div>
+
         {/* Header Section */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full backdrop-blur-sm">
-              <Shield size={16} className="text-emerald-400" />
-              <span className="text-sm font-semibold text-emerald-300">
-                Admin Dashboard
-              </span>
-            </div>
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+              Staff <span className="text-emerald-400">Registry.</span>
+            </h1>
+            <p className="text-slate-400 font-medium max-w-xl">
+              Monitor and adjust access levels for the core operational team.
+              Ensure all active personnel are verified.
+            </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">
-                Staff Management
-              </h1>
-              <p className="text-lg text-slate-400 max-w-2xl">
-                Oversee and manage all staff members, their access levels, and
-                account statuses
-              </p>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="flex gap-4">
-              <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-xl px-4 py-3 min-w-[120px]">
-                <p className="text-xs text-slate-400 mb-1">Total Staff</p>
-                <p className="text-2xl font-bold text-white">{staff.length}</p>
-              </div>
-              <div className="bg-slate-900/40 backdrop-blur-xl border border-emerald-500/20 rounded-xl px-4 py-3 min-w-[120px]">
-                <p className="text-xs text-emerald-400 mb-1">Active</p>
-                <p className="text-2xl font-bold text-emerald-300">
-                  {activeCount}
-                </p>
-              </div>
-            </div>
+          <div className="flex gap-4">
+            <StatPill label="Personnel" value={staff.length} color="slate" />
+            <StatPill
+              label="Active Nodes"
+              value={activeCount}
+              color="emerald"
+            />
           </div>
         </div>
 
-        {/* Search and Filter Section */}
-        <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-800/50 shadow-2xl mb-8">
-          <div className="relative">
+        {/* Search & Filter */}
+        <div className="bg-[#0b1120] rounded-4xl p-6 border border-slate-800 shadow-2xl mb-10 flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
             <Search
               size={20}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"
             />
             <input
               type="text"
-              placeholder="Search by name or email address..."
+              placeholder="Search by name or verified email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-12 py-3.5 border-2 border-slate-700/50 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all bg-slate-950/50 text-white placeholder:text-slate-500"
+              className="w-full pl-14 pr-12 py-4 bg-[#010409] border border-slate-800 rounded-2xl text-white font-medium focus:border-emerald-500 transition-all placeholder:text-slate-600"
             />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            )}
           </div>
-
-          <div className="mt-4 flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-slate-400" />
-              <p className="text-slate-400">
-                Showing{" "}
-                <span className="font-semibold text-white">
-                  {filteredStaff.length}
-                </span>{" "}
-                of {staff.length} staff members
-              </p>
-            </div>
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
+          <div className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest bg-slate-900/50 px-6 py-4 rounded-2xl border border-slate-800">
+            <Filter size={16} className="text-emerald-500" />
+            <span>
+              Matches: <b className="text-white ml-1">{filteredStaff.length}</b>
+            </span>
           </div>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-24">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-slate-700 border-t-emerald-400 rounded-full animate-spin"></div>
-              </div>
-              <span className="text-slate-300 text-lg font-medium">
-                Loading staff members...
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && filteredStaff.length === 0 && (
-          <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl p-16 border border-slate-800/50 shadow-2xl text-center">
-            <div className="w-20 h-20 bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Users size={40} className="text-slate-500" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-3">
-              No Staff Members Found
-            </h3>
-            <p className="text-slate-400 text-lg max-w-md mx-auto">
-              {searchTerm
-                ? "No staff members match your search criteria. Try adjusting your filters."
-                : "No staff members have been added to the system yet."}
+        {/* Table Content */}
+        {isLoading ? (
+          <div className="py-24 flex flex-col items-center">
+            <Loader className="animate-spin text-emerald-500 mb-4" size={40} />
+            <p className="text-slate-500 font-black text-[10px] uppercase tracking-[0.2em]">
+              Synchronizing Personnel Data...
             </p>
           </div>
-        )}
-
-        {/* Staff Table */}
-        {!isLoading && filteredStaff.length > 0 && (
-          <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-800/50 shadow-2xl overflow-hidden">
+        ) : filteredStaff.length === 0 ? (
+          <div className="bg-[#0b1120] rounded-[2.5rem] p-20 border border-slate-800 text-center">
+            <Users size={60} className="mx-auto text-slate-800 mb-6" />
+            <h3 className="text-xl font-black text-white">
+              No Personnel Identified
+            </h3>
+            <p className="text-slate-500 text-sm mt-2">
+              The staff registry is currently unpopulated.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-[#0b1120] rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-800/40 border-b border-slate-700/50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Staff Member
+                <thead>
+                  <tr className="bg-slate-900/50 border-b border-slate-800">
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Operator
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Contact
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Communication
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Status
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      System Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
                       Verification
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Joined Date
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
-                      Actions
+                    <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Action Hub
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/30">
+                <tbody className="divide-y divide-slate-800/50">
                   {filteredStaff.map((member) => (
                     <tr
                       key={member.id}
-                      className="hover:bg-slate-800/20 transition-colors"
+                      className="hover:bg-slate-900/30 transition-colors group"
                     >
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <span className="text-white font-bold text-base">
-                              {member.full_name?.charAt(0).toUpperCase() || "S"}
-                            </span>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-11 h-11 bg-slate-800 rounded-xl flex items-center justify-center text-emerald-400 font-black group-hover:scale-110 transition-transform">
+                            {member.full_name?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-white text-base">
-                              {member.full_name || "Unknown"}
+                            <p className="font-bold text-white text-base">
+                              {member.full_name}
                             </p>
-                            <p className="text-xs text-slate-500 font-mono">
-                              ID: {member.id}
+                            <p className="text-[9px] font-mono text-slate-600 tracking-tighter uppercase">
+                              UID: {member.id?.slice(0, 10)}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2 text-sm text-slate-300">
-                          <Mail
-                            size={14}
-                            className="text-emerald-400 flex-shrink-0"
-                          />
-                          <span className="truncate max-w-[200px]">
-                            {member.email || "N/A"}
-                          </span>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                          <Mail size={12} className="text-emerald-500" />{" "}
+                          {member.email}
                         </div>
                       </td>
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${
+                      <td className="px-8 py-6">
+                        <div
+                          className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${
                             member.is_active
-                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                              : "bg-red-500/15 text-red-300 border border-red-500/30"
+                              ? "text-emerald-500"
+                              : "text-red-500"
                           }`}
                         >
-                          {member.is_active ? (
-                            <UserCheck size={13} />
-                          ) : (
-                            <UserX size={13} />
-                          )}
-                          {member.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${
-                            member.email_verified
-                              ? "bg-blue-500/15 text-blue-300 border border-blue-500/30"
-                              : "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                          }`}
-                        >
-                          {member.email_verified ? "Verified" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2 text-sm text-slate-300">
-                          <Calendar size={14} className="text-emerald-400" />
-                          {member.created_at
-                            ? new Date(member.created_at).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                }
-                              )
-                            : "N/A"}
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              member.is_active
+                                ? "bg-emerald-500 animate-pulse"
+                                : "bg-red-500"
+                            }`}
+                          />
+                          {member.is_active ? "Authorized" : "Suspended"}
                         </div>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
+                      <td className="px-8 py-6">
+                        <span
+                          className={`px-3 py-1 text-[9px] font-black uppercase tracking-tighter rounded-full border ${
+                            member.email_verified
+                              ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          }`}
+                        >
+                          {member.email_verified
+                            ? "Identity Confirmed"
+                            : "Awaiting Proof"}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() =>
                               navigate(`/update-staff/${member.id}`)
                             }
-                            className="p-2 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30 rounded-lg transition-all group"
-                            title="Edit Staff"
+                            className="p-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:text-emerald-400 hover:border-emerald-400 transition-all rounded-xl"
                           >
-                            <Edit
-                              size={16}
-                              className="group-hover:scale-110 transition-transform"
-                            />
+                            <Edit size={16} />
                           </button>
                           <button
                             onClick={() =>
                               handleToggleStatus(member.id, member.is_active)
                             }
-                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                            className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all ${
                               member.is_active
-                                ? "bg-red-500/15 text-red-300 hover:bg-red-500/25 border border-red-500/30"
-                                : "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30"
+                                ? "border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white"
+                                : "border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-slate-950"
                             }`}
                           >
-                            {member.is_active ? "Deactivate" : "Activate"}
+                            {member.is_active ? "Suspend" : "Activate"}
                           </button>
                         </div>
                       </td>
@@ -402,58 +316,67 @@ const ManageStaffsPage = () => {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="w-14 h-14 bg-red-500/15 border-2 border-red-500/30 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <AlertTriangle size={28} className="text-red-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Confirm Deactivation
+        {/* Confirmation Modal */}
+        {showConfirmModal && (
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+            <div className="bg-[#0b1120] rounded-[2.5rem] border border-red-500/20 shadow-2xl max-w-md w-full p-10">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center mb-6">
+                  <AlertTriangle size={32} className="text-red-500" />
+                </div>
+                <h3 className="text-2xl font-black text-white mb-3">
+                  Suspend Staff Access?
                 </h3>
-                <p className="text-slate-300 leading-relaxed">
-                  Are you sure you want to deactivate{" "}
-                  <span className="font-semibold text-white">
+                <p className="text-slate-400 mb-8 text-sm font-medium leading-relaxed">
+                  You are about to revoke system access for{" "}
+                  <span className="text-white font-bold">
                     {selectedStaff?.name}
                   </span>
-                  ? This will immediately revoke their access to the system.
+                  . They will no longer be able to process claims or manage
+                  inventory.
                 </p>
               </div>
-            </div>
 
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
-              <p className="text-sm text-amber-200 flex items-start gap-2">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
-                <span>
-                  This action can be reversed by activating the account again.
-                </span>
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleCancelDeactivate}
-                className="flex-1 px-5 py-3 border-2 border-slate-700/50 text-slate-300 font-semibold rounded-xl hover:bg-slate-800/50 hover:border-slate-600 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDeactivate}
-                className="flex-1 px-5 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:shadow-red-500/30 transition-all"
-              >
-                Deactivate
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelDeactivate}
+                  className="flex-1 px-5 py-4 bg-slate-900 text-slate-400 text-xs font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDeactivate}
+                  className="flex-1 px-5 py-4 bg-red-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-red-600 transition-all"
+                >
+                  Confirm
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
+
+const StatPill = ({ label, value, color }) => (
+  <div
+    className={`px-6 py-4 bg-slate-900/40 border ${
+      color === "emerald" ? "border-emerald-500/20" : "border-slate-800"
+    } rounded-2xl min-w-[140px]`}
+  >
+    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+      {label}
+    </p>
+    <p
+      className={`text-3xl font-black ${
+        color === "emerald" ? "text-emerald-400" : "text-white"
+      }`}
+    >
+      {value}
+    </p>
+  </div>
+);
 
 export default ManageStaffsPage;

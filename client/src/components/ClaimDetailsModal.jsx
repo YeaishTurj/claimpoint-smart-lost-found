@@ -3,10 +3,13 @@ import {
   X,
   AlertCircle,
   CheckCircle2,
-  Clock,
-  Image as ImageIcon,
   MapPin,
-  Loader,
+  Loader2,
+  Calendar,
+  ShieldCheck,
+  ImageIcon,
+  ClipboardCheck,
+  Zap,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
@@ -29,328 +32,260 @@ const ClaimDetailsModal = ({ claimId, isOpen, onClose }) => {
       const res = await api.get(`/user/claims/${claimId}`);
       setClaim(res.data.claim);
     } catch (error) {
-      console.error("Failed to load claim", error);
-      toast.error(error.response?.data?.message || "Failed to load claim");
+      toast.error("Telemetry sync failed", { theme: "dark" });
       onClose?.();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      PENDING: {
-        bg: "bg-amber-500/10",
-        text: "text-amber-400",
-        label: "Pending",
-      },
-      APPROVED: {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        label: "Approved",
-      },
-      REJECTED: {
-        bg: "bg-rose-500/10",
-        text: "text-rose-400",
-        label: "Rejected",
-      },
-      COLLECTED: {
-        bg: "bg-teal-500/10",
-        text: "text-teal-400",
-        label: "Collected",
-      },
-    };
-    const config = statusConfig[status] || statusConfig.PENDING;
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-3 py-1 ${config.bg} ${config.text} rounded-full text-xs font-semibold border border-current/20`}
-      >
-        <CheckCircle2 size={12} />
-        {config.label}
-      </span>
-    );
-  };
-
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const renderPublicDetails = (details) => {
-    if (!details) return null;
-
-    if (typeof details === "string") {
-      return (
-        <p className="text-slate-300 mt-3 text-sm leading-relaxed">{details}</p>
-      );
-    }
-
-    if (Array.isArray(details)) {
-      if (details.length === 0) return null;
-      return (
-        <ul className="text-slate-300 mt-3 text-sm leading-relaxed list-disc list-inside space-y-1">
-          {details.map((item, idx) => (
-            <li key={idx}>{String(item)}</li>
-          ))}
-        </ul>
-      );
-    }
-
-    if (typeof details === "object") {
-      const entries = Object.entries(details);
-      if (entries.length === 0) return null;
-      return (
-        <div className="mt-3 space-y-2">
-          {entries.map(([key, value]) => (
-            <div
-              key={key}
-              className="flex items-start justify-between gap-4 border border-white/5 rounded-lg px-3 py-2 bg-slate-950/50"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {key}
-              </span>
-              <span className="text-sm text-slate-200 break-words text-right">
-                {String(value)}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    return (
-      <p className="text-slate-300 mt-3 text-sm leading-relaxed">
-        {String(details)}
-      </p>
-    );
-  };
-
-  const renderUserProof = (proof) => {
-    if (!proof) return null;
-
-    if (typeof proof === "object" && !Array.isArray(proof)) {
-      const entries = Object.entries(proof);
-      if (entries.length === 0) return null;
-      return (
-        <div className="mt-3 space-y-2">
-          {entries.map(([key, value]) => (
-            <div
-              key={key}
-              className="flex items-start justify-between gap-4 border border-white/5 rounded-lg px-3 py-2 bg-slate-950/50"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {key}
-              </span>
-              <span className="text-sm text-slate-200 break-words text-right">
-                {String(value)}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    return <p className="text-slate-300 mt-3 text-sm">{String(proof)}</p>;
-  };
-
-  if (!isOpen) return null;
-
-  if (!isAuthenticated || user?.role !== "USER") {
-    return null;
-  }
+  if (!isOpen || !isAuthenticated || user?.role !== "USER") return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-150 flex items-center justify-center pt-15">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-5xl max-h-[80vh] bg-[#0b1120] border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-8 py-5 flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-white">Claim Details</h2>
-              {claim && getStatusBadge(claim.status)}
+        <div className="px-10 py-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-2xl font-black text-white tracking-tight">
+                Claim <span className="text-emerald-400">Verification.</span>
+              </h2>
+              {claim && <StatusBadge status={claim.status} />}
             </div>
-            <p className="text-sm text-slate-400 mt-1">
-              {claim
-                ? `Submitted ${formatDate(claim.created_at)}`
-                : "Loading claim details"}
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Claim ID:{" "}
+              <span className="text-slate-300 font-mono">
+                #{claimId?.slice(0, 12)}
+              </span>
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 hover:bg-slate-800/50 rounded-xl transition-all text-slate-400 hover:text-white active:scale-95"
-            aria-label="Close"
+            className="p-3 bg-slate-800 text-slate-400 hover:text-white rounded-2xl transition-all"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto max-h-[calc(90vh-160px)] bg-gradient-to-br from-slate-950/50 via-slate-900/30 to-slate-950/50">
+        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
           {isLoading ? (
-            <div className="flex items-center justify-center py-28">
-              <div className="flex flex-col items-center gap-4">
-                <Loader size={48} className="text-emerald-400 animate-spin" />
-                <span className="text-slate-300 text-lg font-semibold">
-                  Loading...
-                </span>
-              </div>
+            <div className="py-24 flex flex-col items-center justify-center">
+              <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                Reconstructing Claim Data...
+              </p>
             </div>
           ) : claim ? (
-            <div className="p-8 space-y-6">
-              {/* Match Score Badge */}
-              {claim.match_percentage !== undefined && (
-                <div className="px-4 py-3 bg-emerald-500/10 text-emerald-300 rounded-xl border border-emerald-500/20 font-semibold inline-flex items-center gap-2">
-                  <CheckCircle2 size={16} />
-                  AI Match Score: {claim.match_percentage}%
+            <div className="space-y-8">
+              {/* Top Intelligence Bar */}
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 px-5 py-3 rounded-2xl flex items-center gap-3">
+                  <Zap
+                    size={18}
+                    className="text-emerald-400 fill-emerald-400/20"
+                  />
+                  <div>
+                    <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">
+                      AI match confidence
+                    </p>
+                    <p className="text-lg font-black text-emerald-400">
+                      {claim.match_percentage}%
+                    </p>
+                  </div>
                 </div>
-              )}
+                <div className="bg-slate-900/50 border border-slate-800 px-5 py-3 rounded-2xl flex items-center gap-3">
+                  <ShieldCheck size={18} className="text-slate-500" />
+                  <div>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">
+                      Submission Date
+                    </p>
+                    <p className="text-lg font-black text-slate-300">
+                      {new Date(claim.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              {/* Main Content Grid */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Left Column: Item Info & Proof Images */}
-                <div className="space-y-4">
-                  {/* Found Item Information */}
-                  <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <ImageIcon size={18} className="text-emerald-400" />
-                      Found Item Info
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          Item Type
-                        </span>
-                        <span className="text-sm font-semibold text-white text-right">
-                          {claim.item_info?.type || "Unknown"}
-                        </span>
-                      </div>
-                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          <MapPin size={14} className="inline mr-1" />
-                          Location
-                        </span>
-                        <span className="text-sm font-semibold text-white text-right">
-                          {claim.item_info?.location || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          <Clock size={14} className="inline mr-1" />
-                          Date Found
-                        </span>
-                        <span className="text-sm font-semibold text-white text-right">
-                          {claim.item_info?.date
-                            ? formatDate(claim.item_info.date)
-                            : "N/A"}
-                        </span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left: Your Evidence */}
+                <div className="space-y-6">
+                  <SectionHeader
+                    icon={ClipboardCheck}
+                    title="Your Claim Evidence"
+                  />
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-8 space-y-6">
+                    <div>
+                      <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                        Proof Details Provided
+                      </p>
+                      <div className="space-y-4">
+                        {renderMetadata(claim.claim_details?.user_proof)}
                       </div>
                     </div>
-
-                    {/* Public Details of Found Item */}
-                    {claim.item_info?.public_details && (
-                      <div className="mt-4 pt-4 border-t border-white/5">
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                          Public Details
+                    {claim.image_urls?.length > 0 && (
+                      <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                          Ownership Documentation
                         </p>
-                        {renderPublicDetails(claim.item_info.public_details)}
+                        <div className="grid grid-cols-2 gap-3">
+                          {claim.image_urls.map((url, i) => (
+                            <div
+                              key={i}
+                              className="aspect-video rounded-2xl overflow-hidden border border-slate-800 bg-slate-950"
+                            >
+                              <img
+                                src={url}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
-
-                  {/* User's Proof Images */}
-                  {Array.isArray(claim.image_urls) &&
-                    claim.image_urls.length > 0 && (
-                      <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                          <ImageIcon size={18} className="text-amber-400" />
-                          Your Proof Images
-                        </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {claim.image_urls.map((url, idx) => (
-                            <img
-                              key={idx}
-                              src={url}
-                              alt="Proof"
-                              className="w-full h-32 object-cover rounded-lg border border-white/10 hover:border-amber-500/50 transition-all cursor-pointer"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
                 </div>
 
-                {/* Right Column: User Proof & Item Photos */}
-                <div className="space-y-4">
-                  {/* User's Proof Details */}
-                  {claim.claim_details?.user_proof && (
-                    <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-                      <h3 className="text-lg font-semibold text-white mb-4">
-                        Your Proof Details
-                      </h3>
-                      {renderUserProof(claim.claim_details.user_proof)}
+                {/* Right: Asset Intelligence */}
+                <div className="space-y-6">
+                  <SectionHeader
+                    icon={ImageIcon}
+                    title="Found Asset Reference"
+                  />
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-8 space-y-6">
+                    <div className="grid grid-cols-2 gap-6 pb-6 border-b border-slate-800">
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                          Asset Type
+                        </p>
+                        <p className="text-sm font-bold text-white">
+                          {claim.item_info?.type}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                          Recovery Site
+                        </p>
+                        <p className="text-sm font-bold text-white">
+                          {claim.item_info?.location}
+                        </p>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Found Item Photos */}
-                  {Array.isArray(claim.item_info?.images) &&
-                    claim.item_info.images.length > 0 && (
-                      <div className="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                          <ImageIcon size={18} className="text-teal-400" />
-                          Found Item Photos
-                        </h3>
+                    <div>
+                      <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                        Public Descriptive Data
+                      </p>
+                      <div className="space-y-4">
+                        {renderMetadata(claim.item_info?.public_details)}
+                      </div>
+                    </div>
+
+                    {claim.item_info?.images?.length > 0 && (
+                      <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                          Asset Visuals
+                        </p>
                         <div className="grid grid-cols-2 gap-3">
-                          {claim.item_info.images.map((url, idx) => (
-                            <img
-                              key={idx}
-                              src={url}
-                              alt="Found item"
-                              className="w-full h-32 object-cover rounded-lg border border-white/10 hover:border-teal-500/50 transition-all cursor-pointer"
-                            />
+                          {claim.item_info.images.map((url, i) => (
+                            <div
+                              key={i}
+                              className="aspect-video rounded-2xl overflow-hidden border border-slate-800 bg-slate-950"
+                            >
+                              <img
+                                src={url}
+                                alt=""
+                                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                              />
+                            </div>
                           ))}
                         </div>
                       </div>
                     )}
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center py-28">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <AlertCircle size={48} className="text-red-400" />
-                </div>
-                <p className="text-slate-300 text-xl font-bold mb-2">
-                  Failed to load claim
-                </p>
-                <p className="text-slate-500 text-sm">Please try again later</p>
-              </div>
+            <div className="py-20 text-center">
+              <AlertCircle size={48} className="text-rose-500 mx-auto mb-4" />
+              <p className="text-white font-black uppercase tracking-widest text-xs">
+                Claim Analysis Failed
+              </p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-t border-slate-800/50 px-8 py-2 flex justify-end">
+        <div className="px-10 py-6 border-t border-slate-800 bg-slate-900/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-8 py-2 border-2 border-slate-700/50 text-slate-300 font-bold rounded-xl hover:bg-slate-800/50 hover:border-slate-600 transition-all active:scale-95"
+            className="px-8 py-3 bg-slate-800 text-slate-300 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-700 transition-all"
           >
-            Close
+            Exit Verification
           </button>
         </div>
       </div>
     </div>
   );
+};
+
+// --- Helpers ---
+
+const StatusBadge = ({ status }) => {
+  const configs = {
+    PENDING: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    APPROVED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    REJECTED: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    COLLECTED: "bg-teal-500/10 text-teal-400 border-teal-500/20",
+  };
+  return (
+    <span
+      className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${configs[status]}`}
+    >
+      {status}
+    </span>
+  );
+};
+
+const SectionHeader = ({ icon: Icon, title }) => (
+  <div className="flex items-center gap-3 px-2">
+    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+      <Icon size={16} />
+    </div>
+    <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">
+      {title}
+    </h3>
+  </div>
+);
+
+const renderMetadata = (data) => {
+  if (!data)
+    return (
+      <p className="text-xs text-slate-600 font-bold italic uppercase">
+        No data points available
+      </p>
+    );
+  if (typeof data === "string")
+    return (
+      <p className="text-sm font-bold text-slate-300 leading-relaxed">{data}</p>
+    );
+
+  return Object.entries(data).map(([key, value]) => (
+    <div key={key} className="flex flex-col">
+      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+        {key}
+      </span>
+      <span className="text-sm font-bold text-slate-300">{String(value)}</span>
+    </div>
+  ));
 };
 
 export default ClaimDetailsModal;

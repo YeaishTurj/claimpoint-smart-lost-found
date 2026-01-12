@@ -17,6 +17,8 @@ import {
   Loader,
   Info,
 } from "lucide-react";
+import { PageShell } from "../components/layout";
+import { AccessCard } from "../components/ui";
 
 const ClaimItemPage = () => {
   const navigate = useNavigate();
@@ -33,23 +35,9 @@ const ClaimItemPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
-        <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-          <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 size={36} className="text-emerald-400" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-3">Login Required</h2>
-          <p className="text-slate-400 mb-8 text-sm leading-relaxed">
-            You must be logged in to submit a claim for a found item.
-          </p>
-          <button
-            onClick={() => navigate("/login")}
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
+      <PageShell variant="centered">
+        <AccessCard />
+      </PageShell>
     );
   }
 
@@ -174,8 +162,8 @@ const ClaimItemPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <PageShell>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="mb-8">
           <button
@@ -442,7 +430,7 @@ const ClaimItemPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
 
