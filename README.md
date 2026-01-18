@@ -1,5 +1,7 @@
 # ClaimPoint — Smart Lost & Found Management System
 
+[➡️ Project Overview & System Workflow (Full Details)](./README_PROJECT_OVERVIEW.md)
+
 ClaimPoint is a full-stack lost & found system with **role-based dashboards** (Admin / Staff / User) and **local AI-powered claim verification**. Staff can post found items (with hidden verification details), users can submit claims, and the backend assigns a **match percentage** using a local embedding model.
 
 ## Tech Stack
