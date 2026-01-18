@@ -96,13 +96,11 @@ const MyDashboardPage = () => {
 
   if (!isAuthenticated || user?.role !== "USER") {
     return (
-      <PageShell variant="centered">
         <AccessCard
           icon={ShieldCheck}
           title="Identity Verification Required"
           description="Access to personal dossiers is restricted. Please authenticate as a USER."
         />
-      </PageShell>
     );
   }
 
@@ -186,7 +184,14 @@ const MyDashboardPage = () => {
                     { label: "Site", value: report.location_lost },
                     {
                       label: "Loss Date",
-                      value: new Date(report.date_lost).toLocaleDateString(),
+                      value: new Date(report.date_lost).toLocaleDateString(
+                        "en-US",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      ),
                     },
                     {
                       label: "ID Ref",

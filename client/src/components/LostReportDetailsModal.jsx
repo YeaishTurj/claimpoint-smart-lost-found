@@ -106,7 +106,14 @@ const LostReportDetailsModal = ({ reportId, isOpen, onClose }) => {
                       <InfoBlock
                         icon={<Calendar size={14} />}
                         label="Incident Date"
-                        value={new Date(report.date_lost).toLocaleDateString()}
+                        value={new Date(report.date_lost).toLocaleDateString(
+                          "en-US",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
                       />
                     </div>
                   </div>

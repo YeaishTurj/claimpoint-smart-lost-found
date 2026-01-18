@@ -51,13 +51,11 @@ const AddFoundItem = () => {
 
   if (!isAuthenticated) {
     return (
-      <PageShell variant="centered">
         <AccessCard
           icon={User}
           title="Authentication required"
           description="You must be logged in with staff privileges to add found items."
         />
-      </PageShell>
     );
   }
 
@@ -220,401 +218,282 @@ const AddFoundItem = () => {
 
   return (
     <PageShell>
-      {/* Header Section */}
-      <div className="mb-8">
+      <div className="max-w-6xl mx-auto pt-15">
+        {/* Navigation */}
         <button
           onClick={() => navigate(-1)}
-          className="group inline-flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors mb-6"
+          className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-emerald-400 transition-all mb-10"
         >
           <ArrowLeft
-            size={20}
+            size={14}
             className="group-hover:-translate-x-1 transition-transform"
           />
-          <span className="font-medium">Back</span>
+          System Portal
         </button>
 
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <Package size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Add Found Item
-            </h1>
-            <p className="text-slate-400 mt-1">
-              Register a new lost item in the system
-            </p>
-          </div>
-        </div>
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left: Form Content */}
+          <div className="lg:col-span-8 space-y-8">
+            <header>
+              <h1 className="text-4xl font-black text-white tracking-tight mb-2">
+                Register <span className="text-emerald-500">Found Item.</span>
+              </h1>
+              <p className="text-slate-400 font-medium">
+                Add a new item to the registry for owners to claim.
+              </p>
+            </header>
 
-      {/* Notice Banner */}
-      <div className="mb-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-l-4 border-emerald-500 px-6 py-4 rounded-r-xl">
-        <div className="flex items-start gap-3">
-          <AlertCircle
-            size={20}
-            className="text-emerald-400 mt-0.5 flex-shrink-0"
-          />
-          <div className="flex-1">
-            <h3 className="font-semibold text-emerald-100 text-sm mb-1">
-              Item Registration
-            </h3>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Please provide accurate details to help owners identify and claim
-              their lost items. Use hidden attributes for security verification.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Main Content: Form Fields */}
-        <div className="lg:col-span-8 space-y-6">
-          <form id="add-item-form" onSubmit={handleSubmit}>
-            {/* Card: Primary Info */}
-            <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                  <FileText className="w-4 h-4 text-emerald-400" />
+            <form
+              id="add-item-form"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              {/* Card 1: Core Details */}
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center gap-3">
+                  <FileText size={16} className="text-emerald-500" />
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Core Details
+                  </span>
                 </div>
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Core Details
-                </h2>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Item Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">
-                    Item Type <span className="text-red-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                      <Package size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="item_type"
-                      value={formData.item_type}
+                <div className="p-8 space-y-6">
+                  <FormInput
+                    label="Item Type / Name"
+                    name="item_type"
+                    value={formData.item_type}
+                    onChange={handleChange}
+                    placeholder="e.g. Black Sony Wireless Headphones"
+                    icon={Package}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput
+                      label="Location Found"
+                      name="location_found"
+                      value={formData.location_found}
                       onChange={handleChange}
-                      placeholder="e.g. Black Sony Wireless Headphones"
-                      className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                        errors.item_type
-                          ? "border-red-500/50"
-                          : "border-white/10"
-                      } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm backdrop-blur-sm`}
+                      placeholder="e.g. Library, 2nd Floor"
+                      icon={MapPin}
                     />
-                  </div>
-                  {errors.item_type && (
-                    <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle size={12} />
-                      {errors.item_type}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Location */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
-                      Location Found <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <MapPin size={18} />
-                      </div>
-                      <input
-                        type="text"
-                        name="location_found"
-                        value={formData.location_found}
-                        onChange={handleChange}
-                        placeholder="e.g. Library, 2nd Floor"
-                        className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                          errors.location_found
-                            ? "border-red-500/50"
-                            : "border-white/10"
-                        } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm backdrop-blur-sm`}
-                      />
-                    </div>
-                    {errors.location_found && (
-                      <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                        <AlertCircle size={12} />
-                        {errors.location_found}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Date */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
-                      Date & Time <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Calendar size={18} />
-                      </div>
-                      <input
-                        type="datetime-local"
-                        name="date_found"
-                        value={formData.date_found}
-                        onChange={handleChange}
-                        max={new Date().toISOString().slice(0, 16)}
-                        className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                          errors.date_found
-                            ? "border-red-500/50"
-                            : "border-white/10"
-                        } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm [color-scheme:dark] backdrop-blur-sm`}
-                      />
-                    </div>
-                    {errors.date_found && (
-                      <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                        <AlertCircle size={12} />
-                        {errors.date_found}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Card: Dynamic Details */}
-            <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-500/10 rounded-lg">
-                    <Info className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                    Attributes
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={addDetailField}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold border border-emerald-500/20 transition-all active:scale-95"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Field
-                </button>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div className="hidden md:grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                  <div className="col-span-4">Attribute Name</div>
-                  <div className="col-span-5">Value</div>
-                  <div className="col-span-3">Visibility</div>
-                </div>
-
-                {detailFields.map((field, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start p-4 bg-slate-950/50 border border-white/10 rounded-xl hover:border-emerald-500/30 transition-all backdrop-blur-sm"
-                  >
-                    {/* Key Input */}
-                    <div className="md:col-span-4">
-                      <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                        Name
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                        Date & Time Found
                       </label>
+                      <div className="relative">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+                          <Calendar size={18} />
+                        </div>
+                        <input
+                          type="datetime-local"
+                          name="date_found"
+                          value={formData.date_found}
+                          onChange={handleChange}
+                          max={new Date().toISOString().slice(0, 16)}
+                          placeholder="dd/mm/yyyy"
+                          className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 [color-scheme:dark]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Item Attributes */}
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Info size={16} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Item Attributes
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addDetailField}
+                    className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-all"
+                  >
+                    <Plus size={12} /> Add Attribute
+                  </button>
+                </div>
+                <div className="p-8 space-y-4">
+                  {detailFields.map((field, index) => (
+                    <div key={index} className="flex gap-3 group items-start">
                       <input
                         type="text"
                         value={field.key}
                         onChange={(e) =>
                           updateDetailField(index, "key", e.target.value)
                         }
-                        placeholder="Color, Brand, etc."
-                        className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                        placeholder="Attribute (e.g. Serial)"
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:border-emerald-500 focus:outline-none transition-all"
                       />
-                    </div>
-
-                    {/* Value Input */}
-                    <div className="md:col-span-5">
-                      <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                        Value
-                      </label>
                       <input
                         type="text"
                         value={field.value}
                         onChange={(e) =>
                           updateDetailField(index, "value", e.target.value)
                         }
-                        placeholder="Red, Nike, etc."
-                        className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                        placeholder="Value"
+                        className="flex-[2] bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-emerald-500 focus:outline-none transition-all"
                       />
-                    </div>
-
-                    {/* Visibility & Actions */}
-                    <div className="md:col-span-3 flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => togglePublic(index)}
-                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-all active:scale-95 ${
+                        className={`p-3 rounded-xl border transition-all ${
                           field.isPublic
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20"
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                            : "bg-slate-800 border-slate-700 text-slate-500"
                         }`}
+                        title={field.isPublic ? "Public" : "Hidden"}
                       >
                         {field.isPublic ? (
-                          <>
-                            <Eye size={14} /> Public
-                          </>
+                          <Eye size={16} />
                         ) : (
-                          <>
-                            <EyeOff size={14} /> Hidden
-                          </>
+                          <EyeOff size={16} />
                         )}
                       </button>
-
                       {detailFields.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeDetailField(index)}
-                          className="p-2.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all active:scale-95 border border-white/10 hover:border-red-500/30"
-                          title="Remove field"
+                          className="p-3 text-slate-600 hover:text-rose-500 transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>
                       )}
                     </div>
-                  </div>
-                ))}
-
-                {errors.details && (
-                  <div className="flex items-center gap-2 text-sm text-red-400 mt-3 px-1">
-                    <ShieldAlert size={16} />
-                    {errors.details}
-                  </div>
-                )}
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Sidebar: Media & Actions (Sticky) */}
-        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 h-fit">
-          {/* Image Upload */}
-          <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6">
-            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <Upload className="w-4 h-4 text-emerald-400" />
-              Evidence Photos
-            </h3>
-
-            <div className="relative group">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
-              />
-              <div className="border-2 border-dashed border-white/20 bg-slate-950/50 rounded-xl p-8 text-center transition-all group-hover:border-emerald-500/50 group-hover:bg-slate-900/50 backdrop-blur-sm">
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
-                </div>
-                <p className="text-sm font-semibold text-slate-200">
-                  Click to upload
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  JPG, PNG up to 5MB
-                </p>
-              </div>
-            </div>
-
-            {errors.images && (
-              <p className="text-red-400 text-xs mt-3 flex items-center gap-1">
-                <AlertCircle size={12} />
-                {errors.images}
-              </p>
-            )}
-
-            {/* Minimalist Image Grid */}
-            {previewImages.length > 0 && (
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {previewImages.map((preview, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square rounded-lg overflow-hidden group border border-white/10"
-                  >
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                      <button
-                        type="button"
-                        onClick={() => removePreviewImage(index)}
-                        className="text-white hover:text-red-400 p-2 bg-slate-900/80 rounded-lg transition-all active:scale-95"
-                      >
-                        <X size={18} />
-                      </button>
+                  ))}
+                  {errors.details && (
+                    <div className="flex items-center gap-2 text-xs text-red-400 mt-2">
+                      <AlertCircle size={14} />
+                      {errors.details}
                     </div>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
-            )}
+            </form>
           </div>
 
-          {/* Quick Tips */}
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <AlertCircle size={14} className="text-emerald-400" /> Guidelines
-            </h4>
-            <ul className="space-y-2.5">
-              <li className="text-xs text-slate-400 flex items-start gap-2">
-                <CheckCircle2
-                  size={14}
-                  className="mt-0.5 text-emerald-400 flex-shrink-0"
-                />
-                <span>
-                  Use "Hidden" attributes for security questions (e.g., serial
-                  numbers).
-                </span>
-              </li>
-              <li className="text-xs text-slate-400 flex items-start gap-2">
-                <CheckCircle2
-                  size={14}
-                  className="mt-0.5 text-emerald-400 flex-shrink-0"
-                />
-                <span>
-                  Clear photos increase claim verification speed by 40%.
-                </span>
-              </li>
-            </ul>
-          </div>
+          {/* Right: Media & Actions Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] p-8 space-y-6 lg:sticky lg:top-10">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Upload size={14} className="text-emerald-500" />
+                Evidence Photos
+              </h3>
 
-          {/* Primary Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/manage-items")}
-              className="col-span-1 py-3 px-4 bg-transparent border border-white/20 hover:bg-white/5 text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition-all active:scale-95"
-              disabled={isSubmitting || uploadingImages}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              form="add-item-form"
-              disabled={isSubmitting || uploadingImages}
-              className="col-span-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              {isSubmitting || uploadingImages ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Save Record</span>
-                </>
+              <div className="relative group">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-[2rem] p-8 text-center group-hover:border-emerald-500/50 transition-all">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-emerald-500">
+                    <Upload size={20} />
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Drop Reference Media
+                  </p>
+                  <p className="text-[9px] text-slate-600 mt-2">
+                    JPG, PNG up to 5MB
+                  </p>
+                </div>
+              </div>
+
+              {errors.images && (
+                <div className="flex items-center gap-2 text-xs text-red-400">
+                  <AlertCircle size={14} />
+                  {errors.images}
+                </div>
               )}
-            </button>
+
+              {previewImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {previewImages.map((src, i) => (
+                    <div
+                      key={i}
+                      className="relative aspect-square rounded-xl overflow-hidden border border-slate-800 group"
+                    >
+                      <img
+                        src={src}
+                        className="w-full h-full object-cover"
+                        alt=""
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => removePreviewImage(i)}
+                          className="text-white hover:text-red-400 p-2 bg-slate-900/80 rounded-lg transition-all"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="space-y-3 pt-6 border-t border-slate-800">
+                <button
+                  type="submit"
+                  form="add-item-form"
+                  disabled={isSubmitting || uploadingImages}
+                  className="w-full py-4 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting || uploadingImages ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Save size={16} /> Save Record
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="w-full py-4 bg-slate-900 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4">
+                <div className="flex gap-3 items-start">
+                  <CheckCircle2 size={16} className="text-emerald-500 mt-1" />
+                  <p className="text-[9px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
+                    Use "Hidden" attributes for security questions (e.g., serial
+                    numbers). Clear photos increase claim verification speed by
+                    40%.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </PageShell>
   );
 };
+
+// --- Helper Component ---
+const FormInput = ({ label, icon: Icon, type = "text", ...props }) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+        <Icon size={18} />
+      </div>
+      <input
+        type={type}
+        {...props}
+        className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 [color-scheme:dark]"
+      />
+    </div>
+  </div>
+);
 
 export default AddFoundItem;

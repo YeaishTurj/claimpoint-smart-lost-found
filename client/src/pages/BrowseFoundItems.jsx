@@ -53,7 +53,7 @@ const BrowseFoundItems = () => {
   }, [items]);
 
   return (
-    <PageShell className="bg-[#020617]" containerClassName="max-w-7xl">
+    <PageShell className="bg-[#020617]" containerClassName="max-w-6xl">
       <div className="relative z-10 py-15">
 
         {/* --- Header Section --- */}

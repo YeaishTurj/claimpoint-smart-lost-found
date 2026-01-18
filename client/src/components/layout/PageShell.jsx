@@ -5,7 +5,7 @@ const shellVariants = {
     outer:
       "min-h-screen bg-[#020617] selection:bg-emerald-500/30 selection:text-emerald-200",
     padding: "py-12 px-4 sm:px-6 lg:px-8",
-    container: "max-w-7xl mx-auto",
+    container: "max-w-6xl mx-auto",
   },
   wide: {
     outer: "min-h-screen bg-[#020617] selection:bg-emerald-500/30",

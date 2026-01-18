@@ -3,7 +3,19 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../context/auth.context";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
-import { User, Phone, ArrowLeft, Loader, Save, X } from "lucide-react";
+import {
+  User,
+  Phone,
+  ArrowLeft,
+  Loader2,
+  Save,
+  X,
+  Fingerprint,
+  ChevronRight,
+  ShieldAlert,
+} from "lucide-react";
+import { PageShell } from "../components/layout";
+import { AccessCard } from "../components/ui";
 
 const UpdateProfilePage = () => {
   const navigate = useNavigate();
@@ -18,14 +30,12 @@ const UpdateProfilePage = () => {
     phone: "",
   });
 
-  // Fetch user profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
       if (!isAuthenticated) {
         setIsLoading(false);
         return;
       }
-
       try {
         setIsLoading(true);
         const response = await api.get("/auth/profile");
@@ -35,75 +45,45 @@ const UpdateProfilePage = () => {
           phone: response.data.user.phone || "",
         });
       } catch (error) {
-        console.error("Failed to fetch profile:", error);
-        toast.error("Failed to load profile data", {
-          position: "top-center",
-          autoClose: 2000,
-        });
+        toast.error("Telemetry sync failed", { theme: "dark" });
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchProfile();
   }, [isAuthenticated]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.full_name.trim()) {
-      newErrors.full_name = "Full name is required";
-    }
-
+    if (!formData.full_name.trim())
+      newErrors.full_name = "Identity string required";
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = "Contact telemetry required";
     } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+      newErrors.phone = "Invalid character sequence";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
-    if (!validateForm()) {
-      return;
-    }
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setIsSaving(true);
     try {
-      const response = await api.patch("/auth/profile", formData);
-      setUser(response.data.user);
-
-      toast.success("Profile updated successfully!", {
-        position: "top-center",
-        autoClose: 5000,
-      });
-
-      // Navigate to my-profile page after 2.5 seconds
-      setTimeout(() => {
-        navigate("/my-profile");
-      }, 1500);
+      await api.patch("/auth/profile", formData);
+      toast.success("Profile registry updated", { theme: "dark" });
+      setTimeout(() => navigate("/my-profile"), 1000);
     } catch (error) {
-      console.error("Failed to update profile:", error);
-      toast.error(error.response?.data?.message || "Failed to update profile", {
-        position: "top-center",
-        autoClose: 2000,
+      toast.error(error.response?.data?.message || "Registry update failed", {
+        theme: "dark",
       });
     } finally {
       setIsSaving(false);
@@ -112,154 +92,132 @@ const UpdateProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <div className="flex items-center gap-3">
-          <Loader size={24} className="animate-spin text-emerald-400" />
-          <span className="text-slate-200">Loading profile...</span>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={40} className="animate-spin text-emerald-500" />
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+            Accessing Registry...
+          </p>
         </div>
-      </div>
     );
   }
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
-        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User size={40} className="text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Access Required
-          </h2>
-          <p className="text-slate-300 mb-6">
-            Please log in to view your profile and manage your account
-          </p>
-          <button
-            onClick={() => navigate("/login")}
-            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
+        <AccessCard
+          icon={ShieldAlert}
+          title="Identity Required"
+          description="Authentication is necessary to modify secure profile data."
+        />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+    <PageShell>
+      <div className="max-w-6xl mx-auto">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-12">
           <button
             onClick={() => navigate("/my-profile")}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-all"
+            className="hover:text-emerald-400 transition-colors"
           >
-            <ArrowLeft size={24} className="text-slate-300" />
+            Profile
           </button>
-          <h1 className="text-3xl font-bold text-white">Update Profile</h1>
+          <ChevronRight size={12} />
+          <span className="text-slate-300">Update Dossier</span>
         </div>
 
-        {/* Update Form Card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50">
-          {/* Profile Info */}
-          <div className="mb-8 pb-8 border-b border-slate-700/50">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                <User size={32} className="text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {user.full_name}
-                </h2>
-                <p className="text-sm text-slate-300 mt-1">{user.email}</p>
-              </div>
+        <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl">
+          {/* Dossier Header */}
+          <div className="p-10 border-b border-slate-800 bg-slate-900/30 flex items-center gap-6">
+            <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-500 shadow-inner">
+              <Fingerprint size={32} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white tracking-tight">
+                Modify Identity.
+              </h1>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
+                Currently Editing:{" "}
+                <span className="text-slate-300">{user.email}</span>
+              </p>
             </div>
           </div>
 
-          {/* Form */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
-            className="space-y-6"
-          >
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">
-                <div className="flex items-center gap-2">
-                  <User size={16} className="text-emerald-400" />
-                  Full Name *
-                </div>
-              </label>
-              <input
-                type="text"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
-                  errors.full_name
-                    ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                    : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                }`}
-              />
-              {errors.full_name && (
-                <p className="text-xs text-red-400 mt-1.5">
-                  {errors.full_name}
-                </p>
-              )}
+          {/* Form Body */}
+          <form onSubmit={handleSave} className="p-10 space-y-8">
+            <div className="grid grid-cols-1 gap-8">
+              {/* Full Name Input */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <User size={14} className="text-emerald-500" />
+                  Full Legal Name
+                </label>
+                <input
+                  type="text"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleInputChange}
+                  className={`w-full bg-slate-950 border-2 px-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none placeholder:text-slate-700 ${
+                    errors.full_name
+                      ? "border-rose-500/50 focus:border-rose-500"
+                      : "border-slate-800 focus:border-emerald-500"
+                  }`}
+                  placeholder="John Doe"
+                />
+                {errors.full_name && (
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest ml-2">
+                    {errors.full_name}
+                  </p>
+                )}
+              </div>
+
+              {/* Phone Input */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <Phone size={14} className="text-emerald-500" />
+                  Contact Telemetry (Phone)
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className={`w-full bg-slate-950 border-2 px-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none placeholder:text-slate-700 ${
+                    errors.phone
+                      ? "border-rose-500/50 focus:border-rose-500"
+                      : "border-slate-800 focus:border-emerald-500"
+                  }`}
+                  placeholder="+1 234 567 890"
+                />
+                {errors.phone && (
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest ml-2">
+                    {errors.phone}
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">
-                <div className="flex items-center gap-2">
-                  <Phone size={16} className="text-emerald-400" />
-                  Phone Number *
-                </div>
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="Enter your phone number"
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
-                  errors.phone
-                    ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                    : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                }`}
-              />
-              {errors.phone && (
-                <p className="text-xs text-red-400 mt-1.5">{errors.phone}</p>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-8 pt-8 border-t border-slate-700/50 flex gap-3 justify-end">
+            {/* Action Area */}
+            <div className="pt-10 mt-10 border-t border-slate-800 flex flex-col sm:flex-row gap-4">
               <button
                 type="button"
                 onClick={() => navigate("/my-profile")}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 rounded-lg transition-all"
+                className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
               >
                 <X size={16} />
-                Cancel
+                Abort Changes
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 disabled:opacity-50"
               >
                 {isSaving ? (
-                  <>
-                    <Loader size={16} className="animate-spin" />
-                    Saving...
-                  </>
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
                   <>
                     <Save size={16} />
-                    Save Changes
+                    Commit to Registry
                   </>
                 )}
               </button>
@@ -267,7 +225,7 @@ const UpdateProfilePage = () => {
           </form>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
 

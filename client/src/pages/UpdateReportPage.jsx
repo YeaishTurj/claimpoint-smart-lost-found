@@ -12,6 +12,7 @@ import {
   Trash2,
   AlertCircle,
   Info,
+  Cpu,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
@@ -196,243 +197,277 @@ const UpdateReportPage = () => {
 
   if (isLoading)
     return (
-      <PageShell variant="centered">
         <LoadingState />
-      </PageShell>
     );
 
   const disabled = formData.status !== "OPEN";
 
   return (
     <PageShell>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 mb-6"
-          >
-            <ArrowLeft size={20} /> <span>Back</span>
-          </button>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-              <Package size={24} className="text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-white">Update Report</h1>
-          </div>
-        </div>
-
-        {/* Status Banner */}
-        <div
-          className={`mb-6 p-4 rounded-xl border-l-4 ${
-            disabled
-              ? "bg-amber-500/10 border-amber-500"
-              : "bg-emerald-500/10 border-emerald-500"
-          }`}
+      <div className="max-w-6xl mx-auto pt-15">
+        {/* Navigation */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-emerald-400 transition-all mb-10"
         >
-          <div className="flex gap-3">
-            <AlertCircle
-              className={disabled ? "text-amber-400" : "text-emerald-400"}
-            />
-            <div>
-              <p className="font-bold text-white">
-                {disabled ? "Editing Locked" : "Open for Edits"}
-              </p>
-              <p className="text-sm text-slate-300">
-                {disabled
-                  ? "Matched reports cannot be changed."
-                  : "Keep details updated for better matching."}
-              </p>
-            </div>
-          </div>
-        </div>
+          <ArrowLeft
+            size={14}
+            className="group-hover:-translate-x-1 transition-transform"
+          />{" "}
+          System Portal
+        </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Form Area */}
-          <div className="lg:col-span-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left: Form Content */}
+          <div className="lg:col-span-8 space-y-8">
+            <header>
+              <h1 className="text-4xl font-black text-white tracking-tight mb-2">
+                Update <span className="text-emerald-500">Lost Report.</span>
+              </h1>
+              <p className="text-slate-400 font-medium">
+                Refine details for better matching accuracy.
+              </p>
+            </header>
+
+            {disabled && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-[2rem] p-6 flex items-start gap-4">
+                <AlertCircle
+                  size={20}
+                  className="text-amber-400 mt-1 flex-shrink-0"
+                />
+                <div>
+                  <p className="text-sm font-black text-amber-400 uppercase tracking-widest">
+                    Report Locked
+                  </p>
+                  <p className="text-sm text-slate-300 mt-1">
+                    Matched reports cannot be changed.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <form
               id="update-report-form"
               onSubmit={handleSubmit}
               className="space-y-6"
             >
-              <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
-                <h2 className="text-white font-bold mb-4 flex items-center gap-2">
-                  <Info size={18} className="text-emerald-400" /> Core Details
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-slate-400 text-sm mb-1 block">
-                      Item Type
-                    </label>
-                    <input
-                      name="item_type"
-                      value={formData.item_type}
+              {/* Card 1: Primary Parameters */}
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center gap-3">
+                  <Cpu size={16} className="text-emerald-500" />
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Primary Parameters
+                  </span>
+                </div>
+                <div className="p-8 space-y-6">
+                  <FormInput
+                    label="Item Type"
+                    name="item_type"
+                    value={formData.item_type}
+                    onChange={handleChange}
+                    disabled={disabled}
+                    placeholder="e.g. MacBook Pro M3 Silver"
+                    icon={Package}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput
+                      label="Last Known Location"
+                      name="location_lost"
+                      value={formData.location_lost}
                       onChange={handleChange}
                       disabled={disabled}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white"
+                      placeholder="e.g. Terminal 3, Cafe"
+                      icon={MapPin}
                     />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-slate-400 text-sm mb-1 block">
-                        Location
-                      </label>
-                      <input
-                        name="location_lost"
-                        value={formData.location_lost}
-                        onChange={handleChange}
-                        disabled={disabled}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-slate-400 text-sm mb-1 block">
-                        Date/Time
-                      </label>
-                      <input
-                        type="datetime-local"
-                        name="date_lost"
-                        value={formData.date_lost}
-                        onChange={handleChange}
-                        disabled={disabled}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white [color-scheme:dark]"
-                      />
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                          Temporal Marker (Date/Time)
+                        </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+                          <Calendar size={18} />
+                        </div>
+                        <input
+                          type="datetime-local"
+                          name="date_lost"
+                          value={formData.date_lost}
+                          onChange={handleChange}
+                          disabled={disabled}
+                          placeholder="dd/mm/yyyy"
+                          className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 disabled:opacity-50 [color-scheme:dark]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Dynamic Attributes */}
-              <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-white font-bold">
-                    Additional Attributes
-                  </h2>
+              {/* Card 2: Distinct Attributes */}
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Info size={16} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Distinct Attributes
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={addProofField}
                     disabled={disabled}
-                    className="text-emerald-400 flex items-center gap-1 text-sm"
+                    className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
                   >
-                    <Plus size={16} /> Add Field
+                    <Plus size={12} /> Add Attribute
                   </button>
                 </div>
-                {proofFields.map((field, idx) => (
-                  <div key={idx} className="flex gap-2 mb-3">
-                    <input
-                      placeholder="Name"
-                      value={field.key}
-                      onChange={(e) =>
-                        updateProofField(idx, "key", e.target.value)
-                      }
-                      disabled={disabled}
-                      className="flex-1 bg-slate-950 border border-white/10 rounded-lg p-2 text-white text-sm"
-                    />
-                    <input
-                      placeholder="Value"
-                      value={field.value}
-                      onChange={(e) =>
-                        updateProofField(idx, "value", e.target.value)
-                      }
-                      disabled={disabled}
-                      className="flex-1 bg-slate-950 border border-white/10 rounded-lg p-2 text-white text-sm"
-                    />
-                    {!disabled && (
-                      <button
-                        type="button"
-                        onClick={() => removeProofField(idx)}
-                        className="text-red-400 p-2"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                <div className="p-8 space-y-4">
+                  {proofFields.map((field, idx) => (
+                    <div key={idx} className="flex gap-4 group">
+                      <input
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:border-emerald-500 focus:outline-none transition-all disabled:opacity-50"
+                        placeholder="Attribute (e.g. Serial)"
+                        value={field.key}
+                        disabled={disabled}
+                        onChange={(e) =>
+                          updateProofField(idx, "key", e.target.value)
+                        }
+                      />
+                      <input
+                        className="flex-[2] bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-emerald-500 focus:outline-none transition-all disabled:opacity-50"
+                        placeholder="Value"
+                        value={field.value}
+                        disabled={disabled}
+                        onChange={(e) =>
+                          updateProofField(idx, "value", e.target.value)
+                        }
+                      />
+                      {proofFields.length > 1 && !disabled && (
+                        <button
+                          type="button"
+                          onClick={() => removeProofField(idx)}
+                          className="p-3 text-slate-600 hover:text-rose-500 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </form>
           </div>
 
-          {/* Sidebar */}
+          {/* Right: Media & Actions Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <Upload size={18} /> Photos
+            <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] p-8 space-y-6 lg:sticky lg:top-10">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Upload size={14} className="text-emerald-500" /> Visual
+                Verification
               </h3>
-              <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-emerald-500 transition-colors relative">
+
+              <div className="relative group">
                 <input
                   type="file"
                   multiple
+                  accept="image/*"
                   onChange={handleImageChange}
                   disabled={disabled}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
                 />
-                <Upload className="mx-auto text-slate-500 mb-2" />
-                <p className="text-xs text-slate-400">
-                  Click or drag to upload new images
-                </p>
+                <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-[2rem] p-8 text-center group-hover:border-emerald-500/50 transition-all">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-emerald-500">
+                    <Upload size={20} />
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Drop Reference Media
+                  </p>
+                </div>
               </div>
 
-              {/* Previews */}
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                {existingImages.map((img, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded overflow-hidden relative"
-                  >
-                    <img
-                      src={img}
-                      className="object-cover w-full h-full opacity-50"
-                      alt="Existing"
-                    />
-                    {!disabled && (
-                      <button
-                        onClick={() =>
-                          setExistingImages(
-                            existingImages.filter((_, idx) => idx !== i)
-                          )
-                        }
-                        className="absolute top-1 right-1 bg-red-500 p-1 rounded text-white"
-                      >
-                        <X size={10} />
-                      </button>
-                    )}
+              {/* Image Previews */}
+              <div className="space-y-3">
+                {existingImages.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                      Existing Images
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {existingImages.map((img, i) => (
+                        <div
+                          key={i}
+                          className="relative aspect-square rounded-xl overflow-hidden border border-slate-700"
+                        >
+                          <img
+                            src={img}
+                            alt="Existing"
+                            className="w-full h-full object-cover"
+                          />
+                          {!disabled && (
+                            <button
+                              onClick={() =>
+                                setExistingImages(
+                                  existingImages.filter((_, idx) => idx !== i)
+                                )
+                              }
+                              className="absolute top-1 right-1 bg-rose-500 p-1 rounded text-white hover:bg-rose-600"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-                {previewImages.map((img, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded overflow-hidden border border-emerald-500"
-                  >
-                    <img
-                      src={img}
-                      className="object-cover w-full h-full"
-                      alt="New"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex-1 py-3 bg-slate-800 text-white rounded-xl font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="update-report-form"
-                disabled={disabled || isSubmitting}
-                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <Loader className="animate-spin" size={18} />
-                ) : (
-                  <Save size={18} />
                 )}
-                Save
-              </button>
+
+                {previewImages.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-3">
+                      New Images
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {previewImages.map((img, i) => (
+                        <div
+                          key={i}
+                          className="aspect-square rounded-xl overflow-hidden border-2 border-emerald-500"
+                        >
+                          <img
+                            src={img}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-4 border-t border-slate-800">
+                <button
+                  type="submit"
+                  form="update-report-form"
+                  disabled={disabled || isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-500 text-slate-950 text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                >
+                  {isSubmitting ? (
+                    <Loader className="animate-spin" size={16} />
+                  ) : (
+                    <Save size={16} />
+                  )}
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="w-full px-6 py-3 bg-slate-900 text-slate-300 text-xs font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all border border-slate-800"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -440,5 +475,31 @@ const UpdateReportPage = () => {
     </PageShell>
   );
 };
+
+// FormInput Component
+const FormInput = ({
+  label,
+  icon: Icon,
+  type = "text",
+  disabled,
+  ...props
+}) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+        <Icon size={18} />
+      </div>
+      <input
+        type={type}
+        disabled={disabled}
+        {...props}
+        className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 disabled:opacity-50 [color-scheme:dark]"
+      />
+    </div>
+  </div>
+);
 
 export default UpdateReportPage;

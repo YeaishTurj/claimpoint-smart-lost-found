@@ -108,7 +108,11 @@ const StaffLostReportDetailsModal = ({ reportId, isOpen, onClose }) => {
                         label="Event Time"
                         value={new Date(
                           reportData.report.date_lost
-                        ).toLocaleDateString()}
+                        ).toLocaleDateString("en-US", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
                       />
                     </div>
                   </div>

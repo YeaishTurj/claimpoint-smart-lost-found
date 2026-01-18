@@ -81,8 +81,8 @@ const ManageClaimsPage = () => {
         prev.map((claim) =>
           claim.id === selectedClaim.id
             ? { ...claim, status: newStatus }
-            : claim
-        )
+            : claim,
+        ),
       );
     } catch (err) {
       console.error("Failed to update claim status:", err);
@@ -96,13 +96,11 @@ const ManageClaimsPage = () => {
 
   if (!isAuthenticated || user?.role !== "STAFF") {
     return (
-      <PageShell variant="centered">
-        <AccessCard
-          icon={AlertCircle}
-          title="Security Override"
-          description="High-level personnel authentication required to access claim adjudications."
-        />
-      </PageShell>
+      <AccessCard
+        icon={AlertCircle}
+        title="Security Override"
+        description="High-level personnel authentication required to access claim adjudications."
+      />
     );
   }
 
@@ -306,8 +304,8 @@ const ManageClaimsPage = () => {
                   newStatus === "APPROVED"
                     ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                     : newStatus === "REJECTED"
-                    ? "bg-red-500/10 border-red-500/20 text-red-500"
-                    : "bg-blue-500/10 border-blue-500/20 text-blue-500"
+                      ? "bg-red-500/10 border-red-500/20 text-red-500"
+                      : "bg-blue-500/10 border-blue-500/20 text-blue-500"
                 }`}
               >
                 {newStatus === "APPROVED" ? (
@@ -345,8 +343,8 @@ const ManageClaimsPage = () => {
                   newStatus === "APPROVED"
                     ? "bg-emerald-500 shadow-emerald-500/20"
                     : newStatus === "REJECTED"
-                    ? "bg-red-500 shadow-red-500/20"
-                    : "bg-blue-600 shadow-blue-500/20"
+                      ? "bg-red-500 shadow-red-500/20"
+                      : "bg-blue-600 shadow-blue-500/20"
                 }`}
               >
                 {isUpdating === selectedClaim.id ? (

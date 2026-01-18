@@ -102,7 +102,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         {
           position: "top-center",
           autoClose: 3000,
-        }
+        },
       );
 
       // Close modal first, then navigate
@@ -110,9 +110,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
       // Navigate after a brief delay to ensure modal is closed
       setTimeout(() => {
-        navigate("/verify-email", {
-          state: { email },
-        });
+        navigate("/");
       }, 500);
     } else {
       setErrors({

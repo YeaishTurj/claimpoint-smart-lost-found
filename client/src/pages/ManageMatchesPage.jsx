@@ -128,13 +128,11 @@ const ManageMatchesPage = () => {
 
   if (!isAuthenticated || user?.role !== "STAFF") {
     return (
-      <PageShell variant="centered">
         <AccessCard
           icon={Lock}
           title="Security Override"
           description="Authentication as STAFF required to access Match Intelligence."
         />
-      </PageShell>
     );
   }
 

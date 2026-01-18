@@ -2,41 +2,32 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
-import { Lock, Eye, EyeOff, ArrowLeft, Loader, Save, X } from "lucide-react";
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Loader2,
+  ShieldCheck,
+  X,
+  ChevronRight,
+  ShieldAlert,
+  KeyRound,
+} from "lucide-react";
 import { useAuth } from "../context/auth.context";
+import { PageShell } from "../components/layout";
+import { AccessCard } from "../components/ui";
 
 const ChangePasswordPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPass, setShowPass] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
   const [errors, setErrors] = useState({});
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
-        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User size={40} className="text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Access Required
-          </h2>
-          <p className="text-slate-300 mb-6">
-            Please log in to view your profile and manage your account
-          </p>
-          <button
-            onClick={() => navigate("/login")}
-            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/20 transition-all"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const [formData, setFormData] = useState({
     currentPassword: "",
@@ -44,44 +35,32 @@ const ChangePasswordPage = () => {
     confirmPassword: "",
   });
 
+  if (!isAuthenticated) {
+    return (
+        <AccessCard
+          icon={ShieldAlert}
+          title="Security Clearance Required"
+          description="Please authenticate to access sensitive credential management."
+        />
+    );
+  }
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.currentPassword.trim()) {
-      newErrors.currentPassword = "Current password is required";
-    }
-
-    if (!formData.newPassword.trim()) {
-      newErrors.newPassword = "New password is required";
-    } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = "New password must be at least 6 characters";
-    }
-
-    if (!formData.confirmPassword.trim()) {
-      newErrors.confirmPassword = "Please confirm your new password";
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    if (formData.currentPassword === formData.newPassword) {
-      newErrors.newPassword =
-        "New password must be different from current password";
-    }
+    if (!formData.currentPassword.trim())
+      newErrors.currentPassword = "Current credentials required";
+    if (formData.newPassword.length < 6)
+      newErrors.newPassword = "Minimum 6 character sequence required";
+    if (formData.newPassword !== formData.confirmPassword)
+      newErrors.confirmPassword = "Sequence mismatch detected";
+    if (formData.currentPassword === formData.newPassword)
+      newErrors.newPassword = "New sequence must be unique";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -89,10 +68,7 @@ const ChangePasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
@@ -102,23 +78,18 @@ const ChangePasswordPage = () => {
       });
 
       toast.success(
-        "Password changed successfully! Please log in with your new password.",
-        {
-          position: "top-center",
-          autoClose: 3000,
-        }
+        "Security credentials rotated. Re-authentication required.",
+        { theme: "dark" }
       );
 
-      // Wait for toast to show, then navigate to login
+      // Logout and force fresh login after 2 seconds
       setTimeout(() => {
+        logout();
         navigate("/login");
       }, 2000);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to change password";
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 2000,
+      toast.error(error.response?.data?.message || "Credential update failed", {
+        theme: "dark",
       });
     } finally {
       setIsLoading(false);
@@ -126,184 +97,132 @@ const ChangePasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+    <PageShell>
+      <div className="max-w-6xl mx-auto">
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-12">
           <button
             onClick={() => navigate("/my-profile")}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-all"
+            className="hover:text-emerald-400 transition-colors"
           >
-            <ArrowLeft size={24} className="text-slate-300" />
+            Identity
           </button>
-          <h1 className="text-3xl font-bold text-white">Change Password</h1>
+          <ChevronRight size={12} />
+          <span className="text-slate-300">Credential Rotation</span>
         </div>
 
-        {/* Password Change Card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8 border border-slate-700/50">
-          {/* Info Section */}
-          <div className="mb-8 pb-8 border-b border-slate-700/50">
-            <div className="flex items-start gap-3">
-              <div className="p-3 bg-emerald-500/10 rounded-lg">
-                <Lock size={24} className="text-emerald-400" />
+        <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+          {/* Glow Decor */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl pointer-events-none" />
+
+          <div className="p-10 border-b border-slate-800 bg-slate-900/30">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
+                <KeyRound size={20} />
               </div>
-              <div>
-                <h2 className="text-lg font-bold text-white">
-                  Secure Your Account
-                </h2>
-                <p className="text-sm text-slate-200 mt-1">
-                  Change your password to keep your account secure. You'll be
-                  logged out and need to sign in again with your new password.
-                </p>
-              </div>
+              <h1 className="text-2xl font-black text-white tracking-tight">
+                Security Protocol.
+              </h1>
             </div>
+            <p className="text-xs text-slate-400 font-medium">
+              Rotating your access credentials will invalidate all current
+              sessions.
+            </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Current Password */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">
-                Current Password *
-              </label>
-              <div className="relative">
-                <input
-                  type={showCurrentPassword ? "text" : "password"}
-                  name="currentPassword"
-                  value={formData.currentPassword}
-                  onChange={handleInputChange}
-                  placeholder="Enter your current password"
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
-                    errors.currentPassword
-                      ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition"
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
-                </button>
-              </div>
-              {errors.currentPassword && (
-                <p className="text-xs text-red-400 mt-1.5">
-                  {errors.currentPassword}
-                </p>
-              )}
+          <form onSubmit={handleSubmit} className="p-10 space-y-8">
+            <div className="space-y-6">
+              {/* Field: Current Password */}
+              <PasswordField
+                label="Existing Credentials"
+                name="currentPassword"
+                value={formData.currentPassword}
+                onChange={handleInputChange}
+                error={errors.currentPassword}
+                show={showPass.current}
+                onToggle={() =>
+                  setShowPass((p) => ({ ...p, current: !p.current }))
+                }
+                placeholder="••••••••"
+              />
+
+              <div className="h-px bg-slate-800/50 my-2" />
+
+              {/* Field: New Password */}
+              <PasswordField
+                label="New Access Sequence"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                error={errors.newPassword}
+                show={showPass.new}
+                onToggle={() => setShowPass((p) => ({ ...p, new: !p.new }))}
+                placeholder="Min. 6 characters"
+              />
+
+              {/* Field: Confirm Password */}
+              <PasswordField
+                label="Verify New Sequence"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                error={errors.confirmPassword}
+                show={showPass.confirm}
+                onToggle={() =>
+                  setShowPass((p) => ({ ...p, confirm: !p.confirm }))
+                }
+                placeholder="Repeat new sequence"
+              />
             </div>
 
-            {/* New Password */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">
-                New Password *
-              </label>
-              <div className="relative">
-                <input
-                  type={showNewPassword ? "text" : "password"}
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  placeholder="Enter your new password"
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
-                    errors.newPassword
-                      ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  }`}
+            {/* Security Checklist */}
+            <div className="p-6 bg-slate-950 border border-slate-800 rounded-[1.5rem] space-y-3">
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <ShieldCheck size={12} className="text-emerald-500" />
+                Safety Requirements
+              </h4>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Requirement
+                  label="Different from current"
+                  met={
+                    formData.newPassword !== formData.currentPassword &&
+                    formData.newPassword !== ""
+                  }
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition"
-                >
-                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              {errors.newPassword && (
-                <p className="text-xs text-red-400 mt-1.5">
-                  {errors.newPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">
-                Confirm New Password *
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  placeholder="Confirm your new password"
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:outline-none transition-all bg-slate-900/50 text-white placeholder:text-slate-400 ${
-                    errors.confirmPassword
-                      ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-slate-700 hover:border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  }`}
+                <Requirement
+                  label="6+ characters"
+                  met={formData.newPassword.length >= 6}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-xs text-red-400 mt-1.5">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Password Requirements */}
-            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <p className="text-sm font-semibold text-amber-200 mb-2">
-                Password Requirements:
-              </p>
-              <ul className="text-xs text-amber-300/90 space-y-1">
-                <li>• At least 6 characters long</li>
-                <li>• Different from your current password</li>
-                <li>• Must be confirmed in the field above</li>
+                <Requirement
+                  label="Matches verification"
+                  met={
+                    formData.newPassword === formData.confirmPassword &&
+                    formData.newPassword !== ""
+                  }
+                />
               </ul>
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 pt-8 border-t border-slate-700/50 flex gap-3 justify-end">
+            {/* Footer Actions */}
+            <div className="pt-8 flex flex-col sm:flex-row gap-4">
               <button
                 type="button"
                 onClick={() => navigate("/my-profile")}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 rounded-lg transition-all"
+                className="flex-1 px-8 py-4 bg-slate-900 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
               >
-                <X size={16} />
-                Cancel
+                Abort Rotation
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                className="flex-[2] flex items-center justify-center gap-3 px-8 py-4 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 disabled:opacity-50"
               >
                 {isLoading ? (
-                  <>
-                    <Loader size={16} className="animate-spin" />
-                    Changing...
-                  </>
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
                   <>
-                    <Save size={16} />
-                    Change Password
+                    <Lock size={16} />
+                    Update Credentials & Logout
                   </>
                 )}
               </button>
@@ -311,8 +230,70 @@ const ChangePasswordPage = () => {
           </form>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
+
+// --- Helper Components ---
+
+const PasswordField = ({
+  label,
+  name,
+  value,
+  onChange,
+  error,
+  show,
+  onToggle,
+  placeholder,
+}) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`w-full bg-slate-950 border-2 px-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none placeholder:text-slate-800 ${
+          error
+            ? "border-rose-500/50 focus:border-rose-500"
+            : "border-slate-800 focus:border-emerald-500"
+        }`}
+        placeholder={placeholder}
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 hover:text-emerald-500 transition-colors"
+      >
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+    {error && (
+      <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest ml-4">
+        {error}
+      </p>
+    )}
+  </div>
+);
+
+const Requirement = ({ label, met }) => (
+  <li className="flex items-center gap-2">
+    <div
+      className={`w-1.5 h-1.5 rounded-full ${
+        met ? "bg-emerald-500" : "bg-slate-700"
+      }`}
+    />
+    <span
+      className={`text-[10px] font-bold ${
+        met ? "text-slate-300" : "text-slate-600"
+      }`}
+    >
+      {label}
+    </span>
+  </li>
+);
 
 export default ChangePasswordPage;

@@ -103,20 +103,18 @@ const ManageItemsPage = () => {
   });
 
   const foundCount = items.filter(
-    (u) => u.status?.toLowerCase() === "found"
+    (u) => u.status?.toLowerCase() === "found",
   ).length;
   const claimedCount = items.filter(
-    (u) => u.status?.toLowerCase() === "claimed"
+    (u) => u.status?.toLowerCase() === "claimed",
   ).length;
 
   if (!isAuthenticated) {
     return (
-      <PageShell variant="centered">
-        <AccessCard
-          icon={Shield}
-          description="Authentication required. Please sign in to access the staff inventory ledger."
-        />
-      </PageShell>
+      <AccessCard
+        icon={Shield}
+        description="Authentication required. Please sign in to access the staff inventory ledger."
+      />
     );
   }
 
@@ -156,12 +154,6 @@ const ManageItemsPage = () => {
           <StatPill label="Total Registry" value={items.length} color="slate" />
           <StatPill label="Found" value={foundCount} color="emerald" />
           <StatPill label="Claimed" value={claimedCount} color="teal" />
-          <button
-            onClick={() => navigate("/add-found-item")}
-            className="flex items-center gap-2 px-6 py-4 bg-emerald-500 text-slate-950 text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
-          >
-            <Plus size={16} /> New Entry
-          </button>
         </div>
       </div>
 
@@ -267,7 +259,7 @@ const ManageItemsPage = () => {
                       {item.date_found
                         ? new Date(item.date_found).toLocaleDateString(
                             "en-US",
-                            { month: "short", day: "numeric", year: "numeric" }
+                            { month: "short", day: "numeric", year: "numeric" },
                           )
                         : "---"}
                     </td>
@@ -377,8 +369,8 @@ const StatPill = ({ label, value, color }) => (
       color === "emerald"
         ? "border-emerald-500/20"
         : color === "teal"
-        ? "border-teal-500/20"
-        : "border-slate-800"
+          ? "border-teal-500/20"
+          : "border-slate-800"
     } rounded-2xl min-w-[130px]`}
   >
     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
@@ -389,8 +381,8 @@ const StatPill = ({ label, value, color }) => (
         color === "emerald"
           ? "text-emerald-400"
           : color === "teal"
-          ? "text-teal-400"
-          : "text-white"
+            ? "text-teal-400"
+            : "text-white"
       }`}
     >
       {value}

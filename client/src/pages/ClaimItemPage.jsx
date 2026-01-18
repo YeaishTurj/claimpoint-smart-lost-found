@@ -34,11 +34,7 @@ const ClaimItemPage = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   if (!isAuthenticated) {
-    return (
-      <PageShell variant="centered">
-        <AccessCard />
-      </PageShell>
-    );
+    return <AccessCard />;
   }
 
   const addField = () => setFields([{ key: "", value: "" }, ...fields]);
@@ -94,13 +90,13 @@ const ClaimItemPage = () => {
         cloudinaryFormData.append("file", file);
         cloudinaryFormData.append(
           "upload_preset",
-          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
         );
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${
             import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
           }/image/upload`,
-          { method: "POST", body: cloudinaryFormData }
+          { method: "POST", body: cloudinaryFormData },
         );
         if (!response.ok) throw new Error("Image upload failed");
         const data = await response.json();
@@ -163,140 +159,108 @@ const ClaimItemPage = () => {
 
   return (
     <PageShell>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="group inline-flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors mb-6"
-          >
-            <ArrowLeft
-              size={20}
-              className="group-hover:-translate-x-1 transition-transform"
-            />
-            <span className="font-medium">Back</span>
-          </button>
+      <div className="max-w-6xl mx-auto pt-15">
+        {/* Navigation */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-emerald-400 transition-all mb-10"
+        >
+          <ArrowLeft
+            size={14}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
+          System Portal
+        </button>
 
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Package size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Submit Claim
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left: Form Content */}
+          <div className="lg:col-span-8 space-y-8">
+            <header>
+              <h1 className="text-4xl font-black text-white tracking-tight mb-2">
+                Submit <span className="text-emerald-500">Claim.</span>
               </h1>
-              <p className="text-slate-400 mt-1">
+              <p className="text-slate-400 font-medium">
                 Provide attributes and evidence to verify ownership.
               </p>
-            </div>
-          </div>
-        </div>
+            </header>
 
-        {/* Notice Banner */}
-        <div className="mb-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-l-4 border-emerald-500 px-6 py-4 rounded-r-xl">
-          <div className="flex items-start gap-3">
-            <AlertCircle
-              size={20}
-              className="text-emerald-400 mt-0.5 flex-shrink-0"
-            />
-            <div className="flex-1">
-              <h3 className="font-semibold text-emerald-100 text-sm mb-1">
-                Claim Verification Process
-              </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Be prepared to answer security questions to verify ownership.
-                Use clear photos and precise attributes for faster verification.
-              </p>
+            {/* Info Banner */}
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-6 flex items-start gap-4">
+              <AlertCircle
+                size={20}
+                className="text-emerald-400 mt-1 flex-shrink-0"
+              />
+              <div>
+                <p className="text-sm font-black text-emerald-400 uppercase tracking-widest">
+                  Verification Process
+                </p>
+                <p className="text-sm text-slate-300 mt-1">
+                  Be prepared to answer security questions to verify ownership.
+                  Use clear photos and precise attributes for faster
+                  verification.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Content: Proof Fields */}
-          <div className="lg:col-span-8 space-y-6">
-            <form id="claim-item-form" onSubmit={handleSubmit}>
+            <form
+              id="claim-item-form"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
               {/* Card: Proof Attributes */}
-              <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg">
-                      <Info className="w-4 h-4 text-emerald-400" />
-                    </div>
-                    <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                    <Info size={16} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                       Proof Attributes
-                    </h2>
+                    </span>
                   </div>
                   <button
                     type="button"
                     onClick={addField}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold border border-emerald-500/20 transition-all active:scale-95"
+                    className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-all"
                   >
-                    <Plus className="w-4 h-4" />
-                    Add Field
+                    <Plus size={12} /> Add Field
                   </button>
                 </div>
 
-                <div className="p-6 space-y-4">
-                  <div className="hidden md:grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                    <div className="col-span-5">Attribute Name</div>
-                    <div className="col-span-7">Value</div>
-                  </div>
-
+                <div className="p-8 space-y-4">
                   {fields.map((field, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start p-4 bg-slate-950/50 border border-white/10 rounded-xl hover:border-emerald-500/30 transition-all backdrop-blur-sm"
-                    >
-                      {/* Key Input */}
-                      <div className="md:col-span-5">
-                        <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                          Name
-                        </label>
-                        <input
-                          type="text"
-                          value={field.key}
-                          onChange={(e) =>
-                            updateField(index, "key", e.target.value)
-                          }
-                          placeholder="Color, Brand, etc."
-                          className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all"
-                        />
-                      </div>
-
-                      {/* Value Input */}
-                      <div className="md:col-span-7 flex items-start gap-2">
-                        <div className="flex-1">
-                          <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                            Value
-                          </label>
-                          <input
-                            type="text"
-                            value={field.value}
-                            onChange={(e) =>
-                              updateField(index, "value", e.target.value)
-                            }
-                            placeholder="Red, Nike, etc."
-                            className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all"
-                          />
-                        </div>
-
-                        {fields.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeField(index)}
-                            className="mt-0 md:mt-0 p-2.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all active:scale-95 border border-white/10 hover:border-red-500/30"
-                            title="Remove field"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </div>
+                    <div key={index} className="flex gap-4 group">
+                      <input
+                        type="text"
+                        value={field.key}
+                        onChange={(e) =>
+                          updateField(index, "key", e.target.value)
+                        }
+                        placeholder="Attribute (e.g. Serial)"
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:border-emerald-500 focus:outline-none transition-all"
+                      />
+                      <input
+                        type="text"
+                        value={field.value}
+                        onChange={(e) =>
+                          updateField(index, "value", e.target.value)
+                        }
+                        placeholder="Value"
+                        className="flex-[2] bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-emerald-500 focus:outline-none transition-all"
+                      />
+                      {fields.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeField(index)}
+                          className="p-3 text-slate-600 hover:text-rose-500 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   ))}
 
                   {errors.details && (
-                    <div className="flex items-center gap-2 text-sm text-red-400 mt-3 px-1">
-                      <AlertCircle size={16} />
+                    <div className="flex items-center gap-2 text-[9px] text-rose-500 mt-3 px-1">
+                      <AlertCircle size={14} />
                       {errors.details}
                     </div>
                   )}
@@ -305,12 +269,12 @@ const ClaimItemPage = () => {
             </form>
           </div>
 
-          {/* Sidebar: Evidence & Actions */}
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 h-fit">
-            {/* Image Upload */}
-            <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6">
-              <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                <Upload className="w-4 h-4 text-emerald-400" /> Evidence Photos
+          {/* Right: Media & Actions Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] p-8 space-y-6 lg:sticky lg:top-10">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Upload size={14} className="text-emerald-500" /> Evidence
+                Photos
               </h3>
 
               <div className="relative group">
@@ -319,113 +283,101 @@ const ClaimItemPage = () => {
                   multiple
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
                 />
-                <div className="border-2 border-dashed border-white/20 bg-slate-950/50 rounded-xl p-8 text-center transition-all group-hover:border-emerald-500/50 group-hover:bg-slate-900/50 backdrop-blur-sm">
-                  <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-[2rem] p-8 text-center group-hover:border-emerald-500/50 transition-all">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-emerald-500">
+                    <Upload size={20} />
                   </div>
-                  <p className="text-sm font-semibold text-slate-200">
-                    Click to upload
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    JPG, PNG up to 5MB
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Drop Evidence Photos
                   </p>
                 </div>
               </div>
 
               {errors.images && (
-                <p className="text-red-400 text-xs mt-3 flex items-center gap-1">
+                <p className="text-[9px] text-rose-500 flex items-center gap-1">
                   <AlertCircle size={12} />
                   {errors.images}
                 </p>
               )}
 
-              {/* Minimalist Image Grid */}
+              {/* Image Previews */}
               {previewImages.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {previewImages.map((preview, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden group border border-white/10"
-                    >
-                      <img
-                        src={preview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                <div>
+                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                    Attached Evidence
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {previewImages.map((preview, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-square rounded-xl overflow-hidden border border-slate-700 group"
+                      >
+                        <img
+                          src={preview}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
                         <button
                           type="button"
                           onClick={() => removePreviewImage(index)}
-                          className="text-white hover:text-red-400 p-2 bg-slate-900/80 rounded-lg transition-all active:scale-95"
+                          className="absolute top-1 right-1 bg-rose-500 p-1 rounded text-white hover:bg-rose-600 opacity-0 group-hover:opacity-100 transition-all"
                         >
-                          <X size={18} />
+                          <X size={12} />
                         </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
 
-            {/* Quick Tips */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <AlertCircle size={14} className="text-emerald-400" />{" "}
-                Guidelines
-              </h4>
-              <ul className="space-y-2.5">
-                <li className="text-xs text-slate-400 flex items-start gap-2">
-                  <CheckCircle2
-                    size={14}
-                    className="mt-0.5 text-emerald-400 flex-shrink-0"
-                  />
-                  <span>
-                    Provide specific details like serial numbers, unique marks,
-                    or purchase receipts.
-                  </span>
-                </li>
-                <li className="text-xs text-slate-400 flex items-start gap-2">
-                  <CheckCircle2
-                    size={14}
-                    className="mt-0.5 text-emerald-400 flex-shrink-0"
-                  />
-                  <span>
-                    Clear photos increase claim verification speed by 40%.
-                  </span>
-                </li>
-              </ul>
-            </div>
+              {/* Guidelines */}
+              <div className="pt-6 border-t border-slate-800 space-y-3">
+                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                  Submission Guidelines
+                </p>
+                <ul className="space-y-2">
+                  <li className="text-[10px] text-slate-400 flex items-start gap-2">
+                    <CheckCircle2
+                      size={12}
+                      className="text-emerald-500 mt-0.5 flex-shrink-0"
+                    />
+                    Provide specific details like serial numbers or receipts
+                  </li>
+                  <li className="text-[10px] text-slate-400 flex items-start gap-2">
+                    <CheckCircle2
+                      size={12}
+                      className="text-emerald-500 mt-0.5 flex-shrink-0"
+                    />
+                    Clear photos increase verification speed
+                  </li>
+                </ul>
+              </div>
 
-            {/* Primary Actions */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => navigate("/found-items")}
-                className="col-span-1 py-3 px-4 bg-transparent border border-white/20 hover:bg-white/5 text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition-all active:scale-95"
-                disabled={isSubmitting || uploadingImages}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="claim-item-form"
-                disabled={isSubmitting || uploadingImages}
-                className="col-span-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
-              >
-                {isSubmitting || uploadingImages ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    <span>Submitting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Submit Claim</span>
-                  </>
-                )}
-              </button>
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-4 border-t border-slate-800">
+                <button
+                  type="submit"
+                  form="claim-item-form"
+                  disabled={isSubmitting || uploadingImages}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-500 text-slate-950 text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                >
+                  {isSubmitting || uploadingImages ? (
+                    <Loader className="animate-spin" size={16} />
+                  ) : (
+                    <Save size={16} />
+                  )}
+                  Submit Claim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="w-full px-6 py-3 bg-slate-900 text-slate-300 text-xs font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all border border-slate-800"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -7,15 +7,16 @@ import {
   Upload,
   FileText,
   ArrowLeft,
-  Loader,
+  Loader2,
   Save,
   Plus,
   Trash2,
   X,
   AlertCircle,
-  User,
   Info,
   CheckCircle2,
+  Cpu,
+  Fingerprint,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
@@ -36,22 +37,21 @@ const AddLostItemReportPage = () => {
     location_lost: "",
   });
 
-  const [proofFields, setProofFields] = useState([{ key: "", value: "" }]);
-
+  const [proofFields, setProofFields] = useState([
+    { key: "Brand", value: "" },
+    { key: "Color", value: "" },
+  ]);
   const [previewImages, setPreviewImages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  // --- Logic ---
-
+  // Guard Clause
   if (!isAuthenticated || user?.role !== "USER") {
     return (
-      <PageShell variant="centered">
-        <AccessCard
-          icon={User}
-          title="Authentication required"
-          description="You must be logged in as a USER to report a lost item."
-        />
-      </PageShell>
+      <AccessCard
+        icon={Fingerprint}
+        title="Identity Required"
+        description="Please authenticate as a standard USER to register a lost asset."
+      />
     );
   }
 
@@ -59,17 +59,6 @@ const AddLostItemReportPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const addProofField = () => {
-    setProofFields([{ key: "", value: "" }, ...proofFields]);
-  };
-
-  const removeProofField = (index) => {
-    if (proofFields.length > 1) {
-      const updated = proofFields.filter((_, i) => i !== index);
-      setProofFields(updated);
-    }
   };
 
   const updateProofField = (index, field, value) => {
@@ -80,128 +69,73 @@ const AddLostItemReportPage = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
     const oversizedFiles = files.filter((file) => file.size > 5 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      setErrors((prev) => ({
-        ...prev,
-        images: `${oversizedFiles.length} file(s) exceed 5MB limit`,
-      }));
+      toast.error("Telemetry limit exceeded (5MB per image)");
       return;
     }
 
-    const newPreviews = [];
     files.forEach((file) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result);
-        if (newPreviews.length === files.length) {
-          setPreviewImages((prev) => [...prev, ...newPreviews]);
-        }
-      };
+      reader.onloadend = () =>
+        setPreviewImages((prev) => [...prev, reader.result]);
       reader.readAsDataURL(file);
     });
-
     setSelectedFiles((prev) => [...prev, ...files]);
-    if (errors.images) setErrors((prev) => ({ ...prev, images: "" }));
-  };
-
-  const removePreviewImage = (index) => {
-    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const uploadImagesToCloudinary = async () => {
-    if (selectedFiles.length === 0) return [];
     setUploadingImages(true);
     const uploadedUrls = [];
     try {
       for (const file of selectedFiles) {
-        const cloudinaryFormData = new FormData();
-        cloudinaryFormData.append("file", file);
-        cloudinaryFormData.append(
+        const cloudData = new FormData();
+        cloudData.append("file", file);
+        cloudData.append(
           "upload_preset",
-          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
         );
-        const response = await fetch(
+        const res = await fetch(
           `https://api.cloudinary.com/v1_1/${
             import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
           }/image/upload`,
-          { method: "POST", body: cloudinaryFormData }
+          { method: "POST", body: cloudData },
         );
-        if (!response.ok) throw new Error("Image upload failed");
-        const data = await response.json();
+        const data = await res.json();
         uploadedUrls.push(data.secure_url);
       }
       return uploadedUrls;
-    } catch (error) {
-      console.error("Image upload error:", error);
-      throw new Error("Failed to upload images");
     } finally {
       setUploadingImages(false);
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.item_type.trim())
-      newErrors.item_type = "Item type is required";
-    if (!formData.date_lost) newErrors.date_lost = "Date lost is required";
-    if (!formData.location_lost.trim())
-      newErrors.location_lost = "Location is required";
-    const hasValidFields = proofFields.some(
-      (field) => field.key.trim() && field.value.trim()
-    );
-    if (!hasValidFields)
-      newErrors.details = "At least one detail attribute is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isAuthenticated) {
-      toast.error("You must be logged in");
-      navigate("/login");
+    if (!formData.item_type || !formData.date_lost || !formData.location_lost) {
+      toast.error("Primary parameters missing");
       return;
     }
-    if (!validateForm()) {
-      toast.error("Please check the form for errors");
-      return;
-    }
+
     setIsSubmitting(true);
     try {
-      let imageUrls = [];
-      if (selectedFiles.length > 0) {
-        imageUrls = await uploadImagesToCloudinary();
-      }
-
+      const imageUrls = await uploadImagesToCloudinary();
       const report_details = {};
-      proofFields.forEach((field) => {
-        if (field.key.trim() && field.value.trim()) {
-          report_details[field.key.trim()] = field.value.trim();
-        }
+      proofFields.forEach((f) => {
+        if (f.key && f.value) report_details[f.key] = f.value;
       });
 
-      const payload = {
-        item_type: formData.item_type.trim(),
+      await api.post("/user/lost-reports", {
+        ...formData,
         date_lost: new Date(formData.date_lost).toISOString(),
-        location_lost: formData.location_lost.trim(),
         report_details,
         image_urls: imageUrls,
-      };
+      });
 
-      const response = await api.post("/user/lost-reports", payload);
-      if (response.status === 201 || response.status === 200) {
-        toast.success("Lost item reported successfully");
-        setTimeout(() => navigate("/my-dashboard"), 1500);
-      }
+      toast.success("Asset registry created");
+      navigate("/my-dashboard");
     } catch (error) {
-      console.error(error);
-      toast.error(
-        error.response?.data?.message || "Failed to report lost item."
-      );
+      toast.error("Registry failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -209,377 +143,245 @@ const AddLostItemReportPage = () => {
 
   return (
     <PageShell>
-      {/* Header Section */}
-      <div className="mb-8">
+      <div className="max-w-6xl mx-auto pt-15">
+        {/* Navigation */}
         <button
           onClick={() => navigate(-1)}
-          className="group inline-flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors mb-6"
+          className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-emerald-400 transition-all mb-10"
         >
           <ArrowLeft
-            size={20}
+            size={14}
             className="group-hover:-translate-x-1 transition-transform"
-          />
-          <span className="font-medium">Back</span>
+          />{" "}
+          System Portal
         </button>
 
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <Package size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Report Lost Item
-            </h1>
-            <p className="text-slate-400 mt-1">
-              Help us find your lost item by providing detailed information
-            </p>
-          </div>
-        </div>
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left: Form Content */}
+          <div className="lg:col-span-8 space-y-8">
+            <header>
+              <h1 className="text-4xl font-black text-white tracking-tight mb-2">
+                Register <span className="text-emerald-500">Lost Asset.</span>
+              </h1>
+              <p className="text-slate-400 font-medium">
+                Initiate a global search protocol for your missing item.
+              </p>
+            </header>
 
-      {/* Notice Banner */}
-      <div className="mb-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-l-4 border-emerald-500 px-6 py-4 rounded-r-xl">
-        <div className="flex items-start gap-3">
-          <AlertCircle
-            size={20}
-            className="text-emerald-400 mt-0.5 flex-shrink-0"
-          />
-          <div className="flex-1">
-            <h3 className="font-semibold text-emerald-100 text-sm mb-1">
-              Lost Item Report
-            </h3>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Provide accurate details and clear photos to help staff identify
-              your lost item and notify you when it's found.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Main Content: Form Fields */}
-        <div className="lg:col-span-8 space-y-6">
-          <form id="report-lost-item-form" onSubmit={handleSubmit}>
-            {/* Card: Primary Info */}
-            <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                  <FileText className="w-4 h-4 text-emerald-400" />
+            <form
+              id="lost-report-form"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              {/* Card 1: Primary Parameters */}
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center gap-3">
+                  <Cpu size={16} className="text-emerald-500" />
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Primary Parameters
+                  </span>
                 </div>
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Core Details
-                </h2>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Item Type */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">
-                    Item Type <span className="text-red-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                      <Package size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="item_type"
-                      value={formData.item_type}
+                <div className="p-8 space-y-6">
+                  <FormInput
+                    label="Item Type"
+                    name="item_type"
+                    value={formData.item_type}
+                    onChange={handleChange}
+                    placeholder="e.g. MacBook Pro M3 Silver"
+                    icon={Package}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput
+                      label="Last Known Location"
+                      name="location_lost"
+                      value={formData.location_lost}
                       onChange={handleChange}
-                      placeholder="e.g. Black Sony Wireless Headphones"
-                      className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                        errors.item_type
-                          ? "border-red-500/50"
-                          : "border-white/10"
-                      } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm backdrop-blur-sm`}
+                      placeholder="e.g. Terminal 3, Cafe"
+                      icon={MapPin}
                     />
-                  </div>
-                  {errors.item_type && (
-                    <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle size={12} />
-                      {errors.item_type}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Location */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
-                      Location Lost <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <MapPin size={18} />
-                      </div>
-                      <input
-                        type="text"
-                        name="location_lost"
-                        value={formData.location_lost}
-                        onChange={handleChange}
-                        placeholder="e.g. Dhaka Airport, Terminal 2 - Gate 5"
-                        className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                          errors.location_lost
-                            ? "border-red-500/50"
-                            : "border-white/10"
-                        } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm backdrop-blur-sm`}
-                      />
-                    </div>
-                    {errors.location_lost && (
-                      <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                        <AlertCircle size={12} />
-                        {errors.location_lost}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Date */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
-                      Date & Time Lost <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Calendar size={18} />
-                      </div>
-                      <input
-                        type="datetime-local"
-                        name="date_lost"
-                        value={formData.date_lost}
-                        onChange={handleChange}
-                        max={new Date().toISOString().slice(0, 16)}
-                        className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                          errors.date_lost
-                            ? "border-red-500/50"
-                            : "border-white/10"
-                        } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm [color-scheme:dark] backdrop-blur-sm`}
-                      />
-                    </div>
-                    {errors.date_lost && (
-                      <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                        <AlertCircle size={12} />
-                        {errors.date_lost}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Card: Item Details */}
-            <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-500/10 rounded-lg">
-                    <Info className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                    Item Details
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={addProofField}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold border border-emerald-500/20 transition-all active:scale-95"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Field
-                </button>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div className="hidden md:grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                  <div className="col-span-5">Detail Name</div>
-                  <div className="col-span-7">Value</div>
-                </div>
-
-                {proofFields.map((field, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start p-4 bg-slate-950/50 border border-white/10 rounded-xl hover:border-emerald-500/30 transition-all backdrop-blur-sm"
-                  >
-                    {/* Key Input */}
-                    <div className="md:col-span-5">
-                      <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        value={field.key}
-                        onChange={(e) =>
-                          updateProofField(index, "key", e.target.value)
-                        }
-                        placeholder="Brand, Model, Color, etc."
-                        className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all"
-                      />
-                    </div>
-
-                    {/* Value Input */}
-                    <div className="md:col-span-7 flex items-start gap-2">
-                      <div className="flex-1">
-                        <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                          Value
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                          Temporal Marker (Date/Time)
                         </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+                          <Calendar size={18} />
+                        </div>
                         <input
-                          type="text"
-                          value={field.value}
-                          onChange={(e) =>
-                            updateProofField(index, "value", e.target.value)
-                          }
-                          placeholder="e.g., Black, Galaxy S22, Scratch near camera"
-                          className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                          type="datetime-local"
+                          name="date_lost"
+                          value={formData.date_lost}
+                          onChange={handleChange}
+                          placeholder="dd/mm/yyyy"
+                          className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 [color-scheme:dark]"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              {/* Card 2: Distinct Attributes */}
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Info size={16} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Distinct Attributes
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProofFields([...proofFields, { key: "", value: "" }])
+                    }
+                    className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-all"
+                  >
+                    <Plus size={12} /> Add Attribute
+                  </button>
+                </div>
+                <div className="p-8 space-y-4">
+                  {proofFields.map((field, idx) => (
+                    <div key={idx} className="flex gap-4 group">
+                      <input
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:border-emerald-500 focus:outline-none transition-all"
+                        placeholder="Attribute (e.g. Serial)"
+                        value={field.key}
+                        onChange={(e) =>
+                          updateProofField(idx, "key", e.target.value)
+                        }
+                      />
+                      <input
+                        className="flex-[2] bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-emerald-500 focus:outline-none transition-all"
+                        placeholder="Value"
+                        value={field.value}
+                        onChange={(e) =>
+                          updateProofField(idx, "value", e.target.value)
+                        }
+                      />
                       {proofFields.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => removeProofField(index)}
-                          className="mt-0 md:mt-0 p-2.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all active:scale-95 border border-white/10 hover:border-red-500/30"
-                          title="Remove field"
+                          onClick={() =>
+                            setProofFields(
+                              proofFields.filter((_, i) => i !== idx),
+                            )
+                          }
+                          className="p-3 text-slate-600 hover:text-rose-500 transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>
                       )}
                     </div>
-                  </div>
-                ))}
-
-                {errors.details && (
-                  <div className="flex items-center gap-2 text-sm text-red-400 mt-3 px-1">
-                    <AlertCircle size={16} />
-                    {errors.details}
-                  </div>
-                )}
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Sidebar: Media & Actions (Sticky) */}
-        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 h-fit">
-          {/* Image Upload */}
-          <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6">
-            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <Upload className="w-4 h-4 text-emerald-400" />
-              Item Photos
-            </h3>
-
-            <div className="relative group">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
-              />
-              <div className="border-2 border-dashed border-white/20 bg-slate-950/50 rounded-xl p-8 text-center transition-all group-hover:border-emerald-500/50 group-hover:bg-slate-900/50 backdrop-blur-sm">
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  ))}
                 </div>
-                <p className="text-sm font-semibold text-slate-200">
-                  Click to upload
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  JPG, PNG up to 5MB
-                </p>
+              </div>
+            </form>
+          </div>
+
+          {/* Right: Media & Actions Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] p-8 space-y-6 lg:sticky lg:top-10">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Upload size={14} className="text-emerald-500" /> Visual
+                Verification
+              </h3>
+
+              <div className="relative group">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-[2rem] p-8 text-center group-hover:border-emerald-500/50 transition-all">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-emerald-500">
+                    <Upload size={20} />
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Drop Reference Media
+                  </p>
+                </div>
+              </div>
+
+              {previewImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {previewImages.map((src, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square rounded-xl overflow-hidden border border-slate-800"
+                    >
+                      <img
+                        src={src}
+                        className="w-full h-full object-cover"
+                        alt=""
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="space-y-3 pt-6 border-t border-slate-800">
+                <button
+                  type="submit"
+                  form="lost-report-form"
+                  disabled={isSubmitting || uploadingImages}
+                  className="w-full py-4 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-3"
+                >
+                  {isSubmitting || uploadingImages ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Save size={16} /> Broadcast Report
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="w-full py-4 bg-slate-900 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
+                >
+                  Abort Process
+                </button>
+              </div>
+
+              <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4">
+                <div className="flex gap-3 items-start">
+                  <CheckCircle2 size={16} className="text-emerald-500 mt-1" />
+                  <p className="text-[9px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
+                    Reports with specific attributes (Serial #, scratches) are
+                    matched 4x faster.
+                  </p>
+                </div>
               </div>
             </div>
-
-            {errors.images && (
-              <p className="text-red-400 text-xs mt-3 flex items-center gap-1">
-                <AlertCircle size={12} />
-                {errors.images}
-              </p>
-            )}
-
-            {/* Minimalist Image Grid */}
-            {previewImages.length > 0 && (
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {previewImages.map((preview, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square rounded-lg overflow-hidden group border border-white/10"
-                  >
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                      <button
-                        type="button"
-                        onClick={() => removePreviewImage(index)}
-                        className="text-white hover:text-red-400 p-2 bg-slate-900/80 rounded-lg transition-all active:scale-95"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Quick Tips */}
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <AlertCircle size={14} className="text-emerald-400" /> Guidelines
-            </h4>
-            <ul className="space-y-2.5">
-              <li className="text-xs text-slate-400 flex items-start gap-2">
-                <CheckCircle2
-                  size={14}
-                  className="mt-0.5 text-emerald-400 flex-shrink-0"
-                />
-                <span>
-                  Provide specific details like brand, model, color, and unique
-                  marks.
-                </span>
-              </li>
-              <li className="text-xs text-slate-400 flex items-start gap-2">
-                <CheckCircle2
-                  size={14}
-                  className="mt-0.5 text-emerald-400 flex-shrink-0"
-                />
-                <span>Clear photos increase matching accuracy by 50%.</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Primary Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/found-items")}
-              className="col-span-1 py-3 px-4 bg-transparent border border-white/20 hover:bg-white/5 text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition-all active:scale-95"
-              disabled={isSubmitting || uploadingImages}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              form="report-lost-item-form"
-              disabled={isSubmitting || uploadingImages}
-              className="col-span-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              {isSubmitting || uploadingImages ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  <span>Submitting...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Submit Report</span>
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>
     </PageShell>
   );
 };
+
+// --- Helper Component ---
+const FormInput = ({ label, icon: Icon, type = "text", ...props }) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+        <Icon size={18} />
+      </div>
+      <input
+        type={type}
+        {...props}
+        className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 [color-scheme:dark]"
+      />
+    </div>
+  </div>
+);
 
 export default AddLostItemReportPage;

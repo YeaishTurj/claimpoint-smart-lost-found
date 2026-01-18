@@ -15,12 +15,42 @@ import {
   AlertCircle,
   ShieldAlert,
   Info,
+  FileText, // Added missing import
+  X, // Added missing import
 } from "lucide-react";
 import { api } from "../lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/auth.context";
 import { PageShell } from "../components/layout";
 import { AccessCard, LoadingState } from "../components/ui";
+
+// --- Sub-Components (Outside to prevent re-renders & focus loss) ---
+
+const FormInput = ({ label, icon: Icon, error, ...props }) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
+        <Icon size={18} />
+      </div>
+      <input
+        {...props}
+        className={`w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold transition-all focus:outline-none focus:border-emerald-500 placeholder:text-slate-800 [color-scheme:dark] ${
+          error ? "border-rose-500/50 focus:border-rose-500" : ""
+        }`}
+      />
+    </div>
+    {error && (
+      <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest ml-4">
+        {error}
+      </p>
+    )}
+  </div>
+);
+
+// --- Main Page Component ---
 
 const UpdateItemPage = () => {
   const navigate = useNavigate();
@@ -50,20 +80,10 @@ const UpdateItemPage = () => {
 
   const isLocked = useMemo(
     () => formData.status?.toLowerCase() === "claimed",
-    [formData.status]
+    [formData.status],
   );
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const preloaded = state?.item;
-    if (preloaded) {
-      hydrateFromItem(preloaded);
-      setIsFetching(false);
-    } else if (itemId) {
-      fetchItem();
-    }
-  }, [itemId, state, isAuthenticated]);
-
+  // Helper to fill form with data
   const hydrateFromItem = (item) => {
     setFormData({
       item_type: item.item_type || "",
@@ -73,59 +93,51 @@ const UpdateItemPage = () => {
       location_found: item.location_found || "",
       status: item.status || "FOUND",
     });
-
-    const fields = [];
-    if (item.public_details) {
-      Object.entries(item.public_details).forEach(([key, value]) => {
-        fields.push({ key, value, isPublic: true });
-      });
-    }
-    if (item.hidden_details) {
-      Object.entries(item.hidden_details).forEach(([key, value]) => {
-        fields.push({ key, value, isPublic: false });
-      });
-    }
-    setDetailFields(
-      fields.length ? fields : [{ key: "", value: "", isPublic: true }]
-    );
-    setExistingImages(item.image_urls || []);
-  };
-
-  const fetchItem = async () => {
-    setIsFetching(true);
-    try {
-      const response = await api.get(`/items/found-items/${itemId}`);
-      hydrateFromItem(response.data.data);
-    } catch (error) {
-      console.error("Failed to fetch item:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to load item details",
-        {
-          position: "top-center",
-          autoClose: 2000,
-        }
+    setExistingImages(item.images || []);
+    if (item.details) {
+      setDetailFields(
+        Object.entries(item.details).map(([key, info]) => ({
+          key,
+          value: info.value,
+          isPublic: info.isPublic,
+        })),
       );
-      navigate(-1);
-    } finally {
-      setIsFetching(false);
     }
   };
 
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const res = await api.get(`/items/${itemId}`);
+        hydrateFromItem(res.data.item);
+      } catch (err) {
+        toast.error("Failed to load item");
+        navigate("/manage-items");
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    if (!isAuthenticated) return;
+    if (state?.item) {
+      hydrateFromItem(state.item);
+      setIsFetching(false);
+    } else if (itemId) {
+      fetchItem();
+    }
+  }, [itemId, isAuthenticated, state, navigate]);
+
+  // Event Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const addDetailField = () => {
-    setDetailFields([{ key: "", value: "", isPublic: true }, ...detailFields]);
-  };
+  const addDetailField = () =>
+    setDetailFields([...detailFields, { key: "", value: "", isPublic: true }]);
 
-  const removeDetailField = (index) => {
-    if (detailFields.length > 1) {
-      setDetailFields(detailFields.filter((_, i) => i !== index));
-    }
-  };
+  const removeDetailField = (index) =>
+    setDetailFields(detailFields.filter((_, i) => i !== index));
 
   const updateDetailField = (index, field, value) => {
     const updated = [...detailFields];
@@ -140,36 +152,10 @@ const UpdateItemPage = () => {
   };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    const oversized = files.filter((file) => file.size > 5 * 1024 * 1024);
-    if (oversized.length) {
-      setErrors((prev) => ({
-        ...prev,
-        images: `${oversized.length} file(s) exceed 5MB limit`,
-      }));
-      return;
-    }
-
-    const newPreviews = [];
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result);
-        if (newPreviews.length === files.length) {
-          setPreviewImages((prev) => [...prev, ...newPreviews]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-
+    const files = Array.from(e.target.files);
     setSelectedFiles((prev) => [...prev, ...files]);
-    if (errors.images) setErrors((prev) => ({ ...prev, images: "" }));
-  };
-
-  const removeExistingImage = (index) => {
-    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setPreviewImages((prev) => [...prev, ...previews]);
   };
 
   const removePreviewImage = (index) => {
@@ -177,253 +163,117 @@ const UpdateItemPage = () => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const uploadImagesToCloudinary = async () => {
-    if (!selectedFiles.length) return [];
-    setUploadingImages(true);
-    const uploaded = [];
-    try {
-      for (const file of selectedFiles) {
-        const cloudinaryFormData = new FormData();
-        cloudinaryFormData.append("file", file);
-        cloudinaryFormData.append(
-          "upload_preset",
-          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-        );
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${
-            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-          }/image/upload`,
-          { method: "POST", body: cloudinaryFormData }
-        );
-        if (!response.ok) throw new Error("Image upload failed");
-        const data = await response.json();
-        uploaded.push(data.secure_url);
-      }
-      return uploaded;
-    } catch (error) {
-      console.error("Image upload error:", error);
-      throw new Error("Failed to upload images");
-    } finally {
-      setUploadingImages(false);
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.item_type.trim())
-      newErrors.item_type = "Item type is required";
-    if (!formData.date_found) newErrors.date_found = "Date found is required";
-    if (!formData.location_found.trim())
-      newErrors.location_found = "Location is required";
-    const hasValidFields = detailFields.some(
-      (f) => f.key.trim() && f.value.trim()
-    );
-    if (!hasValidFields)
-      newErrors.details = "At least one detail attribute is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const removeExistingImage = (index) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isLocked) return;
-    if (!validateForm()) {
-      toast.error("Please check the form for errors");
-      return;
-    }
     setIsSubmitting(true);
+
+    // Transform detailFields back to Object for API
+    const detailsObj = {};
+    detailFields.forEach((f) => {
+      if (f.key.trim())
+        detailsObj[f.key] = { value: f.value, isPublic: f.isPublic };
+    });
+
     try {
-      const newUrls = await uploadImagesToCloudinary();
-      const hidden_details = {};
-      const public_details = {};
-      detailFields.forEach((field) => {
-        if (field.key.trim() && field.value.trim()) {
-          if (field.isPublic)
-            public_details[field.key.trim()] = field.value.trim();
-          else hidden_details[field.key.trim()] = field.value.trim();
-        }
-      });
-
-      const payload = {
-        item_type: formData.item_type.trim(),
-        location_found: formData.location_found.trim(),
-        hidden_details,
-        public_details,
-        image_urls: [...existingImages, ...newUrls],
-        status: formData.status,
-      };
-
-      if (formData.date_found) {
-        payload.date_found = new Date(formData.date_found).toISOString();
+      // 1. Upload new images if any
+      let finalImages = [...existingImages];
+      if (selectedFiles.length > 0) {
+        setUploadingImages(true);
+        const imgData = new FormData();
+        selectedFiles.forEach((file) => imgData.append("images", file));
+        const uploadRes = await api.post("/upload", imgData);
+        finalImages = [...finalImages, ...uploadRes.data.urls];
       }
 
-      await api.patch(`/staff/found-items/${itemId}`, payload);
-      toast.success("Item updated successfully", {
-        position: "top-center",
-        autoClose: 2000,
+      // 2. Update Item
+      await api.patch(`/admin/items/${itemId}`, {
+        ...formData,
+        details: detailsObj,
+        images: finalImages,
       });
-      setTimeout(() => navigate("/manage-items"), 1200);
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Failed to update item.");
+
+      toast.success("Item updated successfully");
+      navigate("/manage-items");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Update failed");
     } finally {
       setIsSubmitting(false);
+      setUploadingImages(false);
     }
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated)
     return (
-      <PageShell variant="centered">
         <AccessCard />
-      </PageShell>
     );
-  }
-
-  if (isFetching) {
-    return (
-      <PageShell variant="centered">
-        <LoadingState label="Loading item details..." />
-      </PageShell>
-    );
-  }
+  if (isFetching) return <LoadingState label="Decrypting item data..." />;
 
   return (
     <PageShell>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="group inline-flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors mb-6"
-          >
-            <ArrowLeft
-              size={20}
-              className="group-hover:-translate-x-1 transition-transform"
-            />
-            <span className="font-medium">Back</span>
-          </button>
+      <div className="max-w-6xl mx-auto pt-15">
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-emerald-400 transition-all mb-10"
+        >
+          <ArrowLeft
+            size={14}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
+          System Portal
+        </button>
 
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Package size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Update Found Item
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-8 space-y-8">
+            <header>
+              <h1 className="text-4xl font-black text-white tracking-tight mb-2">
+                Update <span className="text-emerald-500">Found Item.</span>
               </h1>
-              <p className="text-slate-400 mt-1">
-                Edit details, attributes, images, or status
+              <p className="text-slate-400 font-medium">
+                Edit item details, attributes, and media.
               </p>
-            </div>
-          </div>
-        </div>
+            </header>
 
-        {/* Notice Banner */}
-        <div className="mb-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-l-4 border-emerald-500 px-6 py-4 rounded-r-xl">
-          <div className="flex items-start gap-3">
-            <AlertCircle
-              size={20}
-              className="text-emerald-400 mt-0.5 flex-shrink-0"
-            />
-            <div className="flex-1">
-              <h3 className="font-semibold text-emerald-100 text-sm mb-1">
-                Update Policy
-              </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Items marked as claimed cannot be modified. Use hidden
-                attributes for owner verification.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-8 space-y-6">
-            <form id="update-item-form" onSubmit={handleSubmit}>
-              {/* Core Details */}
-              <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
-                  <div className="p-2 bg-emerald-500/10 rounded-lg">
-                    <Info className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+            <form
+              id="update-item-form"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center gap-3">
+                  <FileText size={16} className="text-emerald-500" />
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     Core Details
-                  </h2>
+                  </span>
                 </div>
-
-                <div className="p-6 space-y-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
-                      Item Type <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Package size={18} />
-                      </div>
-                      <input
-                        type="text"
-                        name="item_type"
-                        value={formData.item_type}
-                        onChange={handleChange}
-                        disabled={isLocked}
-                        placeholder="e.g. Black Sony Wireless Headphones"
-                        className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                          errors.item_type
-                            ? "border-red-500/50"
-                            : "border-white/10"
-                        } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm backdrop-blur-sm ${
-                          isLocked ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
-                      />
-                    </div>
-                    {errors.item_type && (
-                      <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                        <AlertCircle size={12} />
-                        {errors.item_type}
-                      </p>
-                    )}
-                  </div>
-
+                <div className="p-8 space-y-6">
+                  <FormInput
+                    label="Item Type / Name"
+                    name="item_type"
+                    value={formData.item_type}
+                    onChange={handleChange}
+                    icon={Package}
+                    disabled={isLocked}
+                    error={errors.item_type}
+                  />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-300 mb-2">
-                        Location Found <span className="text-red-400">*</span>
+                    <FormInput
+                      label="Location Found"
+                      name="location_found"
+                      value={formData.location_found}
+                      onChange={handleChange}
+                      icon={MapPin}
+                      disabled={isLocked}
+                    />
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                        Date Found
                       </label>
                       <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                          <MapPin size={18} />
-                        </div>
-                        <input
-                          type="text"
-                          name="location_found"
-                          value={formData.location_found}
-                          onChange={handleChange}
-                          disabled={isLocked}
-                          placeholder="e.g. Library, 2nd Floor"
-                          className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                            errors.location_found
-                              ? "border-red-500/50"
-                              : "border-white/10"
-                          } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm backdrop-blur-sm ${
-                            isLocked ? "opacity-70 cursor-not-allowed" : ""
-                          }`}
-                        />
-                      </div>
-                      {errors.location_found && (
-                        <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                          <AlertCircle size={12} />
-                          {errors.location_found}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-300 mb-2">
-                        Date & Time <span className="text-red-400">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500/50">
                           <Calendar size={18} />
                         </div>
                         <input
@@ -432,341 +282,160 @@ const UpdateItemPage = () => {
                           value={formData.date_found}
                           onChange={handleChange}
                           disabled={isLocked}
-                          max={new Date().toISOString().slice(0, 16)}
-                          className={`w-full pl-12 pr-4 py-3 bg-slate-950/50 border ${
-                            errors.date_found
-                              ? "border-red-500/50"
-                              : "border-white/10"
-                          } rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all text-sm [color-scheme:dark] backdrop-blur-sm ${
-                            isLocked ? "opacity-70 cursor-not-allowed" : ""
-                          }`}
+                          className="w-full bg-slate-950 border-2 border-slate-800 pl-14 pr-6 py-4 rounded-2xl text-white font-bold [color-scheme:dark]"
                         />
                       </div>
-                      {errors.date_found && (
-                        <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                          <AlertCircle size={12} />
-                          {errors.date_found}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-300 mb-2">
-                        Status
-                      </label>
-                      <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
-                        disabled={isLocked}
-                        className={`w-full px-4 py-3 bg-slate-950/50 border ${
-                          isLocked
-                            ? "opacity-70 cursor-not-allowed border-slate-700/50"
-                            : "border-white/10 hover:border-emerald-500/50"
-                        } rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all text-sm`}
-                      >
-                        <option value="FOUND">FOUND</option>
-                        <option value="RETURNED">RETURNED</option>
-                        <option value="CLAIMED">CLAIMED</option>
-                        <option value="REJECTED">REJECTED</option>
-                      </select>
-                      {isLocked && (
-                        <p className="text-xs text-amber-300 flex items-center gap-1 mt-2">
-                          <AlertCircle size={12} /> Claimed items cannot be
-                          edited
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Attributes */}
-              <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg">
-                      <Info className="w-4 h-4 text-emerald-400" />
-                    </div>
-                    <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                      Attributes
-                    </h2>
-                  </div>
+              <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] overflow-hidden">
+                <div className="px-8 py-5 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Item Attributes
+                  </span>
                   <button
                     type="button"
                     onClick={addDetailField}
                     disabled={isLocked}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold border border-emerald-500/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="text-[9px] text-emerald-500 font-black flex items-center gap-2"
                   >
-                    <Plus className="w-4 h-4" />
-                    Add Field
+                    <Plus size={12} /> Add
                   </button>
                 </div>
-
-                <div className="p-6 space-y-4">
-                  <div className="hidden md:grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                    <div className="col-span-4">Attribute Name</div>
-                    <div className="col-span-5">Value</div>
-                    <div className="col-span-3">Visibility</div>
-                  </div>
-
+                <div className="p-8 space-y-4">
                   {detailFields.map((field, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start p-4 bg-slate-950/50 border border-white/10 rounded-xl hover:border-emerald-500/30 transition-all backdrop-blur-sm"
+                      className="flex flex-wrap md:flex-nowrap gap-3 items-center"
                     >
-                      <div className="md:col-span-4">
-                        <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                          Name
-                        </label>
-                        <input
-                          type="text"
-                          value={field.key}
-                          onChange={(e) =>
-                            updateDetailField(index, "key", e.target.value)
-                          }
-                          disabled={isLocked}
-                          placeholder="Color, Brand, etc."
-                          className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                        />
-                      </div>
-
-                      <div className="md:col-span-5">
-                        <label className="md:hidden text-xs font-semibold text-slate-400 mb-2 block">
-                          Value
-                        </label>
-                        <input
-                          type="text"
-                          value={field.value}
-                          onChange={(e) =>
-                            updateDetailField(index, "value", e.target.value)
-                          }
-                          disabled={isLocked}
-                          placeholder="Red, Nike, etc."
-                          className="w-full px-4 py-2.5 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                        />
-                      </div>
-
-                      <div className="md:col-span-3 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => togglePublic(index)}
-                          disabled={isLocked}
-                          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-all active:scale-95 ${
-                            field.isPublic
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20"
-                          } disabled:opacity-60 disabled:cursor-not-allowed`}
-                        >
-                          {field.isPublic ? (
-                            <>
-                              <Eye size={14} /> Public
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff size={14} /> Hidden
-                            </>
-                          )}
-                        </button>
-
-                        {detailFields.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeDetailField(index)}
-                            disabled={isLocked}
-                            className="p-2.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all active:scale-95 border border-white/10 hover:border-red-500/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                            title="Remove field"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                      <input
+                        placeholder="Key"
+                        value={field.key}
+                        onChange={(e) =>
+                          updateDetailField(index, "key", e.target.value)
+                        }
+                        disabled={isLocked}
+                        className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white"
+                      />
+                      <input
+                        placeholder="Value"
+                        value={field.value}
+                        onChange={(e) =>
+                          updateDetailField(index, "value", e.target.value)
+                        }
+                        disabled={isLocked}
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePublic(index)}
+                        className="p-3 bg-slate-800 rounded-xl text-emerald-500"
+                      >
+                        {field.isPublic ? (
+                          <Eye size={16} />
+                        ) : (
+                          <EyeOff size={16} />
                         )}
-                      </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeDetailField(index)}
+                        className="p-3 text-rose-500"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   ))}
-
-                  {errors.details && (
-                    <div className="flex items-center gap-2 text-sm text-red-400 mt-3 px-1">
-                      <ShieldAlert size={16} />
-                      {errors.details}
-                    </div>
-                  )}
                 </div>
               </div>
             </form>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 h-fit">
-            {/* Image Upload */}
-            <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6">
-              <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                <Upload className="w-4 h-4 text-emerald-400" />
-                Evidence Photos
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-[#0b1120] border border-slate-800 rounded-[2.5rem] p-8 space-y-6 lg:sticky lg:top-10">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Upload size={14} className="text-emerald-500" /> Photos
               </h3>
 
-              <div className="relative group">
+              <div className="relative border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center">
                 <input
                   type="file"
                   multiple
-                  accept="image/*"
                   onChange={handleImageChange}
                   disabled={isLocked}
-                  className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
                 />
-                <div
-                  className={`border-2 border-dashed border-white/20 bg-slate-950/50 rounded-xl p-8 text-center transition-all group-hover:border-emerald-500/50 group-hover:bg-slate-900/50 backdrop-blur-sm ${
-                    isLocked ? "opacity-60 cursor-not-allowed" : ""
-                  }`}
-                >
-                  <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
-                  </div>
-                  <p className="text-sm font-semibold text-slate-200">
-                    {isLocked
-                      ? "Editing disabled for claimed items"
-                      : "Click to upload"}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    JPG, PNG up to 5MB
-                  </p>
-                </div>
+                <Upload className="mx-auto text-slate-600 mb-2" />
+                <p className="text-[10px] text-slate-500 font-black uppercase">
+                  Upload New Media
+                </p>
               </div>
 
-              {errors.images && (
-                <p className="text-red-400 text-xs mt-3 flex items-center gap-1">
-                  <AlertCircle size={12} />
-                  {errors.images}
-                </p>
-              )}
-
-              {/* Existing Images */}
-              {existingImages.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm text-slate-300 font-semibold">
-                    Current Photos
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {existingImages.map((url, index) => (
-                      <div
-                        key={url + index}
-                        className="relative aspect-square rounded-lg overflow-hidden group border border-white/10"
-                      >
-                        <img
-                          src={url}
-                          alt={`Existing ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        {!isLocked && (
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                            <button
-                              type="button"
-                              onClick={() => removeExistingImage(index)}
-                              className="text-white hover:text-red-400 p-2 bg-slate-900/80 rounded-lg transition-all"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+              {/* Combined Image Gallery */}
+              <div className="grid grid-cols-2 gap-2">
+                {existingImages.map((src, i) => (
+                  <div
+                    key={`ex-${i}`}
+                    className="relative aspect-square rounded-lg overflow-hidden border border-slate-800 group"
+                  >
+                    <img
+                      src={src}
+                      className="w-full h-full object-cover"
+                      alt=""
+                    />
+                    <button
+                      onClick={() => removeExistingImage(i)}
+                      className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded"
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
-                </div>
-              )}
-
-              {/* New Previews */}
-              {previewImages.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm text-slate-300 font-semibold">
-                    New Photos
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {previewImages.map((preview, index) => (
-                      <div
-                        key={index}
-                        className="relative aspect-square rounded-lg overflow-hidden group border border-white/10"
-                      >
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                          <button
-                            type="button"
-                            onClick={() => removePreviewImage(index)}
-                            className="text-white hover:text-red-400 p-2 bg-slate-900/80 rounded-lg transition-all"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                ))}
+                {previewImages.map((src, i) => (
+                  <div
+                    key={`pre-${i}`}
+                    className="relative aspect-square rounded-lg overflow-hidden border border-emerald-500/50 group"
+                  >
+                    <img
+                      src={src}
+                      className="w-full h-full object-cover opacity-60"
+                      alt=""
+                    />
+                    <button
+                      onClick={() => removePreviewImage(i)}
+                      className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded"
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
 
-            {/* Quick Tips */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <AlertCircle size={14} className="text-emerald-400" />{" "}
-                Guidelines
-              </h4>
-              <ul className="space-y-2.5">
-                <li className="text-xs text-slate-400 flex items-start gap-2">
-                  <ShieldAlert
-                    size={14}
-                    className="mt-0.5 text-emerald-400 flex-shrink-0"
-                  />
-                  <span>
-                    Use hidden attributes for security questions (serial
-                    numbers, engravings).
-                  </span>
-                </li>
-                <li className="text-xs text-slate-400 flex items-start gap-2">
-                  <Info
-                    size={14}
-                    className="mt-0.5 text-emerald-400 flex-shrink-0"
-                  />
-                  <span>
-                    Clear, well-lit photos speed up claim verification.
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Primary Actions */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => navigate("/manage-items")}
-                className="col-span-1 py-3 px-4 bg-transparent border border-white/20 hover:bg-white/5 text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition-all active:scale-95"
-                disabled={isSubmitting || uploadingImages}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="update-item-form"
-                disabled={isSubmitting || uploadingImages || isLocked}
-                className="col-span-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
-              >
-                {isSubmitting || uploadingImages ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    <span>
-                      {uploadingImages ? "Uploading..." : "Saving..."}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Save Changes</span>
-                  </>
-                )}
-              </button>
+              <div className="pt-4 space-y-3">
+                <button
+                  type="submit"
+                  form="update-item-form"
+                  disabled={isSubmitting || isLocked}
+                  className="w-full py-4 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase rounded-2xl flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <Loader className="animate-spin" size={16} />
+                  ) : (
+                    <>
+                      <Save size={16} /> Save Changes
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="w-full py-4 bg-slate-900 text-slate-500 text-[10px] font-black uppercase rounded-2xl"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

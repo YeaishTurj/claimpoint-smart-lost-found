@@ -63,13 +63,11 @@ const ManageLostReportsPage = () => {
 
   if (!isAuthenticated || user?.role !== "STAFF") {
     return (
-      <PageShell variant="centered">
         <AccessCard
           icon={AlertCircle}
           title="Identity Verification Required"
           description="Access to the Lost Property Ledger is restricted to authorized personnel only."
         />
-      </PageShell>
     );
   }
 
@@ -203,7 +201,14 @@ const ManageLostReportsPage = () => {
                         </div>
                         <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
                           <Calendar size={12} className="text-emerald-500" />{" "}
-                          {new Date(report.date_lost).toLocaleDateString()}
+                          {new Date(report.date_lost).toLocaleDateString(
+                            "en-US",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )}
                         </div>
                       </div>
                     </td>
