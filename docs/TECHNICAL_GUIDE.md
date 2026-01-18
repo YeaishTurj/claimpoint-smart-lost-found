@@ -773,7 +773,7 @@ npm run seed
 npm run dev
 
 # Frontend runs on http://localhost:5173
-# Backend runs on http://localhost:3000
+# Backend runs on http://localhost:5000
 ```
 
 ### **Folder Structure:**
