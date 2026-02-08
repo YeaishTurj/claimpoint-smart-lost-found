@@ -87,36 +87,20 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
     if (!validateForm()) return;
 
-    const payload = {
-      full_name: fullName,
-      phone,
-      email,
+    const response = await register({
+      email: email.trim(),
       password,
-    };
+      full_name: fullName.trim(),
+      phone: phone.trim(),
+    });
 
-    const result = await register(payload);
-
-    if (result.success) {
-      toast.success(
-        "Email sent! Please check your inbox for verification code.",
-        {
-          position: "top-center",
-          autoClose: 3000,
-        },
-      );
-
-      // Close modal first, then navigate
+    if (response?.success) {
       onClose?.();
-
-      // Navigate after a brief delay to ensure modal is closed
-      setTimeout(() => {
-        navigate("/");
-      }, 500);
-    } else {
-      setErrors({
-        submit: result.error || "Registration failed. Please try again.",
-      });
+      navigate("/verify-email", { state: { email: email.trim() } });
+      return;
     }
+
+    toast.error(response?.message || "Registration failed. Please try again.");
   };
 
   return (
