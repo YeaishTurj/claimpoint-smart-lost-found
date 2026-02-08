@@ -74,22 +74,30 @@ const ForgotPasswordPage = () => {
             Check Your Email
           </h2>
           <p className="text-slate-300 mb-8">
-            We've sent a password reset link to <strong>{email}</strong>. Follow
-            the link to reset your password.
+            We've sent a 6-digit reset code to <strong>{email}</strong>. Use the
+            code to reset your password.
           </p>
           <p className="text-sm text-slate-400 mb-8">
-            The reset link will expire in 15 minutes.
+            The reset code will expire in 15 minutes.
           </p>
           <div className="space-y-3">
             <button
-              onClick={() => navigate("/login")}
+              onClick={() =>
+                navigate(`/reset-password?email=${encodeURIComponent(email)}`)
+              }
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl transition-all"
+            >
+              Enter Reset Code
+            </button>
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-xl transition-all"
             >
               Back to Login
             </button>
             <button
               onClick={() => setSubmitted(false)}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-xl transition-all"
+              className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl transition-all"
             >
               Try Another Email
             </button>
