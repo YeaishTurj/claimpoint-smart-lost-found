@@ -13,7 +13,7 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line no-unused-vars
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/auth.context";
@@ -371,6 +371,18 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                       {errors.password}
                     </motion.p>
                   )}
+
+                  {/* Forgot Password Link */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose?.();
+                      navigate("/forgot-password");
+                    }}
+                    className="text-emerald-400 text-xs font-semibold hover:underline mt-2"
+                  >
+                    Forgot password?
+                  </button>
                 </motion.div>
 
                 <motion.button

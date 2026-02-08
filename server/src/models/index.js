@@ -1,4 +1,9 @@
-import { usersTable, usersPendingTable, userRoleEnum } from "./user.model.js";
+import {
+  usersTable,
+  usersPendingTable,
+  userRoleEnum,
+  passwordResetTable,
+} from "./user.model.js";
 
 import {
   foundItemStatusEnum,
@@ -16,6 +21,7 @@ import {
 export {
   usersTable,
   usersPendingTable,
+  passwordResetTable,
   userRoleEnum,
   foundItemStatusEnum,
   claimStatusEnum,

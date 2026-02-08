@@ -4,6 +4,8 @@ import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import VerificationPage from "./VerificationPage";
+import ForgotPasswordPage from "./ForgotPasswordPage";
+import ResetPasswordPage from "./ResetPasswordPage";
 import BrowseFoundItems from "./BrowseFoundItems";
 import HowItWorks from "./HowItWorks";
 import MyProfilePage from "./MyProfilePage";
@@ -32,6 +34,8 @@ export {
   LoginPage,
   RegisterPage,
   VerificationPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
   BrowseFoundItems,
   HowItWorks,
   MyProfilePage,

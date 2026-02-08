@@ -10,6 +10,8 @@ import {
   LoginPage,
   RegisterPage,
   VerificationPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
   BrowseFoundItems,
   HowItWorks,
   MyProfilePage,
@@ -43,8 +45,8 @@ const App = () => {
     location.pathname === "/login"
       ? "login"
       : location.pathname === "/register"
-      ? "register"
-      : null;
+        ? "register"
+        : null;
 
   // Scroll to top on every route change
   useEffect(() => {
@@ -82,6 +84,8 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerificationPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/found-items" element={<BrowseFoundItems />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
 

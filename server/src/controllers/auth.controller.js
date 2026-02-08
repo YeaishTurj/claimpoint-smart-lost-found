@@ -1,5 +1,9 @@
 import { db } from "../index.js";
-import { usersTable, usersPendingTable } from "../models/index.js";
+import {
+  usersTable,
+  usersPendingTable,
+  passwordResetTable,
+} from "../models/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
@@ -70,7 +74,7 @@ export const register = async (req, res) => {
       await sendVerificationEmail(
         email,
         "Verify your email",
-        generateEmailTemplate(full_name, verificationCode)
+        generateEmailTemplate(full_name, verificationCode),
       );
     } catch (emailError) {
       console.error("Email sending error:", emailError);
@@ -199,7 +203,7 @@ export const resendVerificationCode = async (req, res) => {
     await sendVerificationEmail(
       email,
       "New Verification Code",
-      generateEmailTemplate(pendingUser.full_name, newCode)
+      generateEmailTemplate(pendingUser.full_name, newCode),
     );
 
     return res.status(200).json({ message: "New code sent." });
@@ -362,7 +366,7 @@ export const changePassword = async (req, res) => {
     // 2. Verify current password
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
-      user.password
+      user.password,
     );
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Current password is incorrect" });
@@ -400,6 +404,182 @@ export const changePassword = async (req, res) => {
     });
   } catch (error) {
     console.error("Change password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // 1. Check if user exists
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email));
+
+    if (!user) {
+      // For security, don't reveal if email exists
+      return res.status(200).json({
+        message: "If an account exists, a reset link has been sent.",
+      });
+    }
+
+    // 2. Generate reset code
+    const resetCode = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    const expires = new Date();
+    expires.setMinutes(expires.getMinutes() + 15); // 15 minutes validity
+
+    // 3. Store reset code in password_resets table
+    await db.insert(passwordResetTable).values({
+      email,
+      reset_code: resetCode,
+      reset_expires_at: expires,
+    });
+
+    // 4. Send reset email
+    try {
+      const resetEmailBody = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2 style="color: #10b981;">Password Reset Request</h2>
+          <p>Hi ${user.full_name},</p>
+          <p>We received a request to reset your password. Use the code below to reset your password:</p>
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 32px; font-weight: bold; color: #10b981; letter-spacing: 5px;">${resetCode}</p>
+          </div>
+          <p><strong>This code will expire in 15 minutes.</strong></p>
+          <p>If you didn't request a password reset, you can safely ignore this email.</p>
+          <hr style="border: 1px solid #e5e7eb;">
+          <p style="color: #666; font-size: 12px;">
+            For security, never share this code with anyone. ClaimPoint support will never ask for this code.
+          </p>
+        </div>
+      `;
+
+      await sendVerificationEmail(
+        email,
+        "Reset Your Password - ClaimPoint",
+        resetEmailBody,
+      );
+    } catch (emailError) {
+      console.error("Password reset email error:", emailError);
+      // Continue anyway - user can still reset
+    }
+
+    return res.status(200).json({
+      message: "If an account exists, a reset link has been sent.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { email, code, newPassword } = req.body;
+
+  try {
+    // 1. Validate inputs
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({
+        message: "Email, reset code, and new password are required",
+      });
+    }
+
+    // 2. Find valid reset code
+    const [resetRecord] = await db
+      .select()
+      .from(passwordResetTable)
+      .where(eq(passwordResetTable.email, email));
+
+    if (!resetRecord) {
+      return res.status(400).json({
+        message: "No password reset request found for this email",
+      });
+    }
+
+    // 3. Check code validity
+    const isExpired = new Date() > resetRecord.reset_expires_at;
+    if (resetRecord.reset_code !== code || isExpired) {
+      return res.status(400).json({
+        message: "Invalid or expired reset code",
+      });
+    }
+
+    if (resetRecord.is_used) {
+      return res.status(400).json({
+        message: "This reset code has already been used",
+      });
+    }
+
+    // 4. Find user
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email));
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 5. Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 6. Update password and mark reset code as used
+    await db.transaction(async (tx) => {
+      await tx
+        .update(usersTable)
+        .set({
+          password: hashedPassword,
+          updated_at: new Date(),
+        })
+        .where(eq(usersTable.id, user.id));
+
+      await tx
+        .update(passwordResetTable)
+        .set({
+          is_used: true,
+          updated_at: new Date(),
+        })
+        .where(eq(passwordResetTable.id, resetRecord.id));
+    });
+
+    // 7. Send confirmation email
+    try {
+      const confirmationEmailBody = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2 style="color: #10b981;">Password Reset Successful</h2>
+          <p>Hi ${user.full_name},</p>
+          <p>Your password has been successfully reset. You can now log in with your new password.</p>
+          <p style="margin-top: 20px;">If you didn't reset your password, please contact our support team immediately.</p>
+          <hr style="border: 1px solid #e5e7eb;">
+          <p style="color: #666; font-size: 12px;">
+            For security, never share your password with anyone.
+          </p>
+        </div>
+      `;
+
+      await sendVerificationEmail(
+        email,
+        "Password Reset Confirmed - ClaimPoint",
+        confirmationEmailBody,
+      );
+    } catch (emailError) {
+      console.error("Confirmation email error:", emailError);
+    }
+
+    return res.status(200).json({
+      message:
+        "Password reset successfully. You can now log in with your new password.",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -118,6 +118,30 @@ const api = {
     return response.text();
   },
 
+  forgotPassword: async (email) => {
+    const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to request password reset");
+    return data;
+  },
+
+  resetPassword: async (email, code, newPassword) => {
+    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to reset password");
+    return data;
+  },
+
   // Item endpoints
   getAllFoundItems: async (token = null) => {
     const headers = { "Content-Type": "application/json" };

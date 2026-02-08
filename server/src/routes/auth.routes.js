@@ -8,6 +8,8 @@ import {
   getProfile,
   updateProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/auth.controller.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 
@@ -21,5 +23,7 @@ router.get("/resend-verification-code", resendVerificationCode);
 router.get("/profile", authenticateToken, getProfile);
 router.patch("/profile", authenticateToken, updateProfile);
 router.put("/change-password", authenticateToken, changePassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;
