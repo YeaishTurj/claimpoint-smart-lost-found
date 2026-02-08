@@ -412,7 +412,7 @@ export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    // 1. Check if user exists
+    // 1. Check if user exists and is registered (verified and active)
     const [user] = await db
       .select()
       .from(usersTable)
@@ -425,7 +425,21 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // 2. Generate reset code
+    // 2. Check if user is verified and active
+    if (!user.email_verified) {
+      return res.status(400).json({
+        message:
+          "Please verify your email first before resetting your password. Check your inbox for verification link.",
+      });
+    }
+
+    if (!user.is_active) {
+      return res.status(400).json({
+        message: "Your account has been deactivated. Please contact support.",
+      });
+    }
+
+    // 3. Generate reset code
     const resetCode = otpGenerator.generate(6, {
       digits: true,
       lowerCaseAlphabets: false,
@@ -436,14 +450,14 @@ export const forgotPassword = async (req, res) => {
     const expires = new Date();
     expires.setMinutes(expires.getMinutes() + 15); // 15 minutes validity
 
-    // 3. Store reset code in password_resets table
+    // 4. Store reset code in password_resets table
     await db.insert(passwordResetTable).values({
       email,
       reset_code: resetCode,
       reset_expires_at: expires,
     });
 
-    // 4. Send reset email
+    // 5. Send reset email
     try {
       const resetEmailBody = `
         <div style="font-family: Arial, sans-serif; color: #333;">
