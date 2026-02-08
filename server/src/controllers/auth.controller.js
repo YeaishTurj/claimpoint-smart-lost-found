@@ -418,11 +418,11 @@ export const forgotPassword = async (req, res) => {
       .from(usersTable)
       .where(eq(usersTable.email, email));
 
+    // Security tip: Use the same message for "user not found"
     if (!user) {
-      // For security, don't reveal if email exists
-      return res.status(200).json({
-        success: true,
-        message: "If an account exists, a reset link has been sent.",
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
       });
     }
 
