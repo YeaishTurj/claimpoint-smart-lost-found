@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line 
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/auth.context";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -375,10 +377,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                   {/* Forgot Password Link */}
                   <button
                     type="button"
-                    onClick={() => {
-                      onClose?.();
-                      navigate("/forgot-password");
-                    }}
+                    onClick={() => setShowForgotPassword(true)}
                     className="text-emerald-400 text-xs font-semibold hover:underline mt-2"
                   >
                     Forgot password?
@@ -430,6 +429,11 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
           </motion.div>
         </div>
       )}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        onSwitchToLogin={() => setShowForgotPassword(false)}
+      />
     </AnimatePresence>
   );
 };
