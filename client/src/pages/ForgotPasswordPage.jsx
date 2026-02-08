@@ -32,18 +32,15 @@ const ForgotPasswordPage = () => {
     try {
       const response = await api.forgotPassword(email.trim());
 
-      // Check if response has success indication
-      if (
-        response.success ||
-        response.message?.toLowerCase().includes("sent")
-      ) {
+      // Only show success if backend explicitly returned success
+      if (response.success) {
         setSubmitted(true);
         toast.success("Password reset link sent! Check your email.", {
           position: "bottom-right",
           theme: "dark",
         });
       } else {
-        // Handle case where backend returns a message that isn't success
+        // Handle case where backend returns an error
         toast.error(response.message || "Failed to request password reset", {
           position: "bottom-right",
           theme: "dark",
