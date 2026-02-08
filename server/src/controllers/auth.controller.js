@@ -6,7 +6,7 @@ import {
 } from "../models/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import otpGenerator from "otp-generator";
 import { sendVerificationEmail } from "../../services/email.js";
 import { generateEmailTemplate } from "../utils/emailTemplates.js";
@@ -453,14 +453,19 @@ export const forgotPassword = async (req, res) => {
     const expires = new Date();
     expires.setMinutes(expires.getMinutes() + 15); // 15 minutes validity
 
-    // 4. Store reset code in password_resets table
+    // 4. Delete any existing reset codes for this email
+    await db
+      .delete(passwordResetTable)
+      .where(eq(passwordResetTable.email, email));
+
+    // 5. Store new reset code in password_resets table
     await db.insert(passwordResetTable).values({
       email,
       reset_code: resetCode,
       reset_expires_at: expires,
     });
 
-    // 5. Send reset email
+    // 6. Send reset email
     try {
       const resetEmailBody = `
         <div style="font-family: Arial, sans-serif; color: #333;">
@@ -515,11 +520,13 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // 2. Find valid reset code
+    // 2. Find valid reset code (get the most recent one)
     const [resetRecord] = await db
       .select()
       .from(passwordResetTable)
-      .where(eq(passwordResetTable.email, email));
+      .where(eq(passwordResetTable.email, email))
+      .orderBy(desc(passwordResetTable.created_at))
+      .limit(1);
 
     if (!resetRecord) {
       return res.status(400).json({
