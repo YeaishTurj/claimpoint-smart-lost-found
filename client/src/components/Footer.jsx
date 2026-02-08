@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router";
-import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+import { toast } from "react-toastify";
 import {
   Mail,
   Phone,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 const Footer = () => {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -26,6 +28,25 @@ const Footer = () => {
       setSubscribed(true);
       setEmail("");
       setTimeout(() => setSubscribed(false), 3000);
+    }
+  };
+
+  // Define which routes are implemented
+  const implementedRoutes = [
+    "/found-items",
+    "/how-it-works",
+    "/register",
+    "/contact",
+  ];
+
+  const handleLinkClick = (to) => {
+    if (!implementedRoutes.includes(to)) {
+      toast.info("🚀 This feature will be implemented soon!", {
+        position: "bottom-right",
+        theme: "dark",
+      });
+    } else {
+      navigate(to);
     }
   };
 
@@ -167,18 +188,12 @@ const Footer = () => {
               <ul className="space-y-3.5">
                 {footerLinks.platform.map((link) => (
                   <li key={link.label}>
-                    <NavLink
-                      to={link.to}
-                      className={({ isActive }) =>
-                        `text-sm transition-colors ${
-                          isActive
-                            ? "text-emerald-400 font-medium"
-                            : "text-slate-400 hover:text-white"
-                        }`
-                      }
+                    <button
+                      onClick={() => handleLinkClick(link.to)}
+                      className="text-sm text-slate-400 hover:text-white transition-colors text-left"
                     >
                       {link.label}
-                    </NavLink>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -192,18 +207,12 @@ const Footer = () => {
               <ul className="space-y-3.5">
                 {footerLinks.support.map((link) => (
                   <li key={link.label}>
-                    <NavLink
-                      to={link.to}
-                      className={({ isActive }) =>
-                        `text-sm transition-colors ${
-                          isActive
-                            ? "text-emerald-400 font-medium"
-                            : "text-slate-400 hover:text-white"
-                        }`
-                      }
+                    <button
+                      onClick={() => handleLinkClick(link.to)}
+                      className="text-sm text-slate-400 hover:text-white transition-colors text-left"
                     >
                       {link.label}
-                    </NavLink>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -217,18 +226,12 @@ const Footer = () => {
               <ul className="space-y-3.5">
                 {footerLinks.legal.map((link) => (
                   <li key={link.label}>
-                    <NavLink
-                      to={link.to}
-                      className={({ isActive }) =>
-                        `text-sm transition-colors ${
-                          isActive
-                            ? "text-emerald-400 font-medium"
-                            : "text-slate-400 hover:text-white"
-                        }`
-                      }
+                    <button
+                      onClick={() => handleLinkClick(link.to)}
+                      className="text-sm text-slate-400 hover:text-white transition-colors text-left"
                     >
                       {link.label}
-                    </NavLink>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -290,19 +293,24 @@ const Footer = () => {
             {/* Social Links */}
             <div className="flex items-center gap-3">
               {[
-                { icon: Facebook, href: "#", label: "Facebook" },
-                { icon: Twitter, href: "#", label: "Twitter" },
-                { icon: Linkedin, href: "#", label: "LinkedIn" },
-                { icon: Instagram, href: "#", label: "Instagram" },
-              ].map(({ icon: Icon, href, label }) => (
-                <a
+                { icon: Facebook, label: "Facebook" },
+                { icon: Twitter, label: "Twitter" },
+                { icon: Linkedin, label: "LinkedIn" },
+                { icon: Instagram, label: "Instagram" },
+              ].map(({ icon: Icon, label }) => ( // eslint-disable-line no-unused-vars
+                <button
                   key={label}
-                  href={href}
+                  onClick={() =>
+                    toast.info(`🚀 ${label} link coming soon!`, {
+                      position: "bottom-right",
+                      theme: "dark",
+                    })
+                  }
                   aria-label={label}
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/60 border border-slate-700/50 hover:border-emerald-500/40 bg-gradient-to-br from-slate-900/80 to-slate-800/70 hover:from-emerald-600 hover:to-teal-600 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/40"
                 >
                   <Icon size={18} />
-                </a>
+                </button>
               ))}
             </div>
           </div>
