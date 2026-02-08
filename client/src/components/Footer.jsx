@@ -297,21 +297,25 @@ const Footer = () => {
                 { icon: Twitter, label: "Twitter" },
                 { icon: Linkedin, label: "LinkedIn" },
                 { icon: Instagram, label: "Instagram" },
-              ].map(({ icon: Icon, label }) => ( // eslint-disable-line no-unused-vars
-                <button
-                  key={label}
-                  onClick={() =>
-                    toast.info(`🚀 ${label} link coming soon!`, {
-                      position: "bottom-right",
-                      theme: "dark",
-                    })
-                  }
-                  aria-label={label}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/60 border border-slate-700/50 hover:border-emerald-500/40 bg-gradient-to-br from-slate-900/80 to-slate-800/70 hover:from-emerald-600 hover:to-teal-600 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/40"
-                >
-                  <Icon size={18} />
-                </button>
-              ))}
+              ].map(
+                (
+                  { icon: Icon, label }, // eslint-disable-line no-unused-vars
+                ) => (
+                  <button
+                    key={label}
+                    onClick={() =>
+                      toast.info(`🚀 ${label} link coming soon!`, {
+                        position: "bottom-right",
+                        theme: "dark",
+                      })
+                    }
+                    aria-label={label}
+                    className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800/60 border border-slate-700/50 hover:border-emerald-500/40 bg-gradient-to-br from-slate-900/80 to-slate-800/70 hover:from-emerald-600 hover:to-teal-600 text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/40"
+                  >
+                    <Icon size={18} />
+                  </button>
+                ),
+              )}
             </div>
           </div>
 
