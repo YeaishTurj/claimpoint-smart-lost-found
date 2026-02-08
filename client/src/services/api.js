@@ -40,7 +40,7 @@ const api = {
           claim_details: claimDetails,
           image_urls: imageUrls,
         }),
-      }
+      },
     );
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Failed to claim item");
@@ -56,7 +56,7 @@ const api = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     const data = await response.json();
     if (!response.ok)
@@ -103,7 +103,7 @@ const api = {
   verifyEmail: async (code, email) => {
     const response = await fetch(
       `${API_BASE_URL}/api/auth/verify-email?code=${code}&email=${email}`,
-      { method: "GET" }
+      { method: "GET" },
     );
     if (!response.ok) throw new Error("Email verification failed");
     return response.text();
@@ -112,7 +112,7 @@ const api = {
   resendVerificationCode: async (email) => {
     const response = await fetch(
       `${API_BASE_URL}/api/auth/resend-verification-code?email=${email}`,
-      { method: "GET" }
+      { method: "GET" },
     );
     if (!response.ok) throw new Error("Failed to resend verification code");
     return response.text();
@@ -143,7 +143,7 @@ const api = {
       {
         method: "GET",
         headers,
-      }
+      },
     );
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to fetch item");
@@ -218,7 +218,7 @@ const api = {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updateData),
-      }
+      },
     );
     const data = await response.json();
     if (!response.ok)
@@ -236,7 +236,7 @@ const api = {
       {
         method: "GET",
         headers,
-      }
+      },
     );
     const data = await response.json();
     if (!response.ok)
@@ -281,6 +281,20 @@ const api = {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Failed to update claim");
+    return data;
+  },
+
+  // Contact endpoints
+  sendContactMessage: async (contactData) => {
+    const response = await fetch(`${API_BASE_URL}/api/contact/send-message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(contactData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to send message");
     return data;
   },
 };

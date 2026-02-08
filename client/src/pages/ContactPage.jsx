@@ -9,8 +9,9 @@ import {
   Info,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import { PageShell } from "../components/layout";
+import api from "../services/api.js";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -47,15 +48,34 @@ const ContactPage = () => {
     if (!validateForm()) return;
     setIsSubmitting(true);
 
-    // Simulated API Call
-    setTimeout(() => {
-      toast.success("Message received. Our operations team will contact you.", {
+    try {
+      const response = await api.sendContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      });
+
+      if (response.success) {
+        toast.success(response.message || "Message sent successfully!", {
+          position: "bottom-right",
+          theme: "dark",
+        });
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        toast.error(response.message || "Failed to send message", {
+          position: "bottom-right",
+          theme: "dark",
+        });
+      }
+    } catch (error) {
+      toast.error(error.message || "An error occurred. Please try again.", {
         position: "bottom-right",
         theme: "dark",
       });
-      setFormData({ name: "", email: "", subject: "", message: "" });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (

@@ -6,6 +6,7 @@ import adminRoutes from "./src/routes/admin.routes.js";
 import staffRoutes from "./src/routes/staff.routes.js";
 import itemRoutes from "./src/routes/item.routes.js";
 import userRoutes from "./src/routes/user.routes.js";
+import contactRoutes from "./src/routes/contact.routes.js";
 import { roleAuthorization } from "./src/middlewares/roleAuth.middleware.js";
 import { authenticateToken } from "./src/middlewares/auth.middleware.js";
 import { optionalAuthenticateToken } from "./src/middlewares/optionalAuth.middleware.js";
@@ -18,7 +19,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 
@@ -29,19 +30,21 @@ app.use(
   "/api/admin",
   authenticateToken,
   roleAuthorization("ADMIN"),
-  adminRoutes
+  adminRoutes,
 );
 
 app.use(
   "/api/staff",
   authenticateToken,
   roleAuthorization("STAFF"),
-  staffRoutes
+  staffRoutes,
 );
 
 app.use("/api/user", authenticateToken, roleAuthorization("USER"), userRoutes);
 
 app.use("/api/items", optionalAuthenticateToken, itemRoutes);
+
+app.use("/api/contact", contactRoutes);
 
 const PORT = process.env.PORT;
 
