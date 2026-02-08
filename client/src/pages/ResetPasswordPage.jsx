@@ -57,15 +57,29 @@ const ResetPasswordPage = () => {
 
     setIsLoading(true);
     try {
-      await api.resetPassword(email, resetCode.trim(), newPassword);
-      setResetSuccess(true);
-      toast.success("Password reset successfully! Redirecting to login...", {
-        position: "bottom-right",
-        theme: "dark",
-      });
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      const response = await api.resetPassword(
+        email,
+        resetCode.trim(),
+        newPassword,
+      );
+
+      // Check success flag in response
+      if (response.success) {
+        setResetSuccess(true);
+        toast.success("Password reset successfully! Redirecting to login...", {
+          position: "bottom-right",
+          theme: "dark",
+        });
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        // Show error message from backend
+        toast.error(response.message || "Failed to reset password", {
+          position: "bottom-right",
+          theme: "dark",
+        });
+      }
     } catch (error) {
       toast.error(error.message || "Failed to reset password", {
         position: "bottom-right",

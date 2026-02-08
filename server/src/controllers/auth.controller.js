@@ -421,6 +421,7 @@ export const forgotPassword = async (req, res) => {
     if (!user) {
       // For security, don't reveal if email exists
       return res.status(200).json({
+        success: true,
         message: "If an account exists, a reset link has been sent.",
       });
     }
@@ -428,6 +429,7 @@ export const forgotPassword = async (req, res) => {
     // 2. Check if user is verified and active
     if (!user.email_verified) {
       return res.status(400).json({
+        success: false,
         message:
           "Please verify your email first before resetting your password. Check your inbox for verification link.",
       });
@@ -435,6 +437,7 @@ export const forgotPassword = async (req, res) => {
 
     if (!user.is_active) {
       return res.status(400).json({
+        success: false,
         message: "Your account has been deactivated. Please contact support.",
       });
     }
@@ -487,11 +490,16 @@ export const forgotPassword = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "If an account exists, a reset link has been sent.",
+      success: true,
+      message:
+        "Password reset code sent to your email. It will expire in 15 minutes.",
     });
   } catch (error) {
     console.error("Forgot password error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
@@ -502,6 +510,7 @@ export const resetPassword = async (req, res) => {
     // 1. Validate inputs
     if (!email || !code || !newPassword) {
       return res.status(400).json({
+        success: false,
         message: "Email, reset code, and new password are required",
       });
     }
@@ -514,6 +523,7 @@ export const resetPassword = async (req, res) => {
 
     if (!resetRecord) {
       return res.status(400).json({
+        success: false,
         message: "No password reset request found for this email",
       });
     }
@@ -522,12 +532,14 @@ export const resetPassword = async (req, res) => {
     const isExpired = new Date() > resetRecord.reset_expires_at;
     if (resetRecord.reset_code !== code || isExpired) {
       return res.status(400).json({
+        success: false,
         message: "Invalid or expired reset code",
       });
     }
 
     if (resetRecord.is_used) {
       return res.status(400).json({
+        success: false,
         message: "This reset code has already been used",
       });
     }
@@ -539,7 +551,9 @@ export const resetPassword = async (req, res) => {
       .where(eq(usersTable.email, email));
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // 5. Hash new password
@@ -589,11 +603,12 @@ export const resetPassword = async (req, res) => {
     }
 
     return res.status(200).json({
+      success: true,
       message:
         "Password reset successfully. You can now log in with your new password.",
     });
   } catch (error) {
     console.error("Reset password error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
