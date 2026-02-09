@@ -16,6 +16,22 @@ ClaimPoint is a full-stack lost & found system with **role-based dashboards** (A
 - **Email:** Nodemailer (OTP verification + claim status updates)
 - **Images:** Cloudinary
 
+## Demo
+
+Quick preview:
+
+![ClaimPoint Demo](demo/ClaimPoint-demo.gif)
+
+Full demo video:
+
+[![ClaimPoint Demo Video](https://img.youtube.com/vi/vMFaQN0N8js/0.jpg)](https://youtu.be/vMFaQN0N8js)
+
+_(Click the image above to watch the demo on YouTube)_
+
+> 📚 **For a detailed understanding of the system workflow, user roles, and complete feature documentation**, please read the [**Project Overview & System Workflow Guide**](./README_PROJECT_OVERVIEW.md).
+
+---
+
 ## What This Repo Contains
 
 - Users can register and verify email via OTP
