@@ -1,3 +1,5 @@
+<!-- cmnt for final commit -->
+
 # ClaimPoint — Smart Lost & Found Management System
 
 [➡️ Project Overview & System Workflow (Full Details)](./README_PROJECT_OVERVIEW.md)
